@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity"
+    android:paddingTop="5dp"
+    android:background="@drawable/background2">
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:text="GPS Distance"
+        android:id="@+id/GPSView"
+        android:layout_gravity="right|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="43dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="10dp"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:id="@+id/GPSVal"
+        android:layout_gravity="right|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:paddingLeft="8dp"
+        android:layout_alignTop="@+id/GPSView"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:text="BLT Distance"
+        android:id="@+id/BLTView"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:layout_below="@+id/GPSView"
+        android:layout_alignEnd="@+id/GPSView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:id="@+id/BLTVal"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:paddingLeft="8dp"
+        android:layout_below="@+id/GPSView"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:text="Luminosity"
+        android:id="@+id/LuxView"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:layout_below="@+id/BLTView"
+        android:layout_alignStart="@+id/BLTView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:text="Acceleration"
+        android:id="@+id/AccView"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:layout_below="@+id/LuxView"
+        android:layout_alignStart="@+id/LuxView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:text="Rotation"
+        android:id="@+id/RotView"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:layout_below="@+id/AccView"
+        android:layout_alignStart="@+id/AccView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:id="@+id/LuxVal"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:paddingLeft="8dp"
+        android:layout_alignBottom="@+id/LuxView"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:id="@+id/AccVal"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:paddingLeft="8dp"
+        android:layout_above="@+id/RotView"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:layout_width="177dp"
+        android:layout_height="48dp"
+        android:id="@+id/RotVal"
+        android:layout_gravity="left|top"
+        android:textColor="#000000"
+        android:textSize="26dp"
+        android:paddingLeft="8dp"
+        android:layout_below="@+id/AccVal"
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
+
+</RelativeLayout>

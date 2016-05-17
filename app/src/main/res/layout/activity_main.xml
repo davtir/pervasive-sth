@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pervasive.sth.smarttreasurehunt.MainActivity"
+    android:background="@drawable/background2">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textview"
+        android:text="Select the device role"
+        android:textColor="#ffffff"
+        android:textSize="32dp"
+        android:layout_above="@+id/treasure_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="84dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Treasure"
+        android:id="@+id/treasure_button"
+        android:layout_marginLeft="34dp"
+        android:onClick="onClickTreasure"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/textview"
+        android:layout_marginBottom="144dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hunter"
+        android:id="@+id/hunter_button"
+        android:layout_marginRight="44dp"
+        android:onClick="onClickHunter"
+        android:layout_alignTop="@+id/treasure_button"
+        android:layout_alignEnd="@+id/textview" />
+
+</RelativeLayout>
