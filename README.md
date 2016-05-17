@@ -1,5 +1,16 @@
 #pervasive-sth
 
+Authors
+-------
+
+[Davide Tiriticco](https://www.linkedin.com/in/davide-tiriticco-2278719a)
+ 
+[Alessandro Granato](https://www.linkedin.com/in/alessandro-granato-40b03081)
+
+Course
+------
+[Pervasive Systems 2015/16 Course](http://ichatz.me/index.php/Site/PervasiveSystems2016)
+
 Smart Treasure Hunt
 ===================
 
