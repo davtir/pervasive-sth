@@ -37,7 +37,8 @@ The main technologies used for this project are:
 ARCHITECTURE
 ------------
 
-Disegnone
+![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/arch.jpg)
+
 The system architecture is composed by:
 * Web Server: Keeps informations about players and treasure (ID, Name, sensors data, coordinates)
 * Treasure Device: After the registration on the Web Server, periodically updates its own data on the web server in order to make available this informations 
@@ -47,7 +48,8 @@ The system architecture is composed by:
 			conditions around the treasure device and its coordinates. 
 			Continuously performs Bluetooth discovery task in order to find the treasure device and computes the distance based on RSSI.  
 
-Activity diagram
+![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/flow.jpg)
+
 * StartupActivity: Displays authors and course informations
 * MainActivity:	Let the players choose the role of the device (Treasure, Hunter)
 * TreasureActivity: Embed the treasure task described above
