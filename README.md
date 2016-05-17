@@ -56,13 +56,12 @@ The system architecture is composed by:
 * HunterActivity:	Embed the hunter task described above
 * EndingActivity: Notifies to the players (via Web Server) that the game is ended.
 
-Sensor diagram
-	Each device, independently from their role, reads its own sensors.
-	If the device is the treasure, it posts this data on the web server.
-	Otherwise, if the device is the hunter, it retrieves treasure data from the web server and compares them to its 
-	own in order to recognize significant changes in the environmental conditions.
+![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/sensorflow.jpg)
 
-Photos
+Each device, independently from their role, reads its own sensors.
+If the device is the treasure, it posts this data on the web server.
+Otherwise, if the device is the hunter, it retrieves treasure data from the web server and compares them to its 
+own in order to recognize significant changes in the environmental conditions.
 
 INSTALLATION INSTRUCTIONS
 -------------------------
