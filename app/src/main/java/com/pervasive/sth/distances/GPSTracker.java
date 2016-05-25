@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -26,6 +27,8 @@ public class GPSTracker extends Service implements LocationListener {
 
     Context context;
 
+    Criteria mFineCriteria;
+
     boolean isGPSEnabled = false;
     boolean isNetworkEnabled = false;
 
@@ -33,12 +36,20 @@ public class GPSTracker extends Service implements LocationListener {
     double longitude;
 
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
-    private static final long MIN_TIME_BW_UPDRATES = 0;
+    private static final long MIN_TIME_BW_UPDRATES = 10000;
 
     protected LocationManager locationManager;
 
     public GPSTracker(Context context) {
         this.context = context;
+        mFineCriteria = new Criteria();
+        mFineCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+        mFineCriteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+        mFineCriteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+        mFineCriteria.setBearingAccuracy(Criteria.ACCURACY_HIGH);
+        mFineCriteria.setPowerRequirement(Criteria.ACCURACY_HIGH);
+        mFineCriteria.setAltitudeRequired(true);
+        mFineCriteria.setBearingRequired(true);
     }
 
     public boolean isReacheable() {
@@ -69,12 +80,9 @@ public class GPSTracker extends Service implements LocationListener {
             isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
 
-            if(isNetworkEnabled) {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-            }
-            if (isGPSEnabled){
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-            }
+            if(isNetworkEnabled || isGPSEnabled) {
+                locationManager.requestLocationUpdates(MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, mFineCriteria, this, null);            }
+
             Log.d("HunterTask", "getLocation done");
 
         } catch (Exception e) {

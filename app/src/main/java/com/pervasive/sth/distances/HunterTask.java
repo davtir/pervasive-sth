@@ -1,11 +1,15 @@
 package com.pervasive.sth.distances;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.RESTClient;
+import com.pervasive.sth.rest.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
@@ -17,25 +21,20 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
     Context _context;
     GPSTracker _gps;
     BluetoothTracker _bluetooth;
-    RESTClient client;
+    WSInterface _webserver;
     SensorsReader _sensors;
+    Device _hunter;
     String _treasureID;
     double distance;
 
-    float[] _acc;
-    float[] _rot;
-    float _lux;
-    float _temperature;
-
-    public HunterTask(Context context, GPSTracker gps, BluetoothTracker ble) {
+    public HunterTask(Context context, GPSTracker gps, BluetoothTracker ble, Device hunter) {
         _context = context;
         _gps = gps;
         _bluetooth = ble;
         _treasureID = "";
         _sensors = new SensorsReader(context);
-        Log.d("HunterTask", "Creating REST client");
-        client = new RESTClient("http://192.168.1.6:8084/WSPervasiveSTH/webresources/devices");
-        client.addHeader("content-type", "text/plain");
+        _hunter = hunter;
+        _webserver = new WSInterface();
     }
 
     public String getTreasureID() {
@@ -49,68 +48,67 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         // End when a cancel request is received
         while ( !isCancelled() ) {
 
-            // Get treasure string from WS
-            String treasure="";
             try {
-                treasure = client.executeGet();
+                if ( _webserver.retrieveTreasureStatus() ) {
+                    Log.i("HunterTask", "The treasure have been found!");
+                    break;
+                }
+            } catch ( Exception e ) {
+                Log.e("HunterTask", e.getMessage());
+                continue;
+            }
+            // Get treasure string from WS
+            Device treasure;
+            try {
+                treasure = _webserver.retrieveDevice();
+                _treasureID = treasure.getMACAddress();
             } catch (Exception e) {
                 // Error while executing get on WS
                 Log.e("HunterTask", e.getMessage());
                 continue;
             }
 
-            // Parse received string
-            String[] meta = treasure.split(";");
-            if ( meta == null ) {
-                Log.d("HunterTask", "No treasure found");
-                continue;
-            }
-
-            _acc = _sensors.getAcceleration();
-            _rot = _sensors.getRotation();
-            _lux = _sensors.getLuminosity();
-
             try {
-                Log.d("HunterTask", "Luminosity: " + _lux + " lux");
+                _hunter.setAcceleration(_sensors.getAcceleration());
+                _hunter.setRotation(_sensors.getRotation());
+                _hunter.setLuminosity(_sensors.getLuminosity());
+                _hunter.setTemperature(_sensors.getTemperature());
             } catch ( RuntimeException e) {
-                Log.e("HunterTask", e.getMessage());
-            }
-            try {
-                Log.d("HunterTask", "Temperature: " + _sensors.getTemperature() + "°");
-            } catch ( RuntimeException e) {
-                Log.e("HunterTask", e.getMessage());
-            }
-
-            try {
-                Log.d("HunterTask", "Acceleration: " + _acc[0] + " m/s^2, " + _acc[1] + " m/s^2, " + _acc[2] + " m/s^2");
-            } catch ( RuntimeException e) {
-                Log.e("HunterTask", e.getMessage());
+                //Log.e("HunterTask", e.getMessage());
+                //continue;
             }
 
-            try {
-                Log.d("HunterTask", "Rotation: " + _rot[0] + " rad/s, " + _rot[1] + " rad/s, " + _rot[2] + " rad/s");
-            } catch ( RuntimeException e) {
-                Log.e("HunterTask", e.getMessage());
-            }
-
-            _treasureID = meta[0];
-            double t_lat = Double.parseDouble(meta[2]);
-            double t_lon = Double.parseDouble(meta[3]);
+            double t_lat = treasure.getLatitude();
+            double t_lon = treasure.getLongitude();
 
             // Compute gps distance
             distance = _gps.gpsDistance(t_lat, t_lon);
             Log.d("HunterTask", "Distance from treasure: " + distance + " m");
 
+            Intent intent = new Intent(HunterActivity.GPS_ACTION);
+            intent.putExtra("GPS_DISTANCE", distance);
+            _context.sendBroadcast(intent);
+
             // Start bluetooth discovery for 5 seconds
             _bluetooth.discover();
             try {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
             Log.d("HunterTask", "Stop searching");
         }
+
+        try {
+            _webserver.deleteDevice(_hunter.getMACAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Intent intent = new Intent(HunterActivity.FOUND_ACTION);
+        intent.putExtra("TREASURE_FOUND", true);
+        _context.sendBroadcast(intent);
 
         return null;
     }

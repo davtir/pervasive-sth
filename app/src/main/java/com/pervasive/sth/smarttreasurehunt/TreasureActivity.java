@@ -13,12 +13,17 @@ import android.widget.Toast;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.distances.HunterTask;
 import com.pervasive.sth.distances.TreasureTask;
+import com.pervasive.sth.entities.Device;
+import com.pervasive.sth.rest.WSInterface;
 
 public class TreasureActivity extends AppCompatActivity {
 
     private GPSTracker _gps;
     private BluetoothAdapter _bluetooth;
     TreasureTask _task;
+    Device treasure;
+    WSInterface _webserver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +43,7 @@ public class TreasureActivity extends AppCompatActivity {
         _gps = new GPSTracker(this);
         _gps.getLocation();
         _bluetooth = BluetoothAdapter.getDefaultAdapter();
+        _webserver = new WSInterface();
     }
 
     protected void onResume() {
@@ -48,10 +54,10 @@ public class TreasureActivity extends AppCompatActivity {
         if ( _task == null || _task.isCancelled() ) {
             // Initialize treasure task
             try {
-                _task = new TreasureTask(this, _gps);
+                _task = new TreasureTask(this, _gps, treasure);
             } catch ( RuntimeException e ) {
-                //Log.e("TreasureActivity", e.getMessage().toString());
-                Toast.makeText(this, "A treasure already exists", Toast.LENGTH_LONG).show();
+                Log.e("TreasureActivity", e.getMessage());
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 finish();
                 return;
             } catch (Exception e) {
@@ -88,12 +94,15 @@ public class TreasureActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+
     }
 
     public void onClickCaught(View v) {
         Log.d("TreasureActivity", "Treasure caught!");
+
         Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
 
+        TreasureTask.setFound(true);
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
         finish();
