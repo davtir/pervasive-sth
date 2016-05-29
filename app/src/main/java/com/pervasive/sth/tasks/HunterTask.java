@@ -1,4 +1,4 @@
-package com.pervasive.sth.distances;
+package com.pervasive.sth.tasks;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.pervasive.sth.distances.BluetoothTracker;
+import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.RESTClient;
 import com.pervasive.sth.rest.WSInterface;
