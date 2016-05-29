@@ -18,6 +18,7 @@ import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.distances.HunterTask;
 import com.pervasive.sth.distances.TreasureTask;
+import com.pervasive.sth.entities.Device;
 
 import org.w3c.dom.Text;
 
@@ -26,6 +27,8 @@ public class HunterActivity extends AppCompatActivity {
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
     private HunterTask _task;
+    private Device _hunter;
+
     private TextView _GPSView;
     private static TextView _GPSValue;
     private TextView _BLTView;
@@ -69,6 +72,8 @@ public class HunterActivity extends AppCompatActivity {
   //      _task.execute();
 
         _receiverRegistered = false;
+
+        _hunter = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "H");
     }
 
     protected void onResume() {
@@ -91,7 +96,7 @@ public class HunterActivity extends AppCompatActivity {
         Log.d("HunterTask", "Starting task");
         // Start treasure task
         if ( _task == null || _task.isCancelled() ) {
-            _task = new HunterTask(this, _gps, _bluetooth);
+            _task = new HunterTask(this, _gps, _bluetooth, _hunter);
             _task.execute();
         }
     }

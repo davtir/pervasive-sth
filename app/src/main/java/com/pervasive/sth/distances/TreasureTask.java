@@ -5,7 +5,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.RESTClient;
+import com.pervasive.sth.rest.WSInterface;
 
 /**
  * Created by davtir on 15/05/16.
@@ -14,70 +16,61 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
     Context _context;
     GPSTracker _gps;
-    String _bluetooth_mac;
-    String _device_name;
-    RESTClient _client;
+    WSInterface _webserver;
+    Device _treasure;
 
-    private static final String URL = "http://192.168.1.6:8084/WSPervasiveSTH/webresources/devices";
-
-    public TreasureTask(Context context, GPSTracker gps) throws Exception {
+    public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
         _context = context;
         _gps = gps;
-        _bluetooth_mac = BluetoothAdapter.getDefaultAdapter().getAddress();
-        _device_name = BluetoothAdapter.getDefaultAdapter().getName();
-
-            _client = new RESTClient(URL);
-            _client.addHeader("content-type", "text/plain");
-
-        // Check if a treasure already exists
-        String t_entry = "";
-        try {
-            t_entry = _client.executeGet();
-        } catch ( Exception e) {
-            Log.e("TreasureTask", "Server is unreachable." );
-        }
-        String[] parsed = t_entry.split(";");
-        Log.d("TreasureTask", parsed[0]);
-
-        // If the treasure exists then throw an exception
-        /*if ( parsed != null && !parsed[0].equals("No dev found")) {
-            Log.d("Treasure", parsed[0]);
-            throw new RuntimeException("A treasure already exists.");
-        }*/
+        _webserver = new WSInterface();
+        _treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
     }
 
     @Override
     protected Void doInBackground(Void... params) {
-        double lat, lon;
+        // Check if a treasure already exists
+        boolean treasure_exist = true;
+        Device retrieved = null;
+        try {
+            retrieved = _webserver.retrieveDevice();
+        } catch ( Exception e) {
+            treasure_exist = false;
+        }
+
+        if ( treasure_exist && retrieved != null && !retrieved.getMACAddress().equals(_treasure.getMACAddress()))
+            throw new RuntimeException("Treasure already exists.");
+
         while ( !isCancelled() ) {
 
             // Get lat and lon coordinates
-            lat = _gps.getLatitude();
-            lon = _gps.getLongitude();
-
-            // Create string for WS
-            String rest_msg = "T;" + _bluetooth_mac + ";" + _device_name + ";" + lat + ";" + lon;
+            _treasure.setLatitude(_gps.getLatitude());
+            _treasure.setLongitude(_gps.getLongitude());
 
             Log.d("TreasureTask", "Updating treasure data...");
             // Post on WS
             try {
-                _client.executePost(rest_msg);
+                _webserver.updateDeviceEntry(_treasure);
             } catch (Exception e) {
                 // Error while executing post on WS
                 Log.e("TreasureTask", e.getMessage());
                 continue;
             }
 
-            Log.d("TreasureTask", "Sent message: " + rest_msg);
-
             // Sleep for 5 seconds
             try {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
+        try {
+            _webserver.deleteDevice(_treasure.getMACAddress());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
+
 }
