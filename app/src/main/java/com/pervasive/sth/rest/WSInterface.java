@@ -5,7 +5,9 @@ import android.util.Log;
 import com.pervasive.sth.entities.*;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import android.util.Base64;
 
 /**
  * Created by davtir on 22/05/16.
@@ -16,18 +18,22 @@ public class WSInterface {
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
     private static final String FOUND_PATH = "/found";
+    private static final String AUDIO_PATH = "/audio";
 
     private final RESTClient deviceClient;
     private final RESTClient deleteClient;
     private final RESTClient foundClient;
+    private final RESTClient audioClient;
 
     public WSInterface() {
         deviceClient = new RESTClient(BASE_URI + DEV_PATH);
         deleteClient = new RESTClient(BASE_URI + DEL_PATH);
         foundClient = new RESTClient(BASE_URI + FOUND_PATH);
+        audioClient = new RESTClient(BASE_URI + AUDIO_PATH);
         deviceClient.addHeader("content-type", "application/json");
         deleteClient.addHeader("content-type", "text/plain");
         foundClient.addHeader("content-type", "text/plain");
+        audioClient.addHeader("content-type", "application/json");
     }
 
     public void updateDeviceEntry(Device device) throws Exception {
@@ -110,5 +116,36 @@ public class WSInterface {
 
     public void deleteDevice(String id) throws Exception {
         deleteClient.executePost(id);
+    }
+
+    public void uploadAudio(Audio audioFile) throws Exception {
+
+        Log.d("WSInterface", "Trying to update audio info.");
+
+        JSONObject jsonAudio = new JSONObject();
+
+        jsonAudio.put("AUDIO_NAME", audioFile.get_audioName());
+
+        JSONArray jArr = new JSONArray();
+        byte[] audioData = audioFile.get_data();
+
+        String encodedData = Base64.encodeToString(audioData, Base64.DEFAULT);
+
+        jsonAudio.put("AUDIO_DATA",encodedData);
+
+        audioClient.executePost(jsonAudio.toString());
+
+        Log.d("WSInterface", "updated audio info.");
+    }
+
+    public Audio retrieveAudio() throws Exception {
+        JSONObject jsonAudio = new JSONObject(audioClient.executeGet());
+
+        String name = (String) jsonAudio.get("AUDIO_NAME");
+        byte[] audioData = Base64.decode(jsonAudio.getString("AUDIO_DATA"), Base64.DEFAULT);
+
+        Log.d("WSInterface", "Got audio info.");
+
+        return new Audio(name, audioData);
     }
 }

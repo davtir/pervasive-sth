@@ -6,30 +6,36 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
-import com.pervasive.sth.distances.HunterTask;
-import com.pervasive.sth.distances.TreasureTask;
+import com.pervasive.sth.tasks.HunterMediaTask;
+import com.pervasive.sth.tasks.HunterTask;
 import com.pervasive.sth.entities.Device;
 
-import org.w3c.dom.Text;
+import java.io.IOException;
 
 public class HunterActivity extends AppCompatActivity {
 
     public static String FOUND_ACTION = "com.pervasive.sth.smarttreasurehunt.TREASURE_FOUND";
     public static String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
+    public static String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
 
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
     private HunterTask _task;
+    private HunterMediaTask _media;
     private Device _hunter;
 
     private TextView _GPSView;
@@ -42,6 +48,9 @@ public class HunterActivity extends AppCompatActivity {
     private static TextView _AccVal;
     private TextView _RotView;
     private static TextView _RotVal;
+
+    private Button _audioButton;
+    private String _audioPath;
 
     boolean _receiverRegistered;
     @Override
@@ -66,6 +75,8 @@ public class HunterActivity extends AppCompatActivity {
         _RotView = (TextView)this.findViewById(R.id.RotView);
         _RotVal = (TextView)this.findViewById(R.id.RotVal);
 
+        _audioButton = (Button)this.findViewById(R.id.audio_button);
+        _audioButton.setEnabled(false);
 
         _gps = new GPSTracker(this);
         _bluetooth = new BluetoothTracker(this, receiver);
@@ -97,6 +108,8 @@ public class HunterActivity extends AppCompatActivity {
 
             registerReceiver ( receiver, new IntentFilter(GPS_ACTION));
 
+            registerReceiver( receiver, new IntentFilter(AUDIO_ACTION));
+
             _receiverRegistered = true;
         }
 
@@ -104,7 +117,12 @@ public class HunterActivity extends AppCompatActivity {
         // Start treasure task
         if ( _task == null || _task.isCancelled() ) {
             _task = new HunterTask(this, _gps, _bluetooth, _hunter);
-            _task.execute();
+            _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        if ( _media == null || _media.isCancelled() ) {
+            _media = new HunterMediaTask(this);
+            _media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -120,6 +138,8 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
     }
 
     protected void onStop() {
@@ -135,6 +155,8 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
     }
 
     protected void onDestroy() {
@@ -149,6 +171,21 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
+    }
+
+    public void onAudioButtonClick(View v) {
+        MediaPlayer mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(_audioPath);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+            Log.e(this.getClass().getName(), "media player prepare() failed");
+        }
+
+        _audioButton.setEnabled(false);
     }
 
     public static void setGPSDistance(double dist) {
@@ -177,6 +214,11 @@ public class HunterActivity extends AppCompatActivity {
                     }
             } else if(GPS_ACTION.equals(mIntentAction)) {
                 Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
+            } else if(AUDIO_ACTION.equals(mIntentAction)) {
+                Log.d(this.getClass().getName(), "Audio received");
+                _audioPath = intent.getStringExtra("MEDIA_AUDIO");
+                _audioButton.setEnabled(true);
+                Toast.makeText(context, "Audio Received", Toast.LENGTH_LONG).show();
             }
         }
     };

@@ -1,7 +1,14 @@
 package com.pervasive.sth.smarttreasurehunt;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,17 +17,21 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
-import com.pervasive.sth.distances.HunterTask;
-import com.pervasive.sth.distances.TreasureTask;
+import com.pervasive.sth.tasks.TreasureMediaTask;
+import com.pervasive.sth.tasks.TreasureTask;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.WSInterface;
+
+import java.io.File;
 
 public class TreasureActivity extends AppCompatActivity {
 
     private GPSTracker _gps;
     private BluetoothAdapter _bluetooth;
     TreasureTask _task;
+    TreasureMediaTask _media;
     Device treasure;
     WSInterface _webserver;
 
@@ -44,6 +55,8 @@ public class TreasureActivity extends AppCompatActivity {
         _gps.getLocation();
         _bluetooth = BluetoothAdapter.getDefaultAdapter();
         _webserver = new WSInterface();
+
+
     }
 
     protected void onResume() {
@@ -65,7 +78,29 @@ public class TreasureActivity extends AppCompatActivity {
                 finish();
                 return;
             }
-            _task.execute();
+            _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+
+
+        if ( _media == null || _media.isCancelled() ) {
+            // Initialize media task
+            Log.d(this.getClass().getName(),"Entrato in media == null || media is cancelled");
+            try {
+                _media = new TreasureMediaTask(this);
+            } catch ( RuntimeException e ) {
+                Log.d(this.getClass().getName(),"Primo catch");
+                Log.e("TreasureActivity", e.getMessage());
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            } catch (Exception e) {
+                Log.d(this.getClass().getName(),"Secondo catch");
+                Log.e("TreasureActivity", e.getMessage());
+                finish();
+                return;
+            }
+            _media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -76,6 +111,8 @@ public class TreasureActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
     }
 
     protected void onStop() {
@@ -85,6 +122,8 @@ public class TreasureActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null &&  !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
     }
 
     protected void onDestroy() {
@@ -94,7 +133,8 @@ public class TreasureActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
-
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
     }
 
     public void onClickCaught(View v) {
@@ -105,6 +145,9 @@ public class TreasureActivity extends AppCompatActivity {
         TreasureTask.setFound(true);
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
+        if ( _media != null && !_media.isCancelled() )
+            _media.cancel(true);
         finish();
     }
+
 }

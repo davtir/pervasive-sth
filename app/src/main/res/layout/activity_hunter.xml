@@ -129,4 +129,14 @@
         android:layout_alignParentEnd="true"
         android:visibility="invisible"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play audio"
+        android:id="@+id/audio_button"
+        android:layout_alignBottom="@+id/RotView"
+        android:layout_centerHorizontal="true"
+        android:enabled="false"
+        android:onClick="onAudioButtonClick"/>
+
 </RelativeLayout>

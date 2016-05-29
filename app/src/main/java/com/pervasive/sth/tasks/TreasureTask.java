@@ -1,10 +1,11 @@
-package com.pervasive.sth.distances;
+package com.pervasive.sth.tasks;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.RESTClient;
 import com.pervasive.sth.rest.WSInterface;
@@ -51,6 +52,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
         while ( !isCancelled() ) {
 
+            Log.d(this.getClass().getName(),"ENTRATO 1");
             // Get lat and lon coordinates
             _treasure.setLatitude(_gps.getLatitude());
             _treasure.setLongitude(_gps.getLongitude());
