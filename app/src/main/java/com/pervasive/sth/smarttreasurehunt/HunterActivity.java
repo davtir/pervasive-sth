@@ -24,6 +24,9 @@ import org.w3c.dom.Text;
 
 public class HunterActivity extends AppCompatActivity {
 
+    public static String FOUND_ACTION = "com.pervasive.sth.smarttreasurehunt.TREASURE_FOUND";
+    public static String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
+
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
     private HunterTask _task;
@@ -89,6 +92,10 @@ public class HunterActivity extends AppCompatActivity {
 
             // Register for broadcast when discovery has started
             registerReceiver( receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
+
+            registerReceiver ( receiver, new IntentFilter(FOUND_ACTION));
+
+            registerReceiver ( receiver, new IntentFilter(GPS_ACTION));
 
             _receiverRegistered = true;
         }
@@ -160,10 +167,16 @@ public class HunterActivity extends AppCompatActivity {
                 Log.d("Receiver", "Received ID: " + deviceAddress + " TreasureID " + _task.getTreasureID());
                 if( deviceAddress.equals(_task.getTreasureID()) ) {
                    // _BLTValue.setText(Math.round(BluetoothTracker.calculateDistance(RSSI)*100)/100 + " m");
-                    Toast.makeText(context,
-                            "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m" +
-                                    "\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m", Toast.LENGTH_LONG).show();
+                                    //"\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
                 }
+            } else if(FOUND_ACTION.equals(mIntentAction)) {
+                    if ( intent.getBooleanExtra("TREASURE_FOUND", false) ) {
+                        Toast.makeText(context, "The treasure has been found!", Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+            } else if(GPS_ACTION.equals(mIntentAction)) {
+                Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
             }
         }
     };

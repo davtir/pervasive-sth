@@ -12,18 +12,22 @@ import org.json.JSONObject;
  */
 public class WSInterface {
 
-    private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
+    private static final String BASE_URI = "http://192.168.1.2:8084/STHServer/webresources";
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
+    private static final String FOUND_PATH = "/found";
 
     private final RESTClient deviceClient;
     private final RESTClient deleteClient;
+    private final RESTClient foundClient;
 
     public WSInterface() {
         deviceClient = new RESTClient(BASE_URI + DEV_PATH);
         deleteClient = new RESTClient(BASE_URI + DEL_PATH);
+        foundClient = new RESTClient(BASE_URI + FOUND_PATH);
         deviceClient.addHeader("content-type", "application/json");
         deleteClient.addHeader("content-type", "text/plain");
+        foundClient.addHeader("content-type", "text/plain");
     }
 
     public void updateDeviceEntry(Device device) throws Exception {
@@ -72,6 +76,7 @@ public class WSInterface {
         double temperature = jsonDevice.getDouble("TEMPERATURE");
         double[] acceleration = new double[3];
 
+
         JSONArray jArr = jsonDevice.getJSONArray("ACCELERATION");
         if(jArr.length() != 3) {
             throw new RuntimeException("Invalid acceleration array length");
@@ -92,6 +97,15 @@ public class WSInterface {
         rotation[2] = jArr.getDouble(2);
 
         return new Device(id, name, role, latitude, longitude, luminosity, temperature, acceleration, rotation);
+    }
+
+    public void updateTreasureStatus(Boolean status) throws Exception {
+        Log.d("WSInterface", "Status=" + status.toString());
+        foundClient.executePost(status.toString());
+    }
+
+    public boolean retrieveTreasureStatus() throws Exception {
+        return Boolean.parseBoolean(foundClient.executeGet());
     }
 
     public void deleteDevice(String id) throws Exception {

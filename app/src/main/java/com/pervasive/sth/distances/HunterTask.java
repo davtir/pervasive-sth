@@ -1,7 +1,9 @@
 package com.pervasive.sth.distances;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -46,6 +48,15 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         // End when a cancel request is received
         while ( !isCancelled() ) {
 
+            try {
+                if ( _webserver.retrieveTreasureStatus() ) {
+                    Log.i("HunterTask", "The treasure have been found!");
+                    break;
+                }
+            } catch ( Exception e ) {
+                Log.e("HunterTask", e.getMessage());
+                continue;
+            }
             // Get treasure string from WS
             Device treasure;
             try {
@@ -74,6 +85,10 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
             distance = _gps.gpsDistance(t_lat, t_lon);
             Log.d("HunterTask", "Distance from treasure: " + distance + " m");
 
+            Intent intent = new Intent(HunterActivity.GPS_ACTION);
+            intent.putExtra("GPS_DISTANCE", distance);
+            _context.sendBroadcast(intent);
+
             // Start bluetooth discovery for 5 seconds
             _bluetooth.discover();
             try {
@@ -90,6 +105,10 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Intent intent = new Intent(HunterActivity.FOUND_ACTION);
+        intent.putExtra("TREASURE_FOUND", true);
+        _context.sendBroadcast(intent);
 
         return null;
     }

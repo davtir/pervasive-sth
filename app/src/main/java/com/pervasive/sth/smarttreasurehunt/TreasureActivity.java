@@ -22,6 +22,7 @@ public class TreasureActivity extends AppCompatActivity {
     private BluetoothAdapter _bluetooth;
     TreasureTask _task;
     Device treasure;
+    WSInterface _webserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class TreasureActivity extends AppCompatActivity {
         _gps = new GPSTracker(this);
         _gps.getLocation();
         _bluetooth = BluetoothAdapter.getDefaultAdapter();
+        _webserver = new WSInterface();
     }
 
     protected void onResume() {
@@ -93,13 +95,14 @@ public class TreasureActivity extends AppCompatActivity {
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
 
-
     }
 
     public void onClickCaught(View v) {
         Log.d("TreasureActivity", "Treasure caught!");
+
         Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
 
+        TreasureTask.setFound(true);
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
         finish();

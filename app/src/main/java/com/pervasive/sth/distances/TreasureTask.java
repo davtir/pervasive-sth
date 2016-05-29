@@ -18,6 +18,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
     GPSTracker _gps;
     WSInterface _webserver;
     Device _treasure;
+    public static boolean _found = false;
 
     public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
         _context = context;
@@ -40,6 +41,14 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
         if ( treasure_exist && retrieved != null && !retrieved.getMACAddress().equals(_treasure.getMACAddress()))
             throw new RuntimeException("Treasure already exists.");
 
+        _found = false;
+        _treasure.setFound(_found);
+        try {
+            _webserver.updateTreasureStatus(_treasure.isFound());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         while ( !isCancelled() ) {
 
             // Get lat and lon coordinates
@@ -56,7 +65,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
                 continue;
             }
 
-            // Sleep for 5 seconds
+            // Sleep for 10 seconds
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
@@ -64,7 +73,16 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
             }
         }
 
+        Log.d("TreasureTask", "Task cancelled");
+        _treasure.setFound(_found);
+        Log.d("TreasureTask", "Status from activity: " + _found);
         try {
+            Log.d("TreasureTask", "Found = " + _treasure.isFound());
+            if ( _treasure.isFound() ) {
+                Log.d("TreasureTask", "Updating...........");
+                _webserver.updateTreasureStatus(_treasure.isFound());
+            }
+
             _webserver.deleteDevice(_treasure.getMACAddress());
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,4 +91,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    public static void setFound(boolean value) {
+        _found = value;
+    }
 }

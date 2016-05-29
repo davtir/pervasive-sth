@@ -19,6 +19,7 @@ public class Device {
     private double temperature_;
     private double[] acceleration_;
     private double[] rotation_;
+    private boolean found_;
 
     public Device(String mac_address, String name, String role, double lat, double lon, double lux, double temp, double[] acc, double[] rot) throws RuntimeException {
         if ( mac_address == null || name == null || acc == null || rot == null)  {
@@ -34,6 +35,7 @@ public class Device {
         temperature_ = temp;
         acceleration_ = acc;
         rotation_ = rot;
+        found_ = false;
     }
 
     public Device(String mac_address, String name, String role) {
@@ -116,9 +118,15 @@ public class Device {
         return role_;
     }
 
+    public boolean isFound() { return found_; }
+
+    public void setFound(boolean value) {
+        found_ = value;
+    }
+
     @Override
     public String toString() {
-        return "Device{" + "mac_address_=" + mac_address_ + ", name_=" + name_ + ", role_=" + role_ + ", latitude_=" + latitude_ + ", longitude_=" + longitude_ + ", luminosity_=" + luminosity_ + ", temperature_=" + temperature_ + ", acceleration_=" + acceleration_ + ", rotation_=" + rotation_ + '}';
+        return "Device{" + "mac_address_=" + mac_address_ + ", name_=" + name_ + ", role_=" + role_ + ", latitude_=" + latitude_ + ", longitude_=" + longitude_ + ", luminosity_=" + luminosity_ + ", temperature_=" + temperature_ + ", acceleration_=" + acceleration_ + ", rotation_=" + rotation_ + ", found_ =" + found_ +'}';
     }
 
 
