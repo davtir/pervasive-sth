@@ -214,6 +214,7 @@ public class HunterActivity extends AppCompatActivity {
             ImageView image = (ImageView) findViewById(R.id.image_view);
             image.setImageBitmap(bmapRotated);
             image.setVisibility(View.VISIBLE);
+
         }
 
         _pictureButton.setEnabled(false);
