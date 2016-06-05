@@ -5,7 +5,6 @@ import android.util.Log;
 import com.pervasive.sth.entities.*;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import android.util.Base64;
 
@@ -14,26 +13,32 @@ import android.util.Base64;
  */
 public class WSInterface {
 
-    private static final String BASE_URI = "http://192.168.1.2:8084/STHServer/webresources";
+    private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
     private static final String FOUND_PATH = "/found";
     private static final String AUDIO_PATH = "/audio";
+    private static final String PIC_PATH = "/picture";
+
 
     private final RESTClient deviceClient;
     private final RESTClient deleteClient;
     private final RESTClient foundClient;
     private final RESTClient audioClient;
+    private final RESTClient pictureClient;
+
 
     public WSInterface() {
         deviceClient = new RESTClient(BASE_URI + DEV_PATH);
         deleteClient = new RESTClient(BASE_URI + DEL_PATH);
         foundClient = new RESTClient(BASE_URI + FOUND_PATH);
         audioClient = new RESTClient(BASE_URI + AUDIO_PATH);
+        pictureClient = new RESTClient(BASE_URI + PIC_PATH);
         deviceClient.addHeader("content-type", "application/json");
         deleteClient.addHeader("content-type", "text/plain");
         foundClient.addHeader("content-type", "text/plain");
         audioClient.addHeader("content-type", "application/json");
+        pictureClient.addHeader("content-type", "application/json");
     }
 
     public void updateDeviceEntry(Device device) throws Exception {
@@ -118,16 +123,16 @@ public class WSInterface {
         deleteClient.executePost(id);
     }
 
-    public void uploadAudio(Audio audioFile) throws Exception {
+    public void uploadAudio(Media mediaFile) throws Exception {
 
         Log.d("WSInterface", "Trying to update audio info.");
 
         JSONObject jsonAudio = new JSONObject();
 
-        jsonAudio.put("AUDIO_NAME", audioFile.get_audioName());
+        jsonAudio.put("AUDIO_NAME", mediaFile.get_mediaName());
 
         JSONArray jArr = new JSONArray();
-        byte[] audioData = audioFile.get_data();
+        byte[] audioData = mediaFile.get_data();
 
         String encodedData = Base64.encodeToString(audioData, Base64.DEFAULT);
 
@@ -138,7 +143,7 @@ public class WSInterface {
         Log.d("WSInterface", "updated audio info.");
     }
 
-    public Audio retrieveAudio() throws Exception {
+    public Media retrieveAudio() throws Exception {
         JSONObject jsonAudio = new JSONObject(audioClient.executeGet());
 
         String name = (String) jsonAudio.get("AUDIO_NAME");
@@ -146,6 +151,37 @@ public class WSInterface {
 
         Log.d("WSInterface", "Got audio info.");
 
-        return new Audio(name, audioData);
+        return new Media(name, audioData);
+    }
+
+    public void uploadPicture(Media mediaFile) throws Exception {
+
+        Log.d("WSInterface", "Trying to update picture info.");
+
+        JSONObject jsonPicture = new JSONObject();
+
+        jsonPicture.put("PIC_NAME", mediaFile.get_mediaName());
+
+        JSONArray jArr = new JSONArray();
+        byte[] audioData = mediaFile.get_data();
+
+        String encodedData = Base64.encodeToString(audioData, Base64.DEFAULT);
+
+        jsonPicture.put("PIC_DATA",encodedData);
+
+        pictureClient.executePost(jsonPicture.toString());
+
+        Log.d("WSInterface", "updated picture info.");
+    }
+
+    public Media retrievePicture() throws Exception {
+        JSONObject jsonPicture = new JSONObject(pictureClient.executeGet());
+
+        String name = (String) jsonPicture.get("PIC_NAME");
+        byte[] picData = Base64.decode(jsonPicture.getString("PIC_DATA"), Base64.DEFAULT);
+
+        Log.d("WSInterface", "Got picture info.");
+
+        return new Media(name, picData);
     }
 }

@@ -14,5 +14,24 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:src="@drawable/catchme"
-        android:onClick="onClickCaught"/>
+        android:onClick="onClickCaught"
+        android:layout_weight="1"
+        />
+
+    <FrameLayout
+        android:id="@+id/front_camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0"
+        android:visibility="invisible"
+        />
+
+    <FrameLayout
+        android:id="@+id/back_camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="0"
+        android:visibility="invisible"
+        />
+
 </RelativeLayout>

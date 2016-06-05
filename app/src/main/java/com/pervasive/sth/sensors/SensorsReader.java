@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 /**
  * Created by davtir on 16/05/16.
@@ -16,6 +17,10 @@ public class SensorsReader implements SensorEventListener {
     Sensor _accelerometer;
     Sensor _gyroscope;
     Sensor _thermometer;
+    public static double LUX_DARK_TRESHOLD = 0.0;
+    public static double LUX_TWILIGHT_THRESHOLD = 5;
+    public static double LUX_DAYLIGHT_THRESHOLD = 1000;
+    public static double LUX_JOURNEY_ON_THE_SUN_THRESHOLD = 5000;
 
     /*
      *  Ambient light level in SI lux units
@@ -78,6 +83,22 @@ public class SensorsReader implements SensorEventListener {
         return _rotation;
     }
 
+    public boolean isPhotoresistorAvailable() {
+        return (_manager.getDefaultSensor(Sensor.TYPE_LIGHT) != null);
+    }
+
+    public boolean isThermometerAvailable() {
+        return (_manager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null);
+    }
+
+    public boolean isAccelerometerAvailable() {
+        return (_manager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null);
+    }
+
+    public boolean isGyroscopeAvailable() {
+        return (_manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null);
+    }
+
     public void registerSensorsListeners() {
         if ( _photoresistor != null ) {
             _manager.registerListener(this, _photoresistor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -116,5 +137,18 @@ public class SensorsReader implements SensorEventListener {
             default:
                 break;
         }
+    }
+
+    public static double getLuxThreshold(double lux) {
+        if(lux >= LUX_JOURNEY_ON_THE_SUN_THRESHOLD)
+            return LUX_JOURNEY_ON_THE_SUN_THRESHOLD;
+        if(lux >= LUX_DAYLIGHT_THRESHOLD)
+            return LUX_DAYLIGHT_THRESHOLD;
+        if(lux >= LUX_TWILIGHT_THRESHOLD)
+            return LUX_TWILIGHT_THRESHOLD;
+        if(lux >= LUX_DARK_TRESHOLD)
+           return LUX_DARK_TRESHOLD;
+
+        return -Double.MAX_VALUE;
     }
 }

@@ -7,12 +7,11 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
-import com.pervasive.sth.entities.Audio;
+import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.rest.WSInterface;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,7 +25,8 @@ public class HunterMediaTask extends AsyncTask<Void, Void, Void> {
 
     private MediaRecorder mRecorder = null;
     WSInterface _webserver;
-    Audio _audio;
+    Media _audio;
+    Media _picture;
     Context _context;
 
     public HunterMediaTask(Context context) {
@@ -45,7 +45,7 @@ public class HunterMediaTask extends AsyncTask<Void, Void, Void> {
         while(!isCancelled()) {
 
             Log.d(this.getClass().getName(), "ENTRATO IN TREASURE MEDIA TASK EXECUTE");
-            Audio audio;
+            Media audio, picture;
 
             try {
                 audio = _webserver.retrieveAudio();
@@ -61,7 +61,7 @@ public class HunterMediaTask extends AsyncTask<Void, Void, Void> {
             }
 
             try {
-                FileOutputStream fo = new FileOutputStream(_audio.get_audioName());
+                FileOutputStream fo = new FileOutputStream(_audio.get_mediaName());
                 fo.write(_audio.get_data());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -71,9 +71,39 @@ public class HunterMediaTask extends AsyncTask<Void, Void, Void> {
                 continue;
             }
 
-            Intent intent = new Intent(HunterActivity.AUDIO_ACTION);
-            intent.putExtra("MEDIA_AUDIO", _audio.get_audioName());
-            _context.sendBroadcast(intent);
+            Intent audioIntent = new Intent(HunterActivity.AUDIO_ACTION);
+            audioIntent.putExtra("MEDIA_AUDIO", _audio.get_mediaName());
+            _context.sendBroadcast(audioIntent);
+
+            try {
+                picture = _webserver.retrievePicture();
+                if(picture == null /*|| picture.equals(_picture)*/) {
+                    Log.d(this.getClass().getName(), "no new Picture retrieved");
+                    continue;
+                }
+
+                _picture = picture;
+                Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                FileOutputStream fo = new FileOutputStream(_picture.get_mediaName());
+                fo.write(_picture.get_data());
+                Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                continue;
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            Intent pictureIntent = new Intent(HunterActivity.PICTURE_ACTION);
+            pictureIntent.putExtra("MEDIA_PICTURE", _picture.get_mediaName());
+            _context.sendBroadcast(pictureIntent);
+            Log.d(this.getClass().getName(), "INTENT SENT------------");
 
             try {
                 Thread.sleep(60000);

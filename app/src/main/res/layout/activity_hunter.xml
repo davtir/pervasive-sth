@@ -132,11 +132,33 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play audio"
+        android:text="Play media"
         android:id="@+id/audio_button"
-        android:layout_alignBottom="@+id/RotView"
-        android:layout_centerHorizontal="true"
         android:enabled="false"
-        android:onClick="onAudioButtonClick"/>
+        android:onClick="onAudioButtonClick"
+        android:layout_below="@+id/AccView"
+        android:layout_alignEnd="@+id/AccView" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Photo"
+        android:id="@+id/pic_button"
+        android:layout_below="@+id/AccVal"
+        android:layout_alignStart="@+id/AccVal"
+        android:enabled="false"
+        android:onClick="onPicButtonClick"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_view"
+        android:layout_above="@+id/RotView"
+        android:layout_alignParentTop="true"
+        android:layout_alignEnd="@+id/GPSVal"
+        android:layout_alignParentStart="true"
+        android:visibility="invisible"
+        />
 
 </RelativeLayout>

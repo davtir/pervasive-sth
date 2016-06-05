@@ -9,6 +9,7 @@ import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.RESTClient;
 import com.pervasive.sth.rest.WSInterface;
+import com.pervasive.sth.sensors.SensorsReader;
 
 /**
  * Created by davtir on 15/05/16.
@@ -20,12 +21,14 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
     WSInterface _webserver;
     Device _treasure;
     public static boolean _found = false;
+    SensorsReader _sr;
 
     public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
         _context = context;
         _gps = gps;
         _webserver = new WSInterface();
         _treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
+        _sr = new SensorsReader(context);
     }
 
     @Override
@@ -56,6 +59,8 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
             // Get lat and lon coordinates
             _treasure.setLatitude(_gps.getLatitude());
             _treasure.setLongitude(_gps.getLongitude());
+
+            setDeviceSensors();
 
             Log.d("TreasureTask", "Updating treasure data...");
             // Post on WS
@@ -91,6 +96,38 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
         }
 
         return null;
+    }
+
+    public void setDeviceSensors () {
+        float[] acc;
+        float[] rot;
+
+        if (_sr.isPhotoresistorAvailable())
+            _treasure.setLuminosity(_sr.getLuminosity());
+        else
+            _treasure.setLuminosity(-Float.MAX_VALUE);
+
+        if(_sr.isThermometerAvailable())
+            _treasure.setTemperature(_sr.getTemperature());
+        else
+            _treasure.setTemperature(-Float.MAX_VALUE);
+
+        acc = _sr.getAcceleration();
+        if(_sr.isAccelerometerAvailable() && acc != null) {
+            _treasure.setAcceleration(_sr.getAcceleration());
+        }
+        else {
+            float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+            _treasure.setAcceleration(a);
+        }
+
+        rot = _sr.getRotation();
+        if(_sr.isGyroscopeAvailable() && rot !=null)
+            _treasure.setRotation(_sr.getRotation());
+        else {
+            float[] r = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+            _treasure.setRotation(r);
+        }
     }
 
     public static void setFound(boolean value) {
