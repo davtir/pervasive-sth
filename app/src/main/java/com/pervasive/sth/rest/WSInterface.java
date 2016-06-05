@@ -10,21 +10,34 @@ import org.json.JSONObject;
 import android.util.Base64;
 
 /**
- * Created by davtir on 22/05/16.
+ * @brief   This class implements the interface between the
+ *          mobile application and the RESTful web server.
  */
 public class WSInterface {
 
+    /* Tomcat web server address */
     private static final String BASE_URI = "http://192.168.1.2:8084/STHServer/webresources";
+    /* Path on the web server for GET/POST operation over connected devices */
     private static final String DEV_PATH = "/device";
+    /* Path on the web server for device unsubscription */
     private static final String DEL_PATH = "/delete";
+    /* Path on the web server for game status */
     private static final String FOUND_PATH = "/found";
+    /* Path on the web server for audio mediatype */
     private static final String AUDIO_PATH = "/audio";
 
+    /* The REST client for devices */
     private final RESTClient deviceClient;
+    /* The REST client for deletion */
     private final RESTClient deleteClient;
+    /* The REST client for game status */
     private final RESTClient foundClient;
+    /* The REST client for audio mediatype */
     private final RESTClient audioClient;
 
+    /**
+     * @brief   Web server interface constructor
+     */
     public WSInterface() {
         deviceClient = new RESTClient(BASE_URI + DEV_PATH);
         deleteClient = new RESTClient(BASE_URI + DEL_PATH);
@@ -36,6 +49,12 @@ public class WSInterface {
         audioClient.addHeader("content-type", "application/json");
     }
 
+    /**
+     * @name    updateDeviceEntry(Device device)
+     * @param   device: the device to be updated on the web server
+     * @throws  Exception
+     * @brief
+     */
     public void updateDeviceEntry(Device device) throws Exception {
         JSONObject jsonDevice = new JSONObject();
 
