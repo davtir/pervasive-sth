@@ -5,18 +5,18 @@ import java.util.Arrays;
 /**
  * Created by Alex on 29/05/2016.
  */
-public class Audio {
+public class Media {
 
-    private final String _audioName;
+    private final String _mediaName;
     private final byte[] _data;
 
-    public Audio(String audioName, byte[] data) {
-        _audioName = audioName;
+    public Media(String mediaName, byte[] data) {
+        _mediaName = mediaName;
         _data = data;
     }
 
-    public String get_audioName() {
-        return _audioName;
+    public String get_mediaName() {
+        return _mediaName;
     }
 
     public byte[] get_data() {
@@ -28,17 +28,17 @@ public class Audio {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Audio audio = (Audio) o;
+        Media media = (Media) o;
 
-        if (_audioName != null ? !_audioName.equals(audio._audioName) : audio._audioName != null)
+        if (_mediaName != null ? !_mediaName.equals(media._mediaName) : media._mediaName != null)
             return false;
-        return Arrays.equals(_data, audio._data);
+        return Arrays.equals(_data, media._data);
 
     }
 
     @Override
     public int hashCode() {
-        int result = _audioName != null ? _audioName.hashCode() : 0;
+        int result = _mediaName != null ? _mediaName.hashCode() : 0;
         result = 31 * result + Arrays.hashCode(_data);
         return result;
     }

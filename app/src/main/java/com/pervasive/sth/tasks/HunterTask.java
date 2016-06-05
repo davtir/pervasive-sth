@@ -24,7 +24,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
     GPSTracker _gps;
     BluetoothTracker _bluetooth;
     WSInterface _webserver;
-    SensorsReader _sensors;
+    SensorsReader _sr;
     Device _hunter;
     String _treasureID;
     double distance;
@@ -34,7 +34,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         _gps = gps;
         _bluetooth = ble;
         _treasureID = "";
-        _sensors = new SensorsReader(context);
+        _sr = new SensorsReader(context);
         _hunter = hunter;
         _webserver = new WSInterface();
     }
@@ -59,6 +59,12 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
                 Log.e("HunterTask", e.getMessage());
                 continue;
             }
+
+
+            _hunter.setLatitude(_gps.getLatitude());
+            _hunter.setLongitude(_gps.getLongitude());
+            setDeviceSensors();
+
             // Get treasure string from WS
             Device treasure;
             try {
@@ -70,22 +76,18 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
                 continue;
             }
 
-            try {
-                _hunter.setAcceleration(_sensors.getAcceleration());
-                _hunter.setRotation(_sensors.getRotation());
-                _hunter.setLuminosity(_sensors.getLuminosity());
-                _hunter.setTemperature(_sensors.getTemperature());
-            } catch ( RuntimeException e) {
-                //Log.e("HunterTask", e.getMessage());
-                //continue;
-            }
-
             double t_lat = treasure.getLatitude();
             double t_lon = treasure.getLongitude();
+
 
             // Compute gps distance
             distance = _gps.gpsDistance(t_lat, t_lon);
             Log.d("HunterTask", "Distance from treasure: " + distance + " m");
+
+            Log.d(this.getClass().getName(), "HUNTER: "+_hunter.toString()+" -----------------------------");
+            Log.d(this.getClass().getName(), "TREASURE: "+treasure.toString()+" -----------------------------");
+
+            compareLuxValues(treasure);
 
             Intent intent = new Intent(HunterActivity.GPS_ACTION);
             intent.putExtra("GPS_DISTANCE", distance);
@@ -115,8 +117,63 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    public void setDeviceSensors () {
+
+        float[] acc;
+        float[] rot;
+
+        if (_sr.isPhotoresistorAvailable())
+            _hunter.setLuminosity(_sr.getLuminosity());
+        else
+            _hunter.setLuminosity(-Float.MAX_VALUE);
+
+        if(_sr.isThermometerAvailable())
+            _hunter.setTemperature(_sr.getTemperature());
+        else
+            _hunter.setTemperature(-Float.MAX_VALUE);
+
+        acc = _sr.getAcceleration();
+        if(_sr.isAccelerometerAvailable() && acc != null) {
+            _hunter.setAcceleration(_sr.getAcceleration());
+        }
+        else {
+            float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+            _hunter.setAcceleration(a);
+        }
+
+        rot = _sr.getRotation();
+        if(_sr.isGyroscopeAvailable() && rot !=null)
+            _hunter.setRotation(_sr.getRotation());
+        else {
+            float[] r = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+            _hunter.setRotation(r);
+        }
+    }
+
     public double getDistance() {
         return distance;
+    }
+
+    public void compareLuxValues(Device treasure) {
+        double t_lux = treasure.getLuminosity();
+        double t_threshold = SensorsReader.getLuxThreshold(t_lux);
+        if(t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD))
+            Log.d(this.getClass().getName(), "Pija lo shuttle");
+        else if(t_lux >= (t_threshold = SensorsReader.LUX_DAYLIGHT_THRESHOLD))
+                Log.d(this.getClass().getName(), "Ben illuminato");
+            else if(t_lux >= (t_threshold = SensorsReader.LUX_TWILIGHT_THRESHOLD))
+                    Log.d(this.getClass().getName(), "Non molto illuminato");
+                else if(t_lux >= (t_threshold = SensorsReader.LUX_DARK_TRESHOLD))
+                        Log.d(this.getClass().getName(), "Scuro zi");
+
+        double h_lux = _hunter.getLuminosity();
+        double h_threshold = SensorsReader.getLuxThreshold(h_lux);
+        if(h_threshold < t_threshold)
+            Log.d(this.getClass().getName(), "Treasure più illuminato di Hunter");
+        else if(h_threshold > t_threshold)
+            Log.d(this.getClass().getName(), "Hunter più illuminato di Treasure");
+            else Log.d(this.getClass().getName(), "Hunter stessa fascia di Treasure");
+
     }
 
 }

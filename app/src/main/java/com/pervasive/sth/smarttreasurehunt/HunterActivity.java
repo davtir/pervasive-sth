@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +18,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +28,9 @@ import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.tasks.HunterMediaTask;
 import com.pervasive.sth.tasks.HunterTask;
 import com.pervasive.sth.entities.Device;
+import com.pervasive.sth.tasks.TreasureMediaTask;
 
+import java.io.File;
 import java.io.IOException;
 
 public class HunterActivity extends AppCompatActivity {
@@ -31,12 +38,15 @@ public class HunterActivity extends AppCompatActivity {
     public static String FOUND_ACTION = "com.pervasive.sth.smarttreasurehunt.TREASURE_FOUND";
     public static String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
     public static String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
+    public static String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
 
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
     private HunterTask _task;
     private HunterMediaTask _media;
     private Device _hunter;
+
+    private RelativeLayout _rl;
 
     private TextView _GPSView;
     private static TextView _GPSValue;
@@ -49,8 +59,8 @@ public class HunterActivity extends AppCompatActivity {
     private TextView _RotView;
     private static TextView _RotVal;
 
-    private Button _audioButton;
-    private String _audioPath;
+    private Button _audioButton, _pictureButton;
+    private String _audioPath, _picturePath;
 
     boolean _receiverRegistered;
     @Override
@@ -74,9 +84,13 @@ public class HunterActivity extends AppCompatActivity {
         _AccVal = (TextView)this.findViewById(R.id.AccVal);
         _RotView = (TextView)this.findViewById(R.id.RotView);
         _RotVal = (TextView)this.findViewById(R.id.RotVal);
+        _rl = new RelativeLayout(this);
 
         _audioButton = (Button)this.findViewById(R.id.audio_button);
         _audioButton.setEnabled(false);
+
+        _pictureButton = (Button)this.findViewById(R.id.pic_button);
+        _pictureButton.setEnabled(false);
 
         _gps = new GPSTracker(this);
         _bluetooth = new BluetoothTracker(this, receiver);
@@ -109,6 +123,8 @@ public class HunterActivity extends AppCompatActivity {
             registerReceiver ( receiver, new IntentFilter(GPS_ACTION));
 
             registerReceiver( receiver, new IntentFilter(AUDIO_ACTION));
+
+            registerReceiver( receiver, new IntentFilter(PICTURE_ACTION));
 
             _receiverRegistered = true;
         }
@@ -188,6 +204,22 @@ public class HunterActivity extends AppCompatActivity {
         _audioButton.setEnabled(false);
     }
 
+    public void onPicButtonClick(View v) {
+        File picFile = new File(_picturePath);
+        if  ( picFile.exists() ) {
+            Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
+            Matrix rotation = new Matrix();
+            rotation.postRotate((float) -90.0);
+            Bitmap bmapRotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), rotation, true);
+            ImageView image = (ImageView) findViewById(R.id.image_view);
+            image.setImageBitmap(bmapRotated);
+            image.setVisibility(View.VISIBLE);
+
+        }
+
+        _pictureButton.setEnabled(false);
+    }
+
     public static void setGPSDistance(double dist) {
        // _GPSValue.setText(Math.round(dist * 100)/100 + " m");
     }
@@ -215,10 +247,15 @@ public class HunterActivity extends AppCompatActivity {
             } else if(GPS_ACTION.equals(mIntentAction)) {
                 Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
             } else if(AUDIO_ACTION.equals(mIntentAction)) {
-                Log.d(this.getClass().getName(), "Audio received");
+                Log.d(this.getClass().getName(), "Media received");
                 _audioPath = intent.getStringExtra("MEDIA_AUDIO");
                 _audioButton.setEnabled(true);
                 Toast.makeText(context, "Audio Received", Toast.LENGTH_LONG).show();
+            } else if(PICTURE_ACTION.equals(mIntentAction)) {
+                Log.d(this.getClass().getName(), "Media received");
+                _picturePath = intent.getStringExtra("MEDIA_PICTURE");
+                _pictureButton.setEnabled(true);
+                Toast.makeText(context, "Picture Received", Toast.LENGTH_LONG).show();
             }
         }
     };
