@@ -35,149 +35,132 @@ import java.io.IOException;
 
 public class TreasureActivity extends AppCompatActivity {
 
-    private GPSTracker _gps;
-    private BluetoothAdapter _bluetooth;
-    TreasureTask _task;
-    TreasureMediaTask _media;
-    Device treasure;
-    WSInterface _webserver;
+	private GPSTracker _gps;
+	TreasureTask _task;
+	TreasureMediaTask _media;
+	Device treasure;
+	WSInterface _webserver;
 
-    CameraPreview _frontPreview;
-    CameraPreview _backPreview;
-    FrameLayout frontPrevLayout;
-    //FrameLayout backPrevLayout;
+	CameraPreview _frontPreview;
+	CameraPreview _backPreview;
+	FrameLayout _frontPrevLayout;
+	//FrameLayout backPrevLayout;
 
-    private void setupCamera() {
-        Log.d(this.getClass().getName(), "Setting up camera.");
-        try {
-            Log.d(this.getClass().getName(), "Front camera opened;");
+	private static final String LOG_TAG = TreasureActivity.class.getName();
 
+	private void releaseCameraPreview() {
+		if ( _frontPreview != null ) {
+			_frontPreview.releaseCamera();
+			_frontPrevLayout.removeView(_frontPreview);
+			_frontPreview = null;
+		}
+	}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	private void terminateTask(AsyncTask<Void, Void, Void> task) {
+		if ( task != null && !task.isCancelled() )
+			task.cancel(true);
+	}
 
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		//Remove title bar
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //Remove title bar
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		//Remove notification bar
+		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		setContentView(R.layout.activity_treasure);
 
-        //Remove notification bar
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_treasure);
+		// Initialize GPS and Bluetooth trackers
+		_gps = new GPSTracker(this);
+		_gps.getLocation();
+		_webserver = new WSInterface();
+	}
 
-        // Request permissions for device discoverability
-        Intent discoverable = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverable.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
-        startActivityForResult(discoverable, 0);
+	protected void onResume() {
+		Log.d(LOG_TAG, "onResume() invoked.");
+		super.onResume();
 
-        // Initialize GPS and Bluetooth trackers
-        _gps = new GPSTracker(this);
-        _gps.getLocation();
-        _bluetooth = BluetoothAdapter.getDefaultAdapter();
-        _webserver = new WSInterface();
+		_frontPreview = new CameraPreview(this, Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT));
+		_frontPrevLayout = (FrameLayout) findViewById(R.id.front_camera_preview);
+		_frontPrevLayout.addView(_frontPreview);
 
-        setupCamera();
-        _frontPreview = new CameraPreview(this,  Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT));
-        frontPrevLayout = (FrameLayout) findViewById(R.id.front_camera_preview);
-        frontPrevLayout.addView(_frontPreview);
-
-        //_backPreview = new CameraPreview(this,  Camera.open(1));
-        //backPrevLayout = (FrameLayout) findViewById(R.id.front_camera_preview);
-        //backPrevLayout.addView(_backPreview);
-
-    }
-
-    protected void onResume() {
-        Log.d("TreasureTask", "onResume() invoked.");
-        super.onResume();
-
-        // Start treasure task
-        if (_task == null || _task.isCancelled()) {
-            // Initialize treasure task
-            try {
-                _task = new TreasureTask(this, _gps, treasure);
-            } catch (RuntimeException e) {
-                Log.e("TreasureActivity", e.getMessage());
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                finish();
-                return;
-            } catch (Exception e) {
-                //  Log.e("TreasureActivity", e.getMessage());
-                finish();
-                return;
-            }
-            _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+		// Start treasure task
+		if ( _task == null || _task.isCancelled() ) {
+			// Initialize treasure task
+			try {
+				_task = new TreasureTask(this, _gps, treasure);
+			} catch ( RuntimeException e ) {
+				Log.e(LOG_TAG, e.getMessage());
+				Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+				finish();
+				return;
+			} catch ( Exception e ) {
+				Log.e(LOG_TAG, e.getMessage());
+				finish();
+				return;
+			}
+			_task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
 
 
-        if (_media == null || _media.isCancelled()) {
-            // Initialize media task
-            Log.d(this.getClass().getName(), "Entrato in media == null || media is cancelled");
-            try {
-                _media = new TreasureMediaTask(this, _frontPreview, _backPreview);
-            } catch (RuntimeException e) {
-                Log.d(this.getClass().getName(), "Primo catch");
-                Log.e("TreasureActivity", e.getMessage());
-                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-                finish();
-                return;
-            } catch (Exception e) {
-                Log.d(this.getClass().getName(), "Secondo catch");
-                Log.e("TreasureActivity", e.getMessage());
-                finish();
-                return;
-            }
-            _media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
-    }
+		if ( _media == null || _media.isCancelled() ) {
+			// Initialize media task
+			try {
+				_media = new TreasureMediaTask(this, _frontPreview, _backPreview);
+			} catch ( RuntimeException e ) {
+				Log.e(LOG_TAG, e.getMessage());
+				Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+				finish();
+				return;
+			} catch ( Exception e ) {
+				Log.e(LOG_TAG, e.getMessage());
+				finish();
+				return;
+			}
+			_media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		}
+	}
 
-    protected void onPause() {
-        super.onPause();
-        Log.d("TreasureTask", "onPause() invoked.");
+	protected void onPause() {
+		super.onPause();
+		Log.d(LOG_TAG, "onPause() invoked.");
 
-        // Stop treasure task
-        if (_task != null && !_task.isCancelled())
-            _task.cancel(true);
-        if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
-    }
+		// Stop treasure tasks
+		terminateTask(_task);
+		terminateTask(_media);
 
-    protected void onStop() {
-        super.onStop();
-        Log.d("TreasureTask", "onStop() invoked.");
+		releaseCameraPreview();
+	}
 
-        // Stop treasure task
-        if (_task != null && !_task.isCancelled())
-            _task.cancel(true);
-        if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
-    }
+	protected void onStop() {
+		super.onStop();
+		Log.d(LOG_TAG, "onStop() invoked.");
 
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("TreasureTask", "onDestroy() invoked.");
+		// Stop treasure task
+		terminateTask(_task);
+		terminateTask(_media);
 
-        // Stop treasure task
-        if (_task != null && !_task.isCancelled())
-            _task.cancel(true);
-        if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
-    }
+		releaseCameraPreview();
+	}
 
-    public void onClickCaught(View v) {
-        Log.d("TreasureActivity", "Treasure caught!");
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d(LOG_TAG, "onDestroy() invoked.");
 
-        Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
+		// Stop treasure task
+		terminateTask(_task);
+		terminateTask(_media);
 
-        TreasureTask.setFound(true);
-        if (_task != null && !_task.isCancelled())
-            _task.cancel(true);
-        if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
-        finish();
-    }
+		releaseCameraPreview();
+	}
+
+	public void onClickCaught(View v) {
+		Log.d(LOG_TAG, "Treasure caught!");
+
+		Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
+
+		TreasureTask.setFound(true);
+		finish();
+	}
 }
