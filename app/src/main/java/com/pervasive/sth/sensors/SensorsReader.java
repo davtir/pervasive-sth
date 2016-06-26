@@ -5,7 +5,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
 /**
  * Created by davtir on 16/05/16.
@@ -17,7 +16,7 @@ public class SensorsReader implements SensorEventListener {
     Sensor _accelerometer;
     Sensor _gyroscope;
     Sensor _thermometer;
-    public static double LUX_DARK_TRESHOLD = 0.0;
+    public static double LUX_DARK_THRESHOLD = 0.0;
     public static double LUX_TWILIGHT_THRESHOLD = 5;
     public static double LUX_DAYLIGHT_THRESHOLD = 1000;
     public static double LUX_JOURNEY_ON_THE_SUN_THRESHOLD = 5000;
@@ -39,6 +38,10 @@ public class SensorsReader implements SensorEventListener {
      */
     float[] _acceleration;
 
+    float[] _cumulativeAcc;
+
+    long _counter;
+
     /*
      *   _rotation[0]: Angular speed around the x-axis (Rad/sec)
      *   _rotation[1]: Angular speed around the y-axis (Rad/sec)
@@ -54,6 +57,12 @@ public class SensorsReader implements SensorEventListener {
         _accelerometer = _manager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         _gyroscope = _manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         _thermometer = _manager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+
+        _cumulativeAcc = new float[3];
+        _cumulativeAcc[0] = 0.0f;
+        _cumulativeAcc[1] = 0.0f;
+        _cumulativeAcc[2] = 0.0f;
+        _counter = 0;
 
         registerSensorsListeners();
     }
@@ -75,6 +84,22 @@ public class SensorsReader implements SensorEventListener {
             throw new RuntimeException("Accelerometer is not available.");
 
         return _acceleration;
+    }
+
+    public float getAverageResultantAcceleration() {
+        if ( _counter == 0 )
+            return 0.0f;
+
+        float resultant = 0.0f;
+        resultant = (float) Math.sqrt(Math.pow(_cumulativeAcc[0], 2) + Math.pow(_cumulativeAcc[1], 2));
+        resultant = ((float) Math.sqrt(Math.pow(resultant, 2) + Math.pow(_cumulativeAcc[2], 2))) / (float)_counter;
+
+        _cumulativeAcc[0] = 0.0f;
+        _cumulativeAcc[1] = 0.0f;
+        _cumulativeAcc[2] = 0.0f;
+        _counter = 0;
+
+        return resultant;
     }
 
     public float[] getRotation() {
@@ -127,6 +152,12 @@ public class SensorsReader implements SensorEventListener {
                 break;
             case Sensor.TYPE_LINEAR_ACCELERATION:
                 _acceleration = event.values;
+                if ( Math.abs(_acceleration[0]) >= 0.5f || Math.abs( _acceleration[1]) >= 0.5f ||  Math.abs(_acceleration[2]) >= 0.5f ) {
+                    _cumulativeAcc[0] +=  Math.abs(_acceleration[0]);
+                    _cumulativeAcc[1] +=  Math.abs(_acceleration[1]);
+                    _cumulativeAcc[2] +=  Math.abs(_acceleration[2]);
+                    ++_counter;
+                }
                 break;
             case Sensor.TYPE_GYROSCOPE:
                 _rotation = event.values;
@@ -146,8 +177,8 @@ public class SensorsReader implements SensorEventListener {
             return LUX_DAYLIGHT_THRESHOLD;
         if(lux >= LUX_TWILIGHT_THRESHOLD)
             return LUX_TWILIGHT_THRESHOLD;
-        if(lux >= LUX_DARK_TRESHOLD)
-           return LUX_DARK_TRESHOLD;
+        if(lux >= LUX_DARK_THRESHOLD)
+           return LUX_DARK_THRESHOLD;
 
         return -Double.MAX_VALUE;
     }

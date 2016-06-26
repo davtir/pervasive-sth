@@ -3,162 +3,133 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity"
-    android:paddingTop="5dp"
-    android:background="@drawable/background2">
+    android:background="@color/black"
+    tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity">
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:text="GPS Distance"
-        android:id="@+id/GPSView"
-        android:layout_gravity="right|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="43dp"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="10dp"
-        android:visibility="invisible"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:weightSum="10"
+        android:orientation="vertical">
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:id="@+id/GPSVal"
-        android:layout_gravity="right|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:paddingLeft="8dp"
-        android:layout_alignTop="@+id/GPSView"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible"/>
+        <LinearLayout
+            android:layout_weight="0.5"
+            android:id="@+id/gps_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="10">
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:text="BLT Distance"
-        android:id="@+id/BLTView"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:layout_below="@+id/GPSView"
-        android:layout_alignEnd="@+id/GPSView"
-        android:visibility="invisible"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:id="@+id/satellite_pic"
+                android:layout_gravity="center_vertical"
+               />
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:id="@+id/BLTVal"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:paddingLeft="8dp"
-        android:layout_below="@+id/GPSView"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible"/>
+            <ProgressBar
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="8"
+                android:id="@+id/gps_progress_bar"
+                android:layout_gravity="center_vertical"
+                />
+        </LinearLayout>
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:text="Luminosity"
-        android:id="@+id/LuxView"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:layout_below="@+id/BLTView"
-        android:layout_alignStart="@+id/BLTView"
-        android:visibility="invisible"/>
+        <LinearLayout
+            android:id="@+id/bl_layout"
+            android:layout_weight="0.5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="10"
+            android:layout_below="@id/gps_layout">
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:text="Acceleration"
-        android:id="@+id/AccView"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:layout_below="@+id/LuxView"
-        android:layout_alignStart="@+id/LuxView"
-        android:visibility="invisible"/>
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:id="@+id/radar_pic"
+                android:layout_gravity="center_vertical"
+                />
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:text="Rotation"
-        android:id="@+id/RotView"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:layout_below="@+id/AccView"
-        android:layout_alignStart="@+id/AccView"
-        android:visibility="invisible"/>
+            <ProgressBar
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="8"
+                android:id="@+id/bl_progress_bar"
+                android:layout_gravity="center_vertical"
+                />
+        </LinearLayout>
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:id="@+id/LuxVal"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:paddingLeft="8dp"
-        android:layout_alignBottom="@+id/LuxView"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible"/>
+        <RelativeLayout
+            android:id="@+id/central_view"
+            android:layout_below="@id/bl_layout"
+            android:layout_weight="7"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:id="@+id/AccVal"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:paddingLeft="8dp"
-        android:layout_above="@+id/RotView"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible"/>
+            <com.pervasive.sth.smarttreasurehunt.Typewriter
+                android:id="@+id/textual_suggestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/green"
+                android:visibility="invisible"/>
 
-    <TextView
-        android:layout_width="177dp"
-        android:layout_height="48dp"
-        android:id="@+id/RotVal"
-        android:layout_gravity="left|top"
-        android:textColor="#000000"
-        android:textSize="26dp"
-        android:paddingLeft="8dp"
-        android:layout_below="@+id/AccVal"
-        android:layout_alignParentEnd="true"
-        android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/photo_suggestion"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Play media"
-        android:id="@+id/audio_button"
-        android:enabled="false"
-        android:onClick="onAudioButtonClick"
-        android:layout_below="@+id/AccView"
-        android:layout_alignEnd="@+id/AccView" />
+        </RelativeLayout>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View Photo"
-        android:id="@+id/pic_button"
-        android:layout_below="@+id/AccVal"
-        android:layout_alignStart="@+id/AccVal"
-        android:enabled="false"
-        android:onClick="onPicButtonClick"
-        />
+        <LinearLayout
+            android:id="@+id/buttons_layout"
+            android:orientation="horizontal"
+            android:layout_below = "@id/central_view"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/image_view"
-        android:layout_above="@+id/RotView"
-        android:layout_alignParentTop="true"
-        android:layout_alignEnd="@+id/GPSVal"
-        android:layout_alignParentStart="true"
-        android:visibility="invisible"
-        />
+            <ImageButton
+                android:id="@+id/photo_button"
+                android:onClick="onPicButtonClick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
 
+            <ImageButton
+                android:id="@+id/audio_button"
+                android:onClick="onAudioButtonClick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/lux_button"
+                android:onClick="onLuxButtonClick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/temperature_button"
+                android:onClick="onTemperatureButtonClick"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
 </RelativeLayout>

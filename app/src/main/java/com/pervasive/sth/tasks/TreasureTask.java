@@ -62,6 +62,8 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
             setDeviceSensors();
 
+            //Log.d(this.getClass().getName(), "Mean acceleration value: " + _sr.getAverageResultantAcceleration());
+
             Log.d("TreasureTask", "Updating treasure data...");
             // Post on WS
             try {

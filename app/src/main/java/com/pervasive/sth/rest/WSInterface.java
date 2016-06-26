@@ -14,6 +14,9 @@ import android.util.Base64;
 public class WSInterface {
 
     private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
+    //private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
+    //private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
+
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
     private static final String FOUND_PATH = "/found";

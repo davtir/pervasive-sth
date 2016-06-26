@@ -3,14 +3,13 @@ package com.pervasive.sth.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
-import com.pervasive.sth.rest.RESTClient;
+import com.pervasive.sth.entities.Suggestion;
+import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.rest.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
@@ -29,6 +28,8 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
     String _treasureID;
     double distance;
 
+    SuggestionsGenerator _suggestionGenerator;
+
     public HunterTask(Context context, GPSTracker gps, BluetoothTracker ble, Device hunter) {
         _context = context;
         _gps = gps;
@@ -37,6 +38,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         _sr = new SensorsReader(context);
         _hunter = hunter;
         _webserver = new WSInterface();
+        _suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
     }
 
     public String getTreasureID() {
@@ -49,7 +51,6 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 
         // End when a cancel request is received
         while ( !isCancelled() ) {
-
             try {
                 if ( _webserver.retrieveTreasureStatus() ) {
                     Log.i("HunterTask", "The treasure have been found!");
@@ -60,53 +61,33 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
                 continue;
             }
 
-
-            _hunter.setLatitude(_gps.getLatitude());
-            _hunter.setLongitude(_gps.getLongitude());
-            setDeviceSensors();
-
             // Get treasure string from WS
             Device treasure;
             try {
                 treasure = _webserver.retrieveDevice();
                 _treasureID = treasure.getMACAddress();
-            } catch (Exception e) {
+            } catch ( Exception e ) {
                 // Error while executing get on WS
                 Log.e("HunterTask", e.getMessage());
                 continue;
             }
 
-            double t_lat = treasure.getLatitude();
-            double t_lon = treasure.getLongitude();
+            //Log.d(this.getClass().getName(), "*********The random suggestion returned is: " + _suggestionGenerator.createRandomSuggestionType());
 
+            Suggestion suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
 
-            // Compute gps distance
-            distance = _gps.gpsDistance(t_lat, t_lon);
-            Log.d("HunterTask", "Distance from treasure: " + distance + " m");
-
-            Log.d(this.getClass().getName(), "HUNTER: "+_hunter.toString()+" -----------------------------");
-            Log.d(this.getClass().getName(), "TREASURE: "+treasure.toString()+" -----------------------------");
-
-            compareLuxValues(treasure);
-
-            Intent intent = new Intent(HunterActivity.GPS_ACTION);
-            intent.putExtra("GPS_DISTANCE", distance);
+            Intent intent = new Intent(HunterActivity.SUGGESTION_ACTION);
+            intent.putExtra("SUGGESTION", suggestion);
             _context.sendBroadcast(intent);
 
-            // Start bluetooth discovery for 5 seconds
-            _bluetooth.discover();
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            Log.d("HunterTask", "Stop searching");
+           // analizeSensors(treasure);
+            notifyGpsDistance(treasure);
+            startBluetoothDiscovery(5000);
         }
 
         try {
             _webserver.deleteDevice(_hunter.getMACAddress());
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             e.printStackTrace();
         }
 
@@ -117,63 +98,110 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
-    public void setDeviceSensors () {
+    private void analizeSensors(Device treasure) {
+        setDeviceSensors();
+        if ( _sr.isPhotoresistorAvailable() ) {
+            analizeLuxValues(treasure);
+        }
+
+        if ( _sr.isThermometerAvailable() ) {
+            analizeTemperatureValues(treasure);
+        }
+    }
+
+    public void setDeviceSensors() {
 
         float[] acc;
         float[] rot;
 
-        if (_sr.isPhotoresistorAvailable())
+        if ( _sr.isPhotoresistorAvailable() ) {
             _hunter.setLuminosity(_sr.getLuminosity());
-        else
-            _hunter.setLuminosity(-Float.MAX_VALUE);
+        } else _hunter.setLuminosity(-Float.MAX_VALUE);
 
-        if(_sr.isThermometerAvailable())
+        if ( _sr.isThermometerAvailable() ) {
             _hunter.setTemperature(_sr.getTemperature());
-        else
-            _hunter.setTemperature(-Float.MAX_VALUE);
+        } else _hunter.setTemperature(-Float.MAX_VALUE);
 
         acc = _sr.getAcceleration();
-        if(_sr.isAccelerometerAvailable() && acc != null) {
+        if ( _sr.isAccelerometerAvailable() && acc != null ) {
             _hunter.setAcceleration(_sr.getAcceleration());
-        }
-        else {
+        } else {
             float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
             _hunter.setAcceleration(a);
         }
 
         rot = _sr.getRotation();
-        if(_sr.isGyroscopeAvailable() && rot !=null)
+        if ( _sr.isGyroscopeAvailable() && rot != null ) {
             _hunter.setRotation(_sr.getRotation());
-        else {
+        } else {
             float[] r = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
             _hunter.setRotation(r);
         }
     }
 
-    public double getDistance() {
-        return distance;
-    }
-
-    public void compareLuxValues(Device treasure) {
+    public void analizeLuxValues(Device treasure) {
+        double t_threshold;
         double t_lux = treasure.getLuminosity();
-        double t_threshold = SensorsReader.getLuxThreshold(t_lux);
-        if(t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD))
+        if ( t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD) )
             Log.d(this.getClass().getName(), "Pija lo shuttle");
-        else if(t_lux >= (t_threshold = SensorsReader.LUX_DAYLIGHT_THRESHOLD))
-                Log.d(this.getClass().getName(), "Ben illuminato");
-            else if(t_lux >= (t_threshold = SensorsReader.LUX_TWILIGHT_THRESHOLD))
-                    Log.d(this.getClass().getName(), "Non molto illuminato");
-                else if(t_lux >= (t_threshold = SensorsReader.LUX_DARK_TRESHOLD))
-                        Log.d(this.getClass().getName(), "Scuro zi");
+        else if ( t_lux >= (t_threshold = SensorsReader.LUX_DAYLIGHT_THRESHOLD) )
+            Log.d(this.getClass().getName(), "Ben illuminato");
+        else if ( t_lux >= (t_threshold = SensorsReader.LUX_TWILIGHT_THRESHOLD) )
+            Log.d(this.getClass().getName(), "Non molto illuminato");
+        else if ( t_lux >= (t_threshold = SensorsReader.LUX_DARK_THRESHOLD) )
+            Log.d(this.getClass().getName(), "Scuro zi");
 
         double h_lux = _hunter.getLuminosity();
         double h_threshold = SensorsReader.getLuxThreshold(h_lux);
-        if(h_threshold < t_threshold)
+        if ( h_threshold < t_threshold )
             Log.d(this.getClass().getName(), "Treasure più illuminato di Hunter");
-        else if(h_threshold > t_threshold)
+        else if ( h_threshold > t_threshold )
             Log.d(this.getClass().getName(), "Hunter più illuminato di Treasure");
-            else Log.d(this.getClass().getName(), "Hunter stessa fascia di Treasure");
+        else Log.d(this.getClass().getName(), "Hunter stessa fascia di Treasure");
 
     }
 
+    public void analizeTemperatureValues(Device treasure) {
+        double t_temp = treasure.getTemperature();
+        double h_temp = _hunter.getTemperature();
+        double deltaT = t_temp - h_temp;
+
+        if(deltaT < 0)
+            Log.d(this.getClass().getName(), "Treasure temperature is "+Math.abs(deltaT)+" degrees lower than you");
+        else if(deltaT > 0)
+                Log.d(this.getClass().getName(), "Treasure temperature is "+Math.abs(deltaT)+" degrees higher than you");
+            else
+                Log.d(this.getClass().getName(), "Treasure temperature is equal to yours");
+    }
+
+    private void notifyGpsDistance(Device treasure) {
+
+        // Get treasure coordinates
+        double t_lat = treasure.getLatitude();
+        double t_lon = treasure.getLongitude();
+
+        // Get hunter coordinates
+        _hunter.setLatitude(_gps.getLatitude());
+        _hunter.setLongitude(_gps.getLongitude());
+
+        // Compute gps distance
+        distance = _gps.gpsDistance(t_lat, t_lon);
+        Log.d("HunterTask", "Distance from treasure: " + distance + " m");
+
+        // Notify computed distance to HunterActivity
+        Intent intent = new Intent(HunterActivity.GPS_ACTION);
+        intent.putExtra("GPS_DISTANCE", distance);
+        _context.sendBroadcast(intent);
+    }
+
+    private void startBluetoothDiscovery(long sleeptime_ms) {
+        // Start bluetooth discovery
+        _bluetooth.discover();
+        try {
+            Thread.sleep(sleeptime_ms);
+        } catch ( InterruptedException e ) {
+            e.printStackTrace();
+        }
+    }
 }
+
