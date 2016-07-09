@@ -75,15 +75,17 @@ public class SuggestionsGenerator {
 
     // ESEGUIRE IN LOOP PER GESTIRE L' ASSENZA DI INFO PER LA SUGGESTION RICHIESTA
     public Suggestion createRandomSuggestion(Device treasure) {
-        int type = getRandomSuggestionType();
+        //int type = getRandomSuggestionType();
         boolean skip = true;
 
         Suggestion suggestion = null;
         while ( skip ) {
+            int type = getRandomSuggestionType();
            analizeSensors(treasure);               // Setta i valori sull' hunter ma non vengono usati. FORSE INUTILE!
 
            if (type == ACCELEROMETER_SUGGESTION) {
-               suggestion = new Suggestion("Accelerometer da fare", 0.0, type);
+
+               suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
                skip = false;
            }
 
@@ -92,13 +94,13 @@ public class SuggestionsGenerator {
                skip = false;
            }
 
-           else if (type == LUX_SUGGESTION) {
+           else if (type == LUX_SUGGESTION && (treasure.getLuminosity() != -Float.MAX_VALUE && _sensorsReader.isPhotoresistorAvailable())) {
                suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
                skip = false;
            }
-           else if (type == TEMPERATURE_SUGGESTION) {
-               suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
-               skip = false;
+           else if (type == TEMPERATURE_SUGGESTION && (treasure.getTemperature() != -Float.MAX_VALUE && _sensorsReader.isThermometerAvailable())) {
+                   suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
+                   skip = false;
            }
 
            else if (type == PICTURE_SUGGESTION) {
@@ -271,11 +273,27 @@ public class SuggestionsGenerator {
 
         String msg;
         if(deltaT < 0)
-            msg = "Seems like treasure temperature is "+Math.abs(deltaT)+" degrees lower than you";
+            msg = "Seems like treasure temperature is "+(Math.round((Math.abs(deltaT)*10))/10.0)+" degrees lower than you";
         else if(deltaT > 0)
-            msg = "Seems like treasure temperature is "+Math.abs(deltaT)+" degrees higher than you";
+            msg = "Seems like treasure temperature is "+(Math.round((Math.abs(deltaT)*10))/10.0)+" degrees higher than you";
         else
             msg = "Seems like treasure temperature is equal to yours";
+
+        return msg;
+    }
+
+    public String createAccelerometerMessage(Device treasure) {
+
+        String msg;
+
+        double[] meanAcc = treasure.getAcceleration();
+        double resultant = 0.0;
+        resultant = (float) Math.sqrt(Math.pow(meanAcc[0], 2) + Math.pow(meanAcc[1], 2) + Math.pow(meanAcc[2], 2));
+
+        if(resultant >= 0.5)
+            msg = "Watch out! The treasure is moving with acceleration equals to " + (Math.round(resultant*10.0)/10.0)+ " m/s²";
+        else
+            msg = "Treasure is not moving at all! What are you waiting for?";
 
         return msg;
     }

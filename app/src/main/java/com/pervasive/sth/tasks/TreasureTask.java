@@ -2,6 +2,7 @@ package com.pervasive.sth.tasks;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -21,6 +22,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
     WSInterface _webserver;
     Device _treasure;
     public static boolean _found = false;
+    public static Bitmap _winner = null;
     SensorsReader _sr;
 
     public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
@@ -47,8 +49,9 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
         _found = false;
         _treasure.setFound(_found);
+
         try {
-            _webserver.updateTreasureStatus(_treasure.isFound());
+            _webserver.updateTreasureStatus(_treasure.isFound(), null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,10 +90,10 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
         Log.d("TreasureTask", "Status from activity: " + _found);
         try {
             Log.d("TreasureTask", "Found = " + _treasure.isFound());
-            if ( _treasure.isFound() ) {
+/*            if ( _treasure.isFound() ) {
                 Log.d("TreasureTask", "Updating...........");
-                _webserver.updateTreasureStatus(_treasure.isFound());
-            }
+                _webserver.updateTreasureStatus(_treasure.isFound(), _winner);
+            }*/
 
             _webserver.deleteDevice(_treasure.getMACAddress());
         } catch (Exception e) {
@@ -114,9 +117,8 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
         else
             _treasure.setTemperature(-Float.MAX_VALUE);
 
-        acc = _sr.getAcceleration();
-        if(_sr.isAccelerometerAvailable() && acc != null) {
-            _treasure.setAcceleration(_sr.getAcceleration());
+        if(_sr.isAccelerometerAvailable()) {
+            _treasure.setAcceleration(_sr.getMeanAcceleration());
         }
         else {
             float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
@@ -134,5 +136,9 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
     public static void setFound(boolean value) {
         _found = value;
+    }
+
+    public static void setWinner(Bitmap  bitmap) {
+        _winner = bitmap;
     }
 }

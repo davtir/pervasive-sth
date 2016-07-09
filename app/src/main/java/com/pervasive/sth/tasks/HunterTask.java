@@ -3,22 +3,30 @@ package com.pervasive.sth.tasks;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
+import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
+import com.pervasive.sth.entities.TreasureStatus;
 import com.pervasive.sth.rest.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 /**
  * Created by davtir on 15/05/16.
  */
 public class HunterTask extends AsyncTask<Void, Void, Void> {
 
+    private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
     Context _context;
     GPSTracker _gps;
     BluetoothTracker _bluetooth;
@@ -26,6 +34,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
     SensorsReader _sr;
     Device _hunter;
     String _treasureID;
+    TreasureStatus _treasureStatus;
     double distance;
 
     SuggestionsGenerator _suggestionGenerator;
@@ -52,7 +61,8 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         // End when a cancel request is received
         while ( !isCancelled() ) {
             try {
-                if ( _webserver.retrieveTreasureStatus() ) {
+                _treasureStatus = _webserver.retrieveTreasureStatus();
+                if ( _treasureStatus.isFound() ) {
                     Log.i("HunterTask", "The treasure have been found!");
                     break;
                 }
@@ -88,6 +98,30 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
         try {
             _webserver.deleteDevice(_hunter.getMACAddress());
         } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+
+        Media picture = _treasureStatus.getWinner();
+
+        File f = new File(pathName);
+        if (!f.exists())
+            f.mkdir();
+        FileOutputStream fo = null;
+        try {
+            fo = new FileOutputStream(picture.get_mediaName());
+            fo.write(picture.get_data());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
+        winnerIntent.putExtra("WINNER_UPDATE", picture.get_mediaName());
+        _context.sendBroadcast(winnerIntent);
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
