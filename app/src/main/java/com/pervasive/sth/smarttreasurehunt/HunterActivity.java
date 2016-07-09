@@ -7,9 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -46,6 +49,7 @@ public class HunterActivity extends AppCompatActivity {
     public static String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
     public static String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
     public static String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
+    public static String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
 
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
@@ -71,6 +75,7 @@ public class HunterActivity extends AppCompatActivity {
     private ImageView _audioButton;
     private ImageView _luxButton;
     private ImageView _temperatureButton;
+    private ImageView _accelerometerButton;
 
     boolean _receiverRegistered;
     @Override
@@ -93,6 +98,9 @@ public class HunterActivity extends AppCompatActivity {
         gpsProgressBar = (ProgressBar) this.findViewById(R.id.gps_progress_bar);
         BLProgressBar = (ProgressBar) this.findViewById(R.id.bl_progress_bar);
 
+        gpsProgressBar.getProgressDrawable().setColorFilter(Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
+        BLProgressBar.getProgressDrawable().setColorFilter(Color.BLUE, android.graphics.PorterDuff.Mode.SRC_IN);
+
         gpsProgressBar.setScaleY(10f);
         BLProgressBar.setScaleY(10f);
 
@@ -101,6 +109,10 @@ public class HunterActivity extends AppCompatActivity {
 
         textualSuggestion = (Typewriter) this.findViewById(R.id.textual_suggestion);
         photoSuggestion = (ImageView) this.findViewById(R.id.photo_suggestion);
+
+        Typeface type = Typeface.createFromAsset(getAssets(),"fonts/TravelingTypewriter.ttf");
+        textualSuggestion.setTypeface(type);
+        textualSuggestion.setTextSize(20);
 
         textualSuggestion.setCharacterDelay(50);
 
@@ -120,6 +132,11 @@ public class HunterActivity extends AppCompatActivity {
         _temperatureButton = (ImageButton) findViewById(R.id.temperature_button);
         _temperatureButton.setImageResource(R.drawable.blue_square);
         _temperatureButton.setEnabled(false);
+
+        _accelerometerButton = (ImageButton) findViewById(R.id.accelerometer_button);
+        _accelerometerButton.setImageResource(R.drawable.blue_square);
+        _accelerometerButton.setEnabled(false);
+        _accelerometerButton.setClickable(false);
 
         _rl = new RelativeLayout(this);
 
@@ -164,6 +181,8 @@ public class HunterActivity extends AppCompatActivity {
             registerReceiver( receiver, new IntentFilter(PICTURE_ACTION));
 
             registerReceiver( receiver, new IntentFilter(SUGGESTION_ACTION));
+
+            registerReceiver(receiver, new IntentFilter(WINNER_ACTION));
 
             _receiverRegistered = true;
         }
@@ -231,26 +250,43 @@ public class HunterActivity extends AppCompatActivity {
     }
 
     public void onLuxButtonClick(View v) {
+        _luxButton.setEnabled(false);
+        _luxButton.setClickable(false);
+        _luxButton.setImageResource(R.drawable.blue_square);
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
         textualSuggestion.animateText(messageReceived);
-        _photoButton.setEnabled(false);
-        _luxButton.setImageResource(R.drawable.blue_square);
-
     }
 
     public void onTemperatureButtonClick(View v) {
+        _temperatureButton.setEnabled(false);
+        _temperatureButton.setClickable(false);
+        _temperatureButton.setImageResource(R.drawable.blue_square);
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
         textualSuggestion.animateText(messageReceived);
-        _temperatureButton.setEnabled(false);
-        _temperatureButton.setImageResource(R.drawable.blue_square);
+    }
+
+    public void onAccelerometerButtonClick(View v) {
+        _accelerometerButton.setEnabled(false);
+        _accelerometerButton.setClickable(false);
+        _accelerometerButton.setImageResource(R.drawable.blue_square);
+        textualSuggestion.setText(messageReceived);
+        photoSuggestion.setVisibility(View.INVISIBLE);
+        textualSuggestion.setVisibility(View.VISIBLE);
+        textualSuggestion.animateText(messageReceived);
+
 
     }
 
     public void onAudioButtonClick(View v) {
+
+        _audioButton.setEnabled(false);
+        _audioButton.setClickable(false);
+        _audioButton.setImageResource(R.drawable.blue_square);
+
         MediaPlayer mPlayer = new MediaPlayer();
         try {
             mPlayer.setDataSource(_audioPath);
@@ -259,13 +295,13 @@ public class HunterActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(this.getClass().getName(), "media player prepare() failed");
         }
-
-        _audioButton.setEnabled(false);
-        _audioButton.setImageResource(R.drawable.blue_square);
-
     }
 
     public void onPicButtonClick(View v) {
+
+        _photoButton.setEnabled(false);
+        _photoButton.setClickable(false);
+        _photoButton.setImageResource(R.drawable.blue_square);
 
         textualSuggestion.setVisibility(View.INVISIBLE);
         Log.d(this.getClass().getName(), "*************"+_picturePath);
@@ -279,10 +315,6 @@ public class HunterActivity extends AppCompatActivity {
             photoSuggestion.setVisibility(View.VISIBLE);
 
         }
-
-        _photoButton.setEnabled(false);
-        _photoButton.setImageResource(R.drawable.blue_square);
-
     }
 
     public void updateBLProximityBars(double dist) {
@@ -335,6 +367,13 @@ public class HunterActivity extends AppCompatActivity {
             } else if(GPS_ACTION.equals(mIntentAction)) {
                 updateGPSProximityBars(intent.getDoubleExtra("GPS_DISTANCE", 0.0));
                 //Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
+            } else if (WINNER_ACTION.equals(mIntentAction)) {
+                String pathName = intent.getStringExtra("WINNER_UPDATE");
+                _picturePath = pathName;
+                _photoButton.setEnabled(true);
+                _photoButton.setClickable(true);
+                _photoButton.setImageResource(R.drawable.red_square);
+
             } else if ( SUGGESTION_ACTION.equals(mIntentAction)) {
                 Suggestion received = (Suggestion)(intent.getSerializableExtra("SUGGESTION"));
                 Log.d(this.getClass().getName(), "++++++++++++++++++++++++++++++++++++++++++++++++++TYPE: " + received.getType());
@@ -342,17 +381,20 @@ public class HunterActivity extends AppCompatActivity {
                 if( received.getType() == SuggestionsGenerator.LUX_SUGGESTION) {
                     messageReceived = received.getMessage();
                     _luxButton.setEnabled(true);
+                    _luxButton.setClickable(true);
                     _luxButton.setImageResource(R.drawable.red_square);
 
                 } else if (received.getType() == SuggestionsGenerator.TEMPERATURE_SUGGESTION ) {
                     messageReceived = received.getMessage();
                     _temperatureButton.setEnabled(true);
+                    _temperatureButton.setClickable(true);
                     _temperatureButton.setImageResource(R.drawable.red_square);
                 } else if ( received.getType() == SuggestionsGenerator.PICTURE_SUGGESTION) {
                     Log.d(this.getClass().getName(), "Media received");
                     Log.d(this.getClass().getName(), "****************************"+received.getMessage());
                     _picturePath = received.getMessage();
                     _photoButton.setEnabled(true);
+                    _photoButton.setClickable(true);
                     _photoButton.setImageResource(R.drawable.red_square);
 
                     //Toast.makeText(context, "Picture Received", Toast.LENGTH_LONG).show();
@@ -360,9 +402,15 @@ public class HunterActivity extends AppCompatActivity {
                     Log.d(this.getClass().getName(), "Media received");
                     _audioPath = received.getMessage();
                     _audioButton.setEnabled(true);
+                    _audioButton.setClickable(true);
                     _audioButton.setImageResource(R.drawable.red_square);
 
                     //Toast.makeText(context, "Audio Received", Toast.LENGTH_LONG).show();
+                } else if ( received.getType() == SuggestionsGenerator.ACCELEROMETER_SUGGESTION) {
+                    messageReceived = received.getMessage();
+                    _accelerometerButton.setEnabled(true);
+                    _accelerometerButton.setClickable(true);
+                    _accelerometerButton.setImageResource(R.drawable.red_square);
                 }
             }
         }

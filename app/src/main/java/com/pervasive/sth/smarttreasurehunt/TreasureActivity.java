@@ -6,10 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,15 +27,20 @@ import android.widget.Toast;
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.CameraPreview;
+import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.tasks.TreasureMediaTask;
 import com.pervasive.sth.tasks.TreasureTask;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.rest.WSInterface;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 
 public class TreasureActivity extends AppCompatActivity {
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private GPSTracker _gps;
     private BluetoothAdapter _bluetooth;
@@ -169,15 +176,64 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     public void onClickCaught(View v) {
-        Log.d("TreasureActivity", "Treasure caught!");
+        Log.d(this.getClass().getName(), "CATCH ME CLICKED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
-        Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
-
+        //Stop the Treasure Task
         TreasureTask.setFound(true);
+        //TreasureTask.setWinner(imageBitmap);
         if (_task != null && !_task.isCancelled())
             _task.cancel(true);
         if (_media != null && !_media.isCancelled())
             _media.cancel(true);
-        finish();
+
+        _frontPreview.getCamera().release();
+
+        //Launch the camera intent
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        //retrieve the winner photo
+        Bitmap imageBitmap = null;
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            imageBitmap = (Bitmap) extras.get("data");
+            //mImageView.setImageBitmap(imageBitmap);
+
+            Toast.makeText(this, "Congratulations! Treasure caught!!!", Toast.LENGTH_LONG).show();
+
+
+            finish();
+
+            EndGameThread endGameThread = new EndGameThread(true, imageBitmap);
+            endGameThread.start();
+        }
+    }
+}
+
+class EndGameThread extends Thread {
+
+    private boolean _status;
+    private Bitmap _bitmap;
+    private WSInterface _webserver;
+
+    public EndGameThread(boolean status, Bitmap bitmap) {
+        _status = status;
+        _bitmap = bitmap;
+        _webserver = new WSInterface();
+    }
+
+    public void run() {
+        try {
+            Log.d("TreasureTask", "Updating...........");
+            _webserver.updateTreasureStatus(_status, _bitmap);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

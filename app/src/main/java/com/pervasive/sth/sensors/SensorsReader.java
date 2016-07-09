@@ -91,8 +91,8 @@ public class SensorsReader implements SensorEventListener {
             return 0.0f;
 
         float resultant = 0.0f;
-        resultant = (float) Math.sqrt(Math.pow(_cumulativeAcc[0], 2) + Math.pow(_cumulativeAcc[1], 2));
-        resultant = ((float) Math.sqrt(Math.pow(resultant, 2) + Math.pow(_cumulativeAcc[2], 2))) / (float)_counter;
+        resultant = (float) Math.sqrt(Math.pow(_cumulativeAcc[0], 2) + Math.pow(_cumulativeAcc[1], 2) + Math.pow(_cumulativeAcc[2], 2));
+        resultant /= (float)_counter;
 
         _cumulativeAcc[0] = 0.0f;
         _cumulativeAcc[1] = 0.0f;
@@ -100,6 +100,24 @@ public class SensorsReader implements SensorEventListener {
         _counter = 0;
 
         return resultant;
+    }
+
+    public float[] getMeanAcceleration() {
+        float[] res = {0.0f, 0.0f, 0.0f};
+
+        if(_counter == 0)
+            return res;
+
+        res[0] = _cumulativeAcc[0] / _counter;
+        res[1] = _cumulativeAcc[1] / _counter;
+        res[2] = _cumulativeAcc[2] / _counter;
+
+        _cumulativeAcc[0] = 0.0f;
+        _cumulativeAcc[1] = 0.0f;
+        _cumulativeAcc[2] = 0.0f;
+        _counter = 0;
+
+        return res;
     }
 
     public float[] getRotation() {

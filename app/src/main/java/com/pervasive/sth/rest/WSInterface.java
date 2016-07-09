@@ -1,5 +1,7 @@
 package com.pervasive.sth.rest;
 
+import android.graphics.Bitmap;
+import android.os.Environment;
 import android.util.Log;
 
 import com.pervasive.sth.entities.*;
@@ -8,25 +10,28 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import android.util.Base64;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * Created by davtir on 22/05/16.
  */
 public class WSInterface {
 
-    private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
     //private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
-    //private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
+    //private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
+    private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
 
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
-    private static final String FOUND_PATH = "/found";
+    private static final String END_PATH = "/endgame";
     private static final String AUDIO_PATH = "/audio";
     private static final String PIC_PATH = "/picture";
 
+    private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
 
     private final RESTClient deviceClient;
     private final RESTClient deleteClient;
-    private final RESTClient foundClient;
+    private final RESTClient endGameClient;
     private final RESTClient audioClient;
     private final RESTClient pictureClient;
 
@@ -34,12 +39,12 @@ public class WSInterface {
     public WSInterface() {
         deviceClient = new RESTClient(BASE_URI + DEV_PATH);
         deleteClient = new RESTClient(BASE_URI + DEL_PATH);
-        foundClient = new RESTClient(BASE_URI + FOUND_PATH);
+        endGameClient = new RESTClient(BASE_URI + END_PATH);
         audioClient = new RESTClient(BASE_URI + AUDIO_PATH);
         pictureClient = new RESTClient(BASE_URI + PIC_PATH);
         deviceClient.addHeader("content-type", "application/json");
         deleteClient.addHeader("content-type", "text/plain");
-        foundClient.addHeader("content-type", "text/plain");
+        endGameClient.addHeader("content-type", "application/json");
         audioClient.addHeader("content-type", "application/json");
         pictureClient.addHeader("content-type", "application/json");
     }
@@ -113,13 +118,46 @@ public class WSInterface {
         return new Device(id, name, role, latitude, longitude, luminosity, temperature, acceleration, rotation);
     }
 
-    public void updateTreasureStatus(Boolean status) throws Exception {
+    public void updateTreasureStatus(Boolean status, Bitmap bitmap) throws Exception {
+
         Log.d("WSInterface", "Status=" + status.toString());
-        foundClient.executePost(status.toString());
+        byte[] pictureData = {};
+        if ( bitmap != null ) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            pictureData = stream.toByteArray();
+        }
+        Log.d("WSInterface", "Trying to update winner picture");
+
+        JSONObject endGame = new JSONObject();
+
+
+        JSONArray jArr = new JSONArray();
+
+        String encodedData = Base64.encodeToString(pictureData, Base64.DEFAULT);
+
+        endGame.put("STATUS", status.toString());
+        endGame.put("PIC_NAME", pathName+"/Winner.bmp");
+        endGame.put("PIC_DATA",encodedData);
+
+        endGameClient.executePost(endGame.toString());
+
+        Log.d("WSInterface", "updated picture info.");
     }
 
-    public boolean retrieveTreasureStatus() throws Exception {
-        return Boolean.parseBoolean(foundClient.executeGet());
+    public TreasureStatus retrieveTreasureStatus() throws Exception {
+        JSONObject jsonEndgame = new JSONObject(endGameClient.executeGet());
+
+        boolean status = Boolean.parseBoolean(jsonEndgame.getString("STATUS"));
+        String picName = (String) jsonEndgame.get("PIC_NAME");
+        byte[] picData = Base64.decode(jsonEndgame.getString("PIC_DATA"), Base64.DEFAULT);
+
+        Log.d("WSInterface", "Got picture info.");
+
+        TreasureStatus res = new TreasureStatus(status);
+        res.setWinner(new Media(picName, picData));
+
+        return res;
     }
 
     public void deleteDevice(String id) throws Exception {
@@ -166,9 +204,9 @@ public class WSInterface {
         jsonPicture.put("PIC_NAME", mediaFile.get_mediaName());
 
         JSONArray jArr = new JSONArray();
-        byte[] audioData = mediaFile.get_data();
+        byte[] pictureData = mediaFile.get_data();
 
-        String encodedData = Base64.encodeToString(audioData, Base64.DEFAULT);
+        String encodedData = Base64.encodeToString(pictureData, Base64.DEFAULT);
 
         jsonPicture.put("PIC_DATA",encodedData);
 
