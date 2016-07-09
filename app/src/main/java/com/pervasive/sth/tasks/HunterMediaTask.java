@@ -21,99 +21,99 @@ import java.io.IOException;
  */
 public class HunterMediaTask extends AsyncTask<Void, Void, Void> {
 
-    private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
+	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
 
-    private MediaRecorder mRecorder = null;
-    WSInterface _webserver;
-    Media _audio;
-    Media _picture;
-    Context _context;
+	private MediaRecorder mRecorder = null;
+	WSInterface _webserver;
+	Media _audio;
+	Media _picture;
+	Context _context;
 
-    public HunterMediaTask(Context context) {
-        _webserver = new WSInterface();
-        _context = context;
-        File f = new File(pathName);
-        if (!f.exists())
-            f.mkdir();
-        Log.d(this.getClass().getName(), "COSTRUTTORE CREATO");
-    }
+	public HunterMediaTask(Context context) {
+		_webserver = new WSInterface();
+		_context = context;
+		File f = new File(pathName);
+		if ( !f.exists() )
+			f.mkdir();
+		Log.d(this.getClass().getName(), "COSTRUTTORE CREATO");
+	}
 
-    @Override
-    protected Void doInBackground(Void... params) {
+	@Override
+	protected Void doInBackground(Void... params) {
 
-        Log.d(this.getClass().getName(), "INIZIO DO IN BACK");
-        while(!isCancelled()) {
+		Log.d(this.getClass().getName(), "INIZIO DO IN BACK");
+		while ( !isCancelled() ) {
 
-            Log.d(this.getClass().getName(), "ENTRATO IN TREASURE MEDIA TASK EXECUTE");
-            Media audio, picture;
+			Log.d(this.getClass().getName(), "ENTRATO IN TREASURE MEDIA TASK EXECUTE");
+			Media audio, picture;
 
-            try {
-                audio = _webserver.retrieveAudio();
-                if(audio == null || audio.equals(_audio)) {
-                    Log.d(this.getClass().getName(), "no new Audio retrieved");
-                    continue;
-                }
+			try {
+				audio = _webserver.retrieveAudio();
+				if ( audio == null || audio.equals(_audio) ) {
+					Log.d(this.getClass().getName(), "no new Audio retrieved");
+					continue;
+				}
 
-                _audio = audio;
+				_audio = audio;
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
 
-            try {
-                FileOutputStream fo = new FileOutputStream(_audio.get_mediaName());
-                fo.write(_audio.get_data());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                continue;
-            } catch (IOException e) {
-                e.printStackTrace();
-                continue;
-            }
+			try {
+				FileOutputStream fo = new FileOutputStream(_audio.getMediaName());
+				fo.write(_audio.getData());
+			} catch ( FileNotFoundException e ) {
+				e.printStackTrace();
+				continue;
+			} catch ( IOException e ) {
+				e.printStackTrace();
+				continue;
+			}
 
-            Intent audioIntent = new Intent(HunterActivity.AUDIO_ACTION);
-            audioIntent.putExtra("MEDIA_AUDIO", _audio.get_mediaName());
-            _context.sendBroadcast(audioIntent);
+			Intent audioIntent = new Intent(HunterActivity.AUDIO_ACTION);
+			audioIntent.putExtra("MEDIA_AUDIO", _audio.getMediaName());
+			_context.sendBroadcast(audioIntent);
 
-            try {
-                picture = _webserver.retrievePicture();
-                if(picture == null /*|| picture.equals(_picture)*/) {
-                    Log.d(this.getClass().getName(), "no new Picture retrieved");
-                    continue;
-                }
+			try {
+				picture = _webserver.retrievePicture();
+				if ( picture == null /*|| picture.equals(_picture)*/ ) {
+					Log.d(this.getClass().getName(), "no new Picture retrieved");
+					continue;
+				}
 
-                _picture = picture;
-                Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+				_picture = picture;
+				Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
 
-            try {
-                FileOutputStream fo = new FileOutputStream(_picture.get_mediaName());
-                fo.write(_picture.get_data());
-                Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                continue;
-            } catch (IOException e) {
-                e.printStackTrace();
-                continue;
-            }
+			try {
+				FileOutputStream fo = new FileOutputStream(_picture.getMediaName());
+				fo.write(_picture.getData());
+				Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
+			} catch ( FileNotFoundException e ) {
+				e.printStackTrace();
+				continue;
+			} catch ( IOException e ) {
+				e.printStackTrace();
+				continue;
+			}
 
-            Intent pictureIntent = new Intent(HunterActivity.PICTURE_ACTION);
-            pictureIntent.putExtra("MEDIA_PICTURE", _picture.get_mediaName());
-            _context.sendBroadcast(pictureIntent);
-            Log.d(this.getClass().getName(), "INTENT SENT------------");
+			Intent pictureIntent = new Intent(HunterActivity.PICTURE_ACTION);
+			pictureIntent.putExtra("MEDIA_PICTURE", _picture.getMediaName());
+			_context.sendBroadcast(pictureIntent);
+			Log.d(this.getClass().getName(), "INTENT SENT------------");
 
-            try {
-                Thread.sleep(60000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+			try {
+				Thread.sleep(60000);
+			} catch ( InterruptedException e ) {
+				e.printStackTrace();
+			}
 
 
-        }
-        return null;
+		}
+		return null;
 
-    }
+	}
 }
