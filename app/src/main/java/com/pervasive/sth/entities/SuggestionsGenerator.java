@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
+import com.pervasive.sth.entities.Media;
 
 /**
  * Created by Alex on 25/06/2016.
@@ -112,15 +113,15 @@ public class SuggestionsGenerator {
                    }
                    Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
 
-                   File f = new File(picture.get_mediaName());
+                   File f = new File(picture.getMediaName());
                    if (!f.exists())
                        f.mkdir();
-                   FileOutputStream fo = new FileOutputStream(picture.get_mediaName());
-                   fo.write(picture.get_data());
+                   FileOutputStream fo = new FileOutputStream(picture.getMediaName());
+                   fo.write(picture.getData());
 
                    Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
 
-                   suggestion = new Suggestion(picture.get_mediaName(), 0.0, type);
+                   suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
                    skip = false;
 
                } catch (Exception e) {
@@ -137,15 +138,15 @@ public class SuggestionsGenerator {
                    }
                    Log.d(this.getClass().getName(), "AUDIO RETRIEVED FROM WEBSERVER------------");
 
-                   File f = new File(audio.get_mediaName());
+                   File f = new File(audio.getMediaName());
                    if (!f.exists())
                        f.mkdir();
-                   FileOutputStream fo = new FileOutputStream(audio.get_mediaName());
-                   fo.write(audio.get_data());
+                   FileOutputStream fo = new FileOutputStream(audio.getMediaName());
+                   fo.write(audio.getData());
 
                    Log.d(this.getClass().getName(), "AUDIO WROTE ON SMARTPHONE------------");
 
-                   suggestion = new Suggestion(audio.get_mediaName(), 0.0, type);
+                   suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
                    skip = false;
 
                } catch (Exception e) {
