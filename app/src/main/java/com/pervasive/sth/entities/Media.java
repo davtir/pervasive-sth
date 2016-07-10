@@ -7,39 +7,43 @@ import java.util.Arrays;
  */
 public class Media {
 
-    private final String _mediaName;
-    private final byte[] _data;
+	private final String mediaName_;
+	private final byte[] data_;
 
-    public Media(String mediaName, byte[] data) {
-        _mediaName = mediaName;
-        _data = data;
-    }
+	public Media(String mediaName, byte[] data) {
+		mediaName_ = mediaName;
+		data_ = data;
+	}
 
-    public String get_mediaName() {
-        return _mediaName;
-    }
+	public String getMediaName() {
+		return mediaName_;
+	}
 
-    public byte[] get_data() {
-        return _data;
-    }
+	public byte[] getData() {
+		return data_;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	@Override
+	public boolean equals(Object o) {
+		if ( this == o ) {
+			return true;
+		}
+		if ( o == null || getClass() != o.getClass() ) {
+			return false;
+		}
 
-        Media media = (Media) o;
+		Media media = (Media) o;
+		if ( mediaName_ != null ? !mediaName_.equals(media.mediaName_) : media.mediaName_ != null ) {
+			return false;
+		}
+		return Arrays.equals(data_, media.data_);
 
-        if (_mediaName != null ? !_mediaName.equals(media._mediaName) : media._mediaName != null)
-            return false;
-        return Arrays.equals(_data, media._data);
+	}
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = _mediaName != null ? _mediaName.hashCode() : 0;
-        result = 31 * result + Arrays.hashCode(_data);
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		int result = mediaName_ != null ? mediaName_.hashCode() : 0;
+		result = 31 * result + Arrays.hashCode(data_);
+		return result;
+	}
 }

@@ -6,14 +6,10 @@ package com.pervasive.sth.rest;
  * and open the template in the editor.
  */
 
-import android.util.Log;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -25,54 +21,45 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 /**
- *
  * @author Alex
  */
 
 public class RESTClient {
 
-    private final static Logger LOG = Logger.getLogger(RESTClient.class.getName());
+	private final static Logger LOG = Logger.getLogger(RESTClient.class.getName());
 
-    String url;
-    String headerName;
-    String headerValue;
+	String _url;
+	String _headerName;
+	String _headerValue;
 
-    public RESTClient(String s){
+	public RESTClient(String s) {
+		_url = s;
+	}
 
-        url = s;
-    }
 
+	public void addHeader(String name, String value) {
+		_headerName = name;
+		_headerValue = value;
 
-    public void addHeader(String name, String value){
+	}
 
-        headerName = name;
-        headerValue = value;
+	public String executePost(String payload) throws Exception {
 
-    }
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpPost httpPost = new HttpPost(_url);
+		httpPost.setHeader(_headerName, _headerValue);
+		StringEntity entity = new StringEntity(payload, HTTP.UTF_8);
+		httpPost.setEntity(entity);
+		HttpResponse response = httpClient.execute(httpPost);
+		HttpEntity entity1 = response.getEntity();
+		return EntityUtils.toString(entity1);
+	}
 
-    public String executePost(String payload) throws Exception {  // If you want to use post method to hit server
+	public String executeGet() throws Exception { //If you want to use get method to hit server
 
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader(headerName, headerValue);
-        HttpResponse response = null;
-        String result = "";
-        StringEntity entity = new StringEntity(payload, HTTP.UTF_8);
-        httpPost.setEntity(entity);
-        response = httpClient.execute(httpPost);
-        HttpEntity entity1 = response.getEntity();
-        result = EntityUtils.toString(entity1);
-        return result;
-    }
-
-    public String executeGet() throws Exception { //If you want to use get method to hit server
-
-        HttpClient httpClient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet(url);
-        String result = null;
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        result = httpClient.execute(httpget, responseHandler);
-
-        return result;
-    }
+		HttpClient httpClient = new DefaultHttpClient();
+		HttpGet httpget = new HttpGet(_url);
+		ResponseHandler<String> responseHandler = new BasicResponseHandler();
+		return httpClient.execute(httpget, responseHandler);
+	}
 }
