@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -35,7 +34,7 @@ import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
-import com.pervasive.sth.tasks.HunterMediaTask;
+import com.pervasive.sth.tasks.HunterDistanceTask;
 import com.pervasive.sth.tasks.HunterTask;
 import com.pervasive.sth.entities.Device;
 
@@ -44,7 +43,9 @@ import java.io.IOException;
 
 public class HunterActivity extends AppCompatActivity {
 
-    public static String FOUND_ACTION = "com.pervasive.sth.smarttreasurehunt.TREASURE_FOUND";
+    private static final int WINNER_REQUEST_CODE = 1;
+
+    public static String EXIT_ACTION = "com.pervasive.sth.smarttreasurehunt.EXIT_GAME";
     public static String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
     public static String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
     public static String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
@@ -54,7 +55,7 @@ public class HunterActivity extends AppCompatActivity {
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
     private HunterTask _task;
-    private HunterMediaTask _media;
+    private HunterDistanceTask _distance;
     private Device _hunter;
 
     private RelativeLayout _rl;
@@ -172,7 +173,7 @@ public class HunterActivity extends AppCompatActivity {
             // Register for broadcast when discovery has started
             registerReceiver( receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
 
-            registerReceiver ( receiver, new IntentFilter(FOUND_ACTION));
+            registerReceiver ( receiver, new IntentFilter(EXIT_ACTION));
 
             registerReceiver ( receiver, new IntentFilter(GPS_ACTION));
 
@@ -190,13 +191,13 @@ public class HunterActivity extends AppCompatActivity {
         Log.d("HunterTask", "Starting task");
         // Start treasure task
         if ( _task == null || _task.isCancelled() ) {
-            _task = new HunterTask(this, _gps, _bluetooth, _hunter);
+            _task = new HunterTask(this, _hunter);
             _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
-        if ( _media == null || _media.isCancelled() ) {
-            _media = new HunterMediaTask(this);
-           // _media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if ( _distance == null || _distance.isCancelled() ) {
+            _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
+           _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -212,8 +213,8 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
-        if ( _media != null && !_media.isCancelled() )
-            _media.cancel(true);
+        if ( _distance != null && !_distance.isCancelled() )
+            _distance.cancel(true);
     }
 
     protected void onStop() {
@@ -229,8 +230,8 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
-        if ( _media != null && !_media.isCancelled() )
-            _media.cancel(true);
+        if ( _distance != null && !_distance.isCancelled() )
+            _distance.cancel(true);
     }
 
     protected void onDestroy() {
@@ -245,8 +246,8 @@ public class HunterActivity extends AppCompatActivity {
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
             _task.cancel(true);
-        if ( _media != null && !_media.isCancelled() )
-            _media.cancel(true);
+        if ( _distance != null && !_distance.isCancelled() )
+            _distance.cancel(true);
     }
 
     public void onLuxButtonClick(View v) {
@@ -343,6 +344,12 @@ public class HunterActivity extends AppCompatActivity {
             gpsProgressBar.setProgress(progress);
     }
 
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
+        if (reqCode == WINNER_REQUEST_CODE) {
+            finish();
+        }
+    }
+
     private final BroadcastReceiver receiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -359,20 +366,18 @@ public class HunterActivity extends AppCompatActivity {
                     Toast.makeText(context, "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m", Toast.LENGTH_LONG).show();
                                     //"\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
                 }
-            } else if(FOUND_ACTION.equals(mIntentAction)) {
-                    if ( intent.getBooleanExtra("TREASURE_FOUND", false) ) {
-                        Toast.makeText(context, "The treasure has been found!", Toast.LENGTH_LONG).show();
+            } else if(EXIT_ACTION.equals(mIntentAction)) {
+                    if ( intent.getBooleanExtra("EXIT_GAME", false) ) {
                         finish();
                     }
             } else if(GPS_ACTION.equals(mIntentAction)) {
                 updateGPSProximityBars(intent.getDoubleExtra("GPS_DISTANCE", 0.0));
-                //Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
             } else if (WINNER_ACTION.equals(mIntentAction)) {
                 String pathName = intent.getStringExtra("WINNER_UPDATE");
-                _picturePath = pathName;
-                _photoButton.setEnabled(true);
-                _photoButton.setClickable(true);
-                _photoButton.setImageResource(R.drawable.red_square);
+                Intent winnerIntent = new Intent(context, TreasureCaught.class);
+                winnerIntent.putExtra("WINNER_PICTURE", pathName);
+                startActivityForResult( winnerIntent, WINNER_REQUEST_CODE);
 
             } else if ( SUGGESTION_ACTION.equals(mIntentAction)) {
                 Suggestion received = (Suggestion)(intent.getSerializableExtra("SUGGESTION"));
