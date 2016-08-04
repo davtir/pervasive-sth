@@ -125,9 +125,9 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
             _treasure.setAcceleration(a);
         }
 
-        rot = _sr.getRotation();
-        if(_sr.isGyroscopeAvailable() && rot !=null)
+        if(_sr.isGyroscopeAvailable()) {
             _treasure.setRotation(_sr.getRotation());
+        }
         else {
             float[] r = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
             _treasure.setRotation(r);
