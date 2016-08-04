@@ -20,17 +20,35 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class StartupActivity extends AppCompatActivity {
+/**
+ * @brief	This class implements the activity associated
+ * 			to the welcome screen of the application.
+ */
+public class WelcomeActivity extends AppCompatActivity {
 
-	private final String LOG_TAG = StartupActivity.class.getName();
+	/*
+	 * Tag string for logs
+	 */
+	private final String LOG_TAG = WelcomeActivity.class.getName();
+
+	/*
+	 * The Location manager class for GPS
+	 */
 	private LocationManager _gpsManager;
+
+	/*
+	 * The bluetooth manager class
+	 */
 	private BluetoothManager _bluetoothManager;
 
+	/**
+	 * @brief	This function implements the creation procedure
+	 * 			of this activity
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,25 +76,34 @@ public class StartupActivity extends AppCompatActivity {
 
 		// Creating gps service manager
 		_gpsManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+
 		// Creating bluetooth service manager
 		_bluetoothManager = (BluetoothManager) this.getSystemService(BLUETOOTH_SERVICE);
 
-		// If not activated yet, then request to user bluetooth activation
+		// If the bluetooth have not been activated yet ...
 		if ( !_bluetoothManager.getAdapter().isEnabled() ) {
+			// ... request the activation to the user
 			requestBluetoothPermissions(this);
 		}
 
-		// If not activated, , then request to user gps activation
+		// If the GPS have not been activated yet ...
 		if ( !_gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+			// ... request the activation to the user
 			requestGPSPermissions(this);
 		}
 
-		Log.d(LOG_TAG, "StartupActivity have been created.");
+		Log.d(LOG_TAG, "WelcomeActivity have been created.");
 	}
 
-	private void createFakeImages(int images) throws IOException {
+	/**
+	 * @param	imagesNumber: The number of images to be written
+	 * @throws	IOException
+	 * @brief	Generates 'imagesNumber' fake images on external storage
+	 * 			starting from fake images in drawable
+	 */
+	private void createFakeImages(int imagesNumber) throws IOException {
 		String imagesPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
-		for ( int i = 0; i <= images; ++i ) {
+		for ( int i = 0; i <= imagesNumber; ++i ) {
 			int fakeImageID = R.drawable.fake_image + i;
 			Log.d(this.getClass().getName(), "Creating fake image " + fakeImageID);
 
@@ -89,10 +116,15 @@ public class StartupActivity extends AppCompatActivity {
 		}
 	}
 
+	/**
+	 * @param	blinkingText: The text view that needs to be animated
+	 * @param	blinkDelay: The blink delay in ms
+	 * @brief	Enables blinking animation to the text view in input
+	 */
 	private void createBlinkingText(TextView blinkingText, int blinkDelay) {
 		if ( blinkingText != null ) {
 			Animation anim = new AlphaAnimation(0.0f, 1.0f);
-			anim.setDuration(blinkDelay); //You can manage the blinking time with this parameter
+			anim.setDuration(blinkDelay);
 			anim.setStartOffset(20);
 			anim.setRepeatMode(Animation.REVERSE);
 			anim.setRepeatCount(Animation.INFINITE);
@@ -100,6 +132,10 @@ public class StartupActivity extends AppCompatActivity {
 		}
 	}
 
+	/**
+	 * @param	context: The current context
+	 * @brief	Requests GPS activation to the user
+	 */
 	public void requestGPSPermissions(final Context context) {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 		alertDialog.setTitle("GPS Permission Request");
@@ -122,6 +158,10 @@ public class StartupActivity extends AppCompatActivity {
 		alertDialog.show();
 	}
 
+	/**
+	 * @param	context: The current context
+	 * @brief	Requests bluetooth activation to the user
+	 */
 	public void requestBluetoothPermissions(final Context context) {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 
@@ -146,6 +186,11 @@ public class StartupActivity extends AppCompatActivity {
 		alertDialog.show();
 	}
 
+	/**
+	 * @param	event: The event to be handled
+	 * @return	True if correctly handled, false otherwise
+	 * @brief	Handles touch event
+	 */
 	public boolean onTouchEvent(MotionEvent event) {
 		boolean bluetoothEnabled = _bluetoothManager.getAdapter().isEnabled();
 		boolean gpsEnabled = _gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
