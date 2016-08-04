@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.os.Environment;
 import android.provider.Settings;
@@ -47,7 +48,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
 	/**
 	 * @brief	This function implements the creation procedure
-	 * 			of this activity
+	 *			of this activity
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +61,7 @@ public class WelcomeActivity extends AppCompatActivity {
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		// Set content view AFTER ABOVE sequence (to avoid crash)
-		setContentView(R.layout.activity_startup);
+		setContentView(R.layout.activity_welcome);
 
 		// Creating fake images
 		try {
@@ -70,9 +71,15 @@ public class WelcomeActivity extends AppCompatActivity {
 			finish();
 		}
 
+		Typeface type = Typeface.createFromAsset(getAssets(), "fonts/TravelingTypewriter.ttf");
+
 		// Creating blinking welcome message
 		TextView blinkingText = (TextView) findViewById(R.id.blinking);
+		blinkingText.setTypeface(type);
 		createBlinkingText(blinkingText, 1000);
+
+		TextView infoText = (TextView) findViewById(R.id.info_textview);
+		infoText.setTypeface(type);
 
 		// Creating gps service manager
 		_gpsManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);

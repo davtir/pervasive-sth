@@ -17,12 +17,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/info_textview"
-        android:text="University of La Sapienza\nPervasive Systems course 2015/16\nAlessandro Granato\nDavide Tiriticco"
+        android:text="University of Rome\n'La Sapienza'\nPervasive Systems 2015/16\n\nAlessandro Granato\nDavide Tiriticco"
         android:textColor="#ffffff"
         android:gravity="center"
         android:textAlignment="center"
         android:textSize="22dp"
-        android:layout_above="@+id/blinking"/>
+        android:layout_above="@+id/blinking"
+        android:textStyle="italic"/>
     <TextView
         android:id="@+id/blinking"
         android:typeface="sans"
