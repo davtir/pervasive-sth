@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="5"
+    android:background="@drawable/app_th_hunterbg"
     tools:context="com.pervasive.sth.smarttreasurehunt.TreasureCaught">
 
     <TextView
@@ -13,6 +14,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="Winner Capture"
+        android:textColor="@color/white"
         android:textAlignment="center"
         android:textSize="50dp"
         android:gravity="center" />
@@ -21,14 +23,17 @@
         android:id="@+id/winner_imageview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"/>
+        android:layout_weight="3.5"/>
 
     <Button
         android:id="@+id/winner_button"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="0.5"
         android:onClick="onWinnerButtonClick"
-        android:text="Exit"
-        android:textSize="50dp" />
+        android:background="@drawable/app_th_catchmebg"
+        android:layout_margin="10dp"
+        android:text="Play again"
+        android:textColor="@color/white"
+        android:textSize="30dp" />
 </LinearLayout>

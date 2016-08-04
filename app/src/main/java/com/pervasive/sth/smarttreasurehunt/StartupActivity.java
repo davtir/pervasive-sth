@@ -5,7 +5,10 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,10 +20,17 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 public class StartupActivity extends AppCompatActivity {
 
 	boolean gps_enabled;
 	boolean bluetooth_enabled;
+	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
+	private Bitmap bm;
+	FileOutputStream outStream;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +44,24 @@ public class StartupActivity extends AppCompatActivity {
 
 		//set content view AFTER ABOVE sequence (to avoid crash)
 		setContentView(R.layout.activity_startup);
+
+		//////////////// WRITING THE 10 fake images to the externalStorage of the device
+		try {
+			for(int i=0; i<=3; i++) {
+				int fakeImageID = R.drawable.fake_image+i;
+				bm = BitmapFactory.decodeResource(getResources(), fakeImageID);
+				Log.d(this.getClass().getName(), "fakeImageID is "+fakeImageID);
+				File file = new File(pathName, "fake_image"+ i +".png");
+				outStream = new FileOutputStream(file);
+				bm.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+				outStream.flush();
+				outStream.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		////////////////
 
 		TextView blinkingText = (TextView) findViewById(R.id.blinking);
 		if ( blinkingText != null ) {

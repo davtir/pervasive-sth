@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/app_th_hunterbg"
     tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
@@ -69,7 +69,10 @@
         </LinearLayout>
 
         <RelativeLayout
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
             android:id="@+id/central_view"
+            android:background="@drawable/app_th_displaybg"
             android:layout_below="@id/bl_layout"
             android:layout_weight="7"
             android:layout_width="match_parent"
@@ -79,6 +82,7 @@
                 android:id="@+id/textual_suggestion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="20dp"
                 android:textColor="@color/green"
                 android:visibility="invisible"/>
 
@@ -86,6 +90,7 @@
                 android:id="@+id/photo_suggestion"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="12dp"
                 android:layout_gravity="center"
                 android:visibility="invisible"/>
 
@@ -104,6 +109,7 @@
                 android:id="@+id/photo_button"
                 android:onClick="onPicButtonClick"
                 android:layout_width="0dp"
+                android:background="@null"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
@@ -111,6 +117,7 @@
                 android:id="@+id/audio_button"
                 android:onClick="onAudioButtonClick"
                 android:layout_width="0dp"
+                android:background="@null"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
@@ -118,6 +125,7 @@
                 android:id="@+id/lux_button"
                 android:onClick="onLuxButtonClick"
                 android:layout_width="0dp"
+                android:background="@null"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
@@ -125,6 +133,7 @@
                 android:id="@+id/temperature_button"
                 android:onClick="onTemperatureButtonClick"
                 android:layout_width="0dp"
+                android:background="@null"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 
@@ -132,6 +141,7 @@
                 android:id="@+id/accelerometer_button"
                 android:onClick="onAccelerometerButtonClick"
                 android:layout_width="0dp"
+                android:background="@null"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
 

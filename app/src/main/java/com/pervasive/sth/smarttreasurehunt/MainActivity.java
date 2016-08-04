@@ -2,12 +2,16 @@ package com.pervasive.sth.smarttreasurehunt;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +26,11 @@ public class MainActivity extends AppCompatActivity {
 		//Remove notification bar
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main);
+
+		TextView roleTextView = (TextView) this.findViewById(R.id.select_your_role_textview);
+		Typeface type = Typeface.createFromAsset(getAssets(),"fonts/TravelingTypewriter.ttf");
+		roleTextView.setTypeface(type);
+
 
 		Log.d("MainActivity", "MainActivity started.");
 	}

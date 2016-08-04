@@ -3,17 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background2"
+    android:background="@drawable/app_th_treasurebg"
     tools:context="com.pervasive.sth.smarttreasurehunt.TreasureActivity">
 
-    <ImageButton
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/display_treasure"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@null"
-        android:id="@+id/imageButton"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/catchme"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/app_th_displaytreasure" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Catch Me"
+        android:textColor="@color/white"
+        android:textSize="30dp"
+        android:background="@drawable/app_th_catchmebg"
+        android:id="@+id/imageButton"
+        android:layout_below="@id/display_treasure"
+        android:layout_margin="10dp"
         android:onClick="onClickCaught"
         android:layout_weight="1"
         />

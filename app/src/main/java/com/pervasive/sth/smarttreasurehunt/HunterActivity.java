@@ -14,6 +14,7 @@ import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +41,7 @@ import com.pervasive.sth.entities.Device;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class HunterActivity extends AppCompatActivity {
 
@@ -51,6 +53,13 @@ public class HunterActivity extends AppCompatActivity {
     public static String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
     public static String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
     public static String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
+
+    private final String externalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
+
+    private int suggestionProbability; //A number between 0 and 100
+    private int fakeSuggestionProbability = 20; // equivale alla percentuale di possibilità di avere un fake suggestion
+    private int totalFakeImages = 4; //Number of Images (from fake_image0 to fake_image3
+    private Random _random;
 
     private GPSTracker _gps;
     private BluetoothTracker _bluetooth;
@@ -78,6 +87,8 @@ public class HunterActivity extends AppCompatActivity {
     private ImageView _temperatureButton;
     private ImageView _accelerometerButton;
 
+    private String[] fakeTextSuggestions;
+
     boolean _receiverRegistered;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,17 +101,21 @@ public class HunterActivity extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_hunter);
 
+        _random = new Random();
+        initFakeTextSuggestion();
+
+
         satellite = (ImageView) this.findViewById(R.id.satellite_pic);
-        satellite.setImageResource(R.drawable.red_square);
+        satellite.setImageResource(R.drawable.app_th_iconsatellite);
 
         radar = (ImageView) this.findViewById(R.id.radar_pic);
-        radar.setImageResource(R.drawable.red_square);
+        radar.setImageResource(R.drawable.app_th_iconradar);
 
         gpsProgressBar = (ProgressBar) this.findViewById(R.id.gps_progress_bar);
         BLProgressBar = (ProgressBar) this.findViewById(R.id.bl_progress_bar);
 
-        gpsProgressBar.getProgressDrawable().setColorFilter(Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
-        BLProgressBar.getProgressDrawable().setColorFilter(Color.BLUE, android.graphics.PorterDuff.Mode.SRC_IN);
+        gpsProgressBar.getProgressDrawable().setColorFilter(Color.rgb(30,122,186), android.graphics.PorterDuff.Mode.SRC_IN);
+        BLProgressBar.getProgressDrawable().setColorFilter(Color.rgb(51,177,71), android.graphics.PorterDuff.Mode.SRC_IN);
 
         gpsProgressBar.setScaleY(10f);
         BLProgressBar.setScaleY(10f);
@@ -118,24 +133,24 @@ public class HunterActivity extends AppCompatActivity {
         textualSuggestion.setCharacterDelay(50);
 
         _photoButton = (ImageButton) findViewById(R.id.photo_button);
-        _photoButton.setImageResource(R.drawable.blue_square);
+        _photoButton.setImageResource(R.drawable.appth_photo_off);
         _photoButton.setEnabled(false);
 
         _audioButton = (ImageButton) findViewById(R.id.audio_button);
-        _audioButton.setImageResource(R.drawable.blue_square);
+        _audioButton.setImageResource(R.drawable.appth_sound_off);
         _audioButton.setEnabled(false);
 
 
         _luxButton = (ImageButton) findViewById(R.id.lux_button);
-        _luxButton.setImageResource(R.drawable.blue_square);
+        _luxButton.setImageResource(R.drawable.appth_light_off);
         _luxButton.setEnabled(false);
 
         _temperatureButton = (ImageButton) findViewById(R.id.temperature_button);
-        _temperatureButton.setImageResource(R.drawable.blue_square);
+        _temperatureButton.setImageResource(R.drawable.appth_temp_off);
         _temperatureButton.setEnabled(false);
 
         _accelerometerButton = (ImageButton) findViewById(R.id.accelerometer_button);
-        _accelerometerButton.setImageResource(R.drawable.blue_square);
+        _accelerometerButton.setImageResource(R.drawable.appth_movement_off);
         _accelerometerButton.setEnabled(false);
         _accelerometerButton.setClickable(false);
 
@@ -250,10 +265,39 @@ public class HunterActivity extends AppCompatActivity {
             _distance.cancel(true);
     }
 
+    public void initFakeTextSuggestion() {
+        fakeTextSuggestions = new String[10];
+        fakeTextSuggestions[0] ="Blabla0";
+        fakeTextSuggestions[1] ="Blabla1";
+        fakeTextSuggestions[2] ="Blabla2";
+        fakeTextSuggestions[3] ="Blabla3";
+        fakeTextSuggestions[4] ="Blabla4";
+        fakeTextSuggestions[5] ="Blabla5";
+        fakeTextSuggestions[6] ="Blabla6";
+        fakeTextSuggestions[7] ="Blabla7";
+        fakeTextSuggestions[8] ="Blabla8";
+        fakeTextSuggestions[9] ="Blabla9";
+    }
+
+    public void selectRealOrFakeTextSuggestion() {
+        suggestionProbability = (int) (Math.random()*100);
+        Log.d(this.getLocalClassName(), "Probability = "+suggestionProbability);
+
+        if(suggestionProbability < fakeSuggestionProbability) {
+            int fakeTextSuggestionIndex = _random.nextInt(fakeTextSuggestions.length);
+            Log.d(this.getLocalClassName(), "fakeTextSuggestionIndex = "+fakeTextSuggestionIndex);
+            messageReceived = fakeTextSuggestions[fakeTextSuggestionIndex];
+        }
+    }
+
     public void onLuxButtonClick(View v) {
+
         _luxButton.setEnabled(false);
         _luxButton.setClickable(false);
-        _luxButton.setImageResource(R.drawable.blue_square);
+        _luxButton.setImageResource(R.drawable.appth_light_off);
+
+        selectRealOrFakeTextSuggestion();
+
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
@@ -263,7 +307,10 @@ public class HunterActivity extends AppCompatActivity {
     public void onTemperatureButtonClick(View v) {
         _temperatureButton.setEnabled(false);
         _temperatureButton.setClickable(false);
-        _temperatureButton.setImageResource(R.drawable.blue_square);
+        _temperatureButton.setImageResource(R.drawable.appth_temp_off);
+
+        selectRealOrFakeTextSuggestion();
+
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
@@ -273,7 +320,10 @@ public class HunterActivity extends AppCompatActivity {
     public void onAccelerometerButtonClick(View v) {
         _accelerometerButton.setEnabled(false);
         _accelerometerButton.setClickable(false);
-        _accelerometerButton.setImageResource(R.drawable.blue_square);
+        _accelerometerButton.setImageResource(R.drawable.appth_movement_off);
+
+        selectRealOrFakeTextSuggestion();
+
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
@@ -286,7 +336,7 @@ public class HunterActivity extends AppCompatActivity {
 
         _audioButton.setEnabled(false);
         _audioButton.setClickable(false);
-        _audioButton.setImageResource(R.drawable.blue_square);
+        _audioButton.setImageResource(R.drawable.appth_sound_off);
 
         MediaPlayer mPlayer = new MediaPlayer();
         try {
@@ -302,20 +352,41 @@ public class HunterActivity extends AppCompatActivity {
 
         _photoButton.setEnabled(false);
         _photoButton.setClickable(false);
-        _photoButton.setImageResource(R.drawable.blue_square);
+        _photoButton.setImageResource(R.drawable.appth_photo_off);
 
         textualSuggestion.setVisibility(View.INVISIBLE);
         Log.d(this.getClass().getName(), "*************"+_picturePath);
-        File picFile = new File(_picturePath);
-        if  ( picFile.exists() ) {
-            Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
-            Matrix rotation = new Matrix();
-            rotation.postRotate((float) -90.0);
-            Bitmap bmapRotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), rotation, true);
-            photoSuggestion.setImageBitmap(bmapRotated);
-            photoSuggestion.setVisibility(View.VISIBLE);
 
+        suggestionProbability = (int) (Math.random()*100);
+
+        Log.d(this.getLocalClassName(), "Probability = "+suggestionProbability);
+
+        File picFile;
+
+        if(suggestionProbability < fakeSuggestionProbability) {
+
+            int fakeImageNumber = _random.nextInt(totalFakeImages); //return an integer between 0 and totalFakeImages-1
+            Log.d(this.getLocalClassName(), "FakeImageNumber "+fakeImageNumber);
+            String fakeImageURI = "/fake_image"+fakeImageNumber+".png";
+            picFile = new File(externalStoragePath + fakeImageURI);
+            if  ( picFile.exists() ) {
+                Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
+                photoSuggestion.setImageBitmap(bmap);
+            }
         }
+        else {
+            picFile = new File(_picturePath);
+
+            if (picFile.exists()) {
+                Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
+                Matrix rotation = new Matrix();
+                rotation.postRotate((float) -90.0);
+                Bitmap bmapRotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), rotation, true);
+                photoSuggestion.setImageBitmap(bmapRotated);
+            }
+        }
+
+        photoSuggestion.setVisibility(View.VISIBLE);
     }
 
     public void updateBLProximityBars(double dist) {
@@ -387,20 +458,20 @@ public class HunterActivity extends AppCompatActivity {
                     messageReceived = received.getMessage();
                     _luxButton.setEnabled(true);
                     _luxButton.setClickable(true);
-                    _luxButton.setImageResource(R.drawable.red_square);
+                    _luxButton.setImageResource(R.drawable.appth_light_on);
 
                 } else if (received.getType() == SuggestionsGenerator.TEMPERATURE_SUGGESTION ) {
                     messageReceived = received.getMessage();
                     _temperatureButton.setEnabled(true);
                     _temperatureButton.setClickable(true);
-                    _temperatureButton.setImageResource(R.drawable.red_square);
+                    _temperatureButton.setImageResource(R.drawable.appth_temp_on);
                 } else if ( received.getType() == SuggestionsGenerator.PICTURE_SUGGESTION) {
                     Log.d(this.getClass().getName(), "Media received");
                     Log.d(this.getClass().getName(), "****************************"+received.getMessage());
                     _picturePath = received.getMessage();
                     _photoButton.setEnabled(true);
                     _photoButton.setClickable(true);
-                    _photoButton.setImageResource(R.drawable.red_square);
+                    _photoButton.setImageResource(R.drawable.appth_photo_on);
 
                     //Toast.makeText(context, "Picture Received", Toast.LENGTH_LONG).show();
                 } else if ( received.getType() == SuggestionsGenerator.AUDIO_SUGGESTION){
@@ -408,14 +479,14 @@ public class HunterActivity extends AppCompatActivity {
                     _audioPath = received.getMessage();
                     _audioButton.setEnabled(true);
                     _audioButton.setClickable(true);
-                    _audioButton.setImageResource(R.drawable.red_square);
+                    _audioButton.setImageResource(R.drawable.appth_sound_on);
 
                     //Toast.makeText(context, "Audio Received", Toast.LENGTH_LONG).show();
                 } else if ( received.getType() == SuggestionsGenerator.ACCELEROMETER_SUGGESTION) {
                     messageReceived = received.getMessage();
                     _accelerometerButton.setEnabled(true);
                     _accelerometerButton.setClickable(true);
-                    _accelerometerButton.setImageResource(R.drawable.red_square);
+                    _accelerometerButton.setImageResource(R.drawable.appth_movement_on);
                 }
             }
         }
