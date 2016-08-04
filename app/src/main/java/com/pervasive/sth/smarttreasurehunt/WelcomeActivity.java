@@ -78,6 +78,7 @@ public class WelcomeActivity extends AppCompatActivity {
 		blinkingText.setTypeface(type);
 		createBlinkingText(blinkingText, 1000);
 
+		// Creating info string
 		TextView infoText = (TextView) findViewById(R.id.info_textview);
 		infoText.setTypeface(type);
 
@@ -201,26 +202,25 @@ public class WelcomeActivity extends AppCompatActivity {
 	public boolean onTouchEvent(MotionEvent event) {
 		boolean bluetoothEnabled = _bluetoothManager.getAdapter().isEnabled();
 		boolean gpsEnabled = _gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		if ( bluetoothEnabled && gpsEnabled) {
-			int action = event.getAction();
-			switch ( action ) {
-				case MotionEvent.ACTION_DOWN:
+		int action = event.getAction();
+		switch ( action ) {
+			case MotionEvent.ACTION_DOWN:
+				if ( bluetoothEnabled && gpsEnabled) {
 					startActivity(new Intent(this, MainActivity.class));
-					break;
-				default:
-					return false;
-			}
-			return true;
-		} else {
-			Log.d(LOG_TAG, "Bluetooth or GPS not available yet.");
-			if ( !bluetoothEnabled ) {
-				Toast.makeText(this, "Bluetooth is not available yet.", Toast.LENGTH_SHORT).show();
-			}
-			if ( !gpsEnabled ) {
-				Toast.makeText(this, "GPS is not available yet.", Toast.LENGTH_SHORT).show();
-			}
-			return true;
+				} else {
+					Log.d(LOG_TAG, "Bluetooth or GPS not available yet.");
+					if ( !bluetoothEnabled ) {
+						Toast.makeText(this, "Bluetooth is not available yet.", Toast.LENGTH_SHORT).show();
+					}
+					if ( !gpsEnabled ) {
+						Toast.makeText(this, "GPS is not available yet.", Toast.LENGTH_SHORT).show();
+					}
+				}
+				break;
+			default:
+				return false;
 		}
+		return true;
 	}
 
 }
