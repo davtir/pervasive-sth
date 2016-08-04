@@ -1,41 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.pervasive.sth.smarttreasurehunt.MainActivity"
-    android:background="@drawable/background2">
+    android:background="@color/black"
+    android:weightSum="6.2">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textview"
-        android:text="Select the device role"
+        android:id="@+id/select_your_role_textview"
+        android:text="Select your role"
         android:textColor="#ffffff"
         android:textSize="32dp"
-        android:layout_above="@+id/treasure_button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="84dp" />
+        android:textAlignment="center"
+        android:layout_weight="0.2"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:layout_width="match_parent"
+        android:background="@color/black"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/app_th_hunter2"
+        android:id="@+id/hunter_button"
+        android:onClick="onClickHunter"
+        android:layout_weight="3"/>
+
+    <ImageButton
+        android:layout_width="match_parent"
+        android:background="@color/black"
+        android:layout_height="0dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/app_th_treasure2"
         android:text="Treasure"
         android:id="@+id/treasure_button"
-        android:layout_marginLeft="34dp"
         android:onClick="onClickTreasure"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/textview"
-        android:layout_marginBottom="144dp" />
+        android:layout_weight="3"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hunter"
-        android:id="@+id/hunter_button"
-        android:layout_marginRight="44dp"
-        android:onClick="onClickHunter"
-        android:layout_alignTop="@+id/treasure_button"
-        android:layout_alignEnd="@+id/textview" />
-
-</RelativeLayout>
+</LinearLayout>

@@ -17,9 +17,9 @@ import java.io.ByteArrayOutputStream;
  */
 public class WSInterface {
 
+    private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
     //private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
-    //private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
-    private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
+    //private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
 
     private static final String DEV_PATH = "/device";
     private static final String DEL_PATH = "/delete";
@@ -170,10 +170,10 @@ public class WSInterface {
 
         JSONObject jsonAudio = new JSONObject();
 
-        jsonAudio.put("AUDIO_NAME", mediaFile.get_mediaName());
+        jsonAudio.put("AUDIO_NAME", mediaFile.getMediaName());
 
         JSONArray jArr = new JSONArray();
-        byte[] audioData = mediaFile.get_data();
+        byte[] audioData = mediaFile.getData();
 
         String encodedData = Base64.encodeToString(audioData, Base64.DEFAULT);
 
@@ -201,10 +201,10 @@ public class WSInterface {
 
         JSONObject jsonPicture = new JSONObject();
 
-        jsonPicture.put("PIC_NAME", mediaFile.get_mediaName());
+        jsonPicture.put("PIC_NAME", mediaFile.getMediaName());
 
         JSONArray jArr = new JSONArray();
-        byte[] pictureData = mediaFile.get_data();
+        byte[] pictureData = mediaFile.getData();
 
         String encodedData = Base64.encodeToString(pictureData, Base64.DEFAULT);
 

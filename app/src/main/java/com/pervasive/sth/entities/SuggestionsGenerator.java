@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
+import com.pervasive.sth.entities.Media;
 
 /**
  * Created by Alex on 25/06/2016.
@@ -65,6 +66,10 @@ public class SuggestionsGenerator {
         double mediaProbs = 1.0 / (2.0 * (sensorsCounter + 1) );
         double sensorsProbs = 2 * mediaProbs;
 
+        //Used to test media
+        //double mediaProbs = 0.5;
+        //double sensorsProbs = 0;
+
         _suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsReader.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);
         _suggestionProbs[GYROSCOPE_SUGGESTION] = _sensorsReader.isGyroscopeAvailable() ? (sensorsProbs) : (0.0);
         _suggestionProbs[LUX_SUGGESTION] = _sensorsReader.isPhotoresistorAvailable() ? (sensorsProbs) : (0.0);
@@ -112,15 +117,15 @@ public class SuggestionsGenerator {
                    }
                    Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
 
-                   File f = new File(picture.get_mediaName());
+                   File f = new File(picture.getMediaName());
                    if (!f.exists())
                        f.mkdir();
-                   FileOutputStream fo = new FileOutputStream(picture.get_mediaName());
-                   fo.write(picture.get_data());
+                   FileOutputStream fo = new FileOutputStream(picture.getMediaName());
+                   fo.write(picture.getData());
 
                    Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
 
-                   suggestion = new Suggestion(picture.get_mediaName(), 0.0, type);
+                   suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
                    skip = false;
 
                } catch (Exception e) {
@@ -137,15 +142,15 @@ public class SuggestionsGenerator {
                    }
                    Log.d(this.getClass().getName(), "AUDIO RETRIEVED FROM WEBSERVER------------");
 
-                   File f = new File(audio.get_mediaName());
+                   File f = new File(audio.getMediaName());
                    if (!f.exists())
                        f.mkdir();
-                   FileOutputStream fo = new FileOutputStream(audio.get_mediaName());
-                   fo.write(audio.get_data());
+                   FileOutputStream fo = new FileOutputStream(audio.getMediaName());
+                   fo.write(audio.getData());
 
                    Log.d(this.getClass().getName(), "AUDIO WROTE ON SMARTPHONE------------");
 
-                   suggestion = new Suggestion(audio.get_mediaName(), 0.0, type);
+                   suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
                    skip = false;
 
                } catch (Exception e) {
@@ -242,6 +247,7 @@ public class SuggestionsGenerator {
     }
 
     public String analizeLuxValues(Device treasure) {
+
         double t_threshold;
         double t_lux = treasure.getLuminosity();
         if ( t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD) )
@@ -290,7 +296,7 @@ public class SuggestionsGenerator {
         double resultant = 0.0;
         resultant = (float) Math.sqrt(Math.pow(meanAcc[0], 2) + Math.pow(meanAcc[1], 2) + Math.pow(meanAcc[2], 2));
 
-        if(resultant >= 0.5)
+        if(resultant >= 1)
             msg = "Watch out! The treasure is moving with acceleration equals to " + (Math.round(resultant*10.0)/10.0)+ " m/s²";
         else
             msg = "Treasure is not moving at all! What are you waiting for?";

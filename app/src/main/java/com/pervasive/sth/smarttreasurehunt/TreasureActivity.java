@@ -147,10 +147,10 @@ public class TreasureActivity extends AppCompatActivity {
         Log.d("TreasureTask", "onPause() invoked.");
 
         // Stop treasure task
-        if (_task != null && !_task.isCancelled())
+        /*if (_task != null && !_task.isCancelled())
             _task.cancel(true);
         if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
+            _media.cancel(true);*/
     }
 
     protected void onStop() {
@@ -158,10 +158,10 @@ public class TreasureActivity extends AppCompatActivity {
         Log.d("TreasureTask", "onStop() invoked.");
 
         // Stop treasure task
-        if (_task != null && !_task.isCancelled())
+        /*if (_task != null && !_task.isCancelled())
             _task.cancel(true);
         if (_media != null && !_media.isCancelled())
-            _media.cancel(true);
+            _media.cancel(true);*/
     }
 
     protected void onDestroy() {

@@ -22,7 +22,9 @@
         android:theme="@style/MyAppTheme">
         <activity
             android:name=".StartupActivity"
-            android:theme="@style/MyAppTheme">
+            android:theme="@style/MyAppTheme"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,14 +33,23 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:theme="@style/MyAppTheme" />
+            android:theme="@style/MyAppTheme"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".TreasureActivity"
-            android:theme="@style/MyAppTheme" />
+            android:theme="@style/MyAppTheme"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".HunterActivity"
-            android:theme="@style/MyAppTheme" />
-        <activity android:name=".TreasureCaught"></activity>
+            android:theme="@style/MyAppTheme"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".TreasureCaught"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
