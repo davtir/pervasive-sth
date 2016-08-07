@@ -35,6 +35,7 @@ import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
+import com.pervasive.sth.exceptions.BluetoothCriticalException;
 import com.pervasive.sth.tasks.HunterDistanceTask;
 import com.pervasive.sth.tasks.HunterTask;
 import com.pervasive.sth.entities.Device;
@@ -45,6 +46,7 @@ import java.util.Random;
 
 public class HunterActivity extends AppCompatActivity {
 
+    private final String LOG_TAG = HunterActivity.class.getName();
     private static final int WINNER_REQUEST_CODE = 1;
 
     public static String EXIT_ACTION = "com.pervasive.sth.smarttreasurehunt.EXIT_GAME";
@@ -99,6 +101,7 @@ public class HunterActivity extends AppCompatActivity {
 
         //Remove notification bar
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_hunter);
 
         _random = new Random();
@@ -163,7 +166,12 @@ public class HunterActivity extends AppCompatActivity {
         //_pictureButton.setEnabled(false);
 
         _gps = new GPSTracker(this);
-        _bluetooth = new BluetoothTracker();
+        try {
+            _bluetooth = new BluetoothTracker();
+        } catch (BluetoothCriticalException e) {
+            Log.e(LOG_TAG, e.toString());
+            finish();
+        }
 
         _gps.getLocation();
  //       _task = new HunterTask(this, _gps, _bluetooth);
