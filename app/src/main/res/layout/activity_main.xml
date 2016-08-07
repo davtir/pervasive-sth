@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/MyAppTheme"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -16,7 +17,7 @@
         android:textColor="#ffffff"
         android:textSize="32dp"
         android:textAlignment="center"
-        android:layout_weight="0.2"/>
+        android:layout_weight="0.2" />
 
     <ImageButton
         android:layout_width="match_parent"
@@ -26,7 +27,7 @@
         android:src="@drawable/app_th_hunter2"
         android:id="@+id/hunter_button"
         android:onClick="onClickHunter"
-        android:layout_weight="3"/>
+        android:layout_weight="3" />
 
     <ImageButton
         android:layout_width="match_parent"
@@ -37,6 +38,6 @@
         android:text="Treasure"
         android:id="@+id/treasure_button"
         android:onClick="onClickTreasure"
-        android:layout_weight="3"/>
+        android:layout_weight="3" />
 
 </LinearLayout>

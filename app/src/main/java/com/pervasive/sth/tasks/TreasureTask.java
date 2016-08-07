@@ -17,128 +17,117 @@ import com.pervasive.sth.sensors.SensorsReader;
  */
 public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
-    Context _context;
-    GPSTracker _gps;
-    WSInterface _webserver;
-    Device _treasure;
-    public static boolean _found = false;
-    public static Bitmap _winner = null;
-    SensorsReader _sr;
+	Context _context;
+	GPSTracker _gps;
+	WSInterface _webserver;
+	Device _treasure;
+	public static boolean _found = false;
+	public static Bitmap _winner = null;
+	SensorsReader _sr;
 
-    public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
-        _context = context;
-        _gps = gps;
-        _webserver = new WSInterface();
-        _treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
-        _sr = new SensorsReader(context);
-    }
+	public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
+		_context = context;
+		_gps = gps;
+		_webserver = new WSInterface();
+		_treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
+		_sr = new SensorsReader(context);
+	}
 
-    @Override
-    protected Void doInBackground(Void... params) {
-        // Check if a treasure already exists
-        boolean treasure_exist = true;
-        Device retrieved = null;
-        try {
-            retrieved = _webserver.retrieveDevice();
-        } catch ( Exception e) {
-            treasure_exist = false;
-        }
+	@Override
+	protected Void doInBackground(Void... params) {
+		// Check if a treasure already exists
+		boolean treasure_exist = true;
+		Device retrieved = null;
+		try {
+			retrieved = _webserver.retrieveDevice();
+		} catch (Exception e) {
+			treasure_exist = false;
+		}
 
-        if ( treasure_exist && retrieved != null && !retrieved.getMACAddress().equals(_treasure.getMACAddress()))
-            throw new RuntimeException("Treasure already exists.");
+		if (treasure_exist && retrieved != null && !retrieved.getMACAddress().equals(_treasure.getMACAddress()))
+			throw new RuntimeException("Treasure already exists.");
 
-        _found = false;
-        _treasure.setFound(_found);
+		_found = false;
+		_treasure.setFound(_found);
 
-        try {
-            _webserver.updateTreasureStatus(_treasure.isFound(), null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		try {
+			_webserver.updateTreasureStatus(_treasure.isFound(), null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        while ( !isCancelled() ) {
+		while (!isCancelled()) {
 
-            Log.d(this.getClass().getName(),"ENTRATO 1");
-            // Get lat and lon coordinates
-            _treasure.setLatitude(_gps.getLatitude());
-            _treasure.setLongitude(_gps.getLongitude());
+			Log.d(this.getClass().getName(), "ENTRATO 1");
+			// Get lat and lon coordinates
+			_treasure.setLatitude(_gps.getLatitude());
+			_treasure.setLongitude(_gps.getLongitude());
 
-            setDeviceSensors();
+			setDeviceSensors();
 
-            //Log.d(this.getClass().getName(), "Mean acceleration value: " + _sr.getAverageResultantAcceleration());
+			//Log.d(this.getClass().getName(), "Mean acceleration value: " + _sr.getAverageResultantAcceleration());
 
-            Log.d("TreasureTask", "Updating treasure data...");
-            // Post on WS
-            try {
-                _webserver.updateDeviceEntry(_treasure);
-            } catch (Exception e) {
-                // Error while executing post on WS
-                Log.e("TreasureTask", e.getMessage());
-                continue;
-            }
+			Log.d("TreasureTask", "Updating treasure data...");
+			// Post on WS
+			try {
+				_webserver.updateDeviceEntry(_treasure);
+			} catch (Exception e) {
+				// Error while executing post on WS
+				Log.e("TreasureTask", e.getMessage());
+				continue;
+			}
 
-            // Sleep for 10 seconds
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+			// Sleep for 10 seconds
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
-        Log.d("TreasureTask", "Task cancelled");
-        _treasure.setFound(_found);
-        Log.d("TreasureTask", "Status from activity: " + _found);
-        try {
-            Log.d("TreasureTask", "Found = " + _treasure.isFound());
+		Log.d("TreasureTask", "Task cancelled");
+		_treasure.setFound(_found);
+		Log.d("TreasureTask", "Status from activity: " + _found);
+		try {
+			Log.d("TreasureTask", "Found = " + _treasure.isFound());
 /*            if ( _treasure.isFound() ) {
-                Log.d("TreasureTask", "Updating...........");
+				Log.d("TreasureTask", "Updating...........");
                 _webserver.updateTreasureStatus(_treasure.isFound(), _winner);
             }*/
 
-            _webserver.deleteDevice(_treasure.getMACAddress());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			_webserver.deleteDevice(_treasure.getMACAddress());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    public void setDeviceSensors () {
-        float[] acc;
-        float[] rot;
+	public void setDeviceSensors() {
 
-        if (_sr.isPhotoresistorAvailable())
-            _treasure.setLuminosity(_sr.getLuminosity());
-        else
-            _treasure.setLuminosity(-Float.MAX_VALUE);
+		if (_sr.isPhotoresistorAvailable())
+			_treasure.setLuminosity(_sr.getLuminosity());
+		else
+			_treasure.setLuminosity(-Float.MAX_VALUE);
 
-        if(_sr.isThermometerAvailable())
-            _treasure.setTemperature(_sr.getTemperature());
-        else
-            _treasure.setTemperature(-Float.MAX_VALUE);
+		if (_sr.isThermometerAvailable())
+			_treasure.setTemperature(_sr.getTemperature());
+		else
+			_treasure.setTemperature(-Float.MAX_VALUE);
 
-        if(_sr.isAccelerometerAvailable()) {
-            _treasure.setAcceleration(_sr.getMeanAcceleration());
-        }
-        else {
-            float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
-            _treasure.setAcceleration(a);
-        }
+		if (_sr.isAccelerometerAvailable()) {
+			_treasure.setAcceleration(_sr.getMeanAcceleration());
+		} else {
+			float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+			_treasure.setAcceleration(a);
+		}
+	}
 
-        if(_sr.isGyroscopeAvailable()) {
-            _treasure.setRotation(_sr.getRotation());
-        }
-        else {
-            float[] r = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
-            _treasure.setRotation(r);
-        }
-    }
+	public static void setFound(boolean value) {
+		_found = value;
+	}
 
-    public static void setFound(boolean value) {
-        _found = value;
-    }
-
-    public static void setWinner(Bitmap  bitmap) {
-        _winner = bitmap;
-    }
+	public static void setWinner(Bitmap bitmap) {
+		_winner = bitmap;
+	}
 }

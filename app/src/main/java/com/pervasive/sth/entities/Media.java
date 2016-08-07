@@ -25,15 +25,15 @@ public class Media {
 
 	@Override
 	public boolean equals(Object o) {
-		if ( this == o ) {
+		if (this == o) {
 			return true;
 		}
-		if ( o == null || getClass() != o.getClass() ) {
+		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
 
 		Media media = (Media) o;
-		if ( mediaName_ != null ? !mediaName_.equals(media.mediaName_) : media.mediaName_ != null ) {
+		if (mediaName_ != null ? !mediaName_.equals(media.mediaName_) : media.mediaName_ != null) {
 			return false;
 		}
 		return Arrays.equals(data_, media.data_);

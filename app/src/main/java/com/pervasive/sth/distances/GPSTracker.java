@@ -57,7 +57,7 @@ public class GPSTracker extends Service implements LocationListener {
 		isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-		if ( !isGPSEnabled && !isNetworkEnabled ) {
+		if (!isGPSEnabled && !isNetworkEnabled) {
 			return false;
 		} else {
 			return true;
@@ -67,9 +67,9 @@ public class GPSTracker extends Service implements LocationListener {
 	public void getLocation() {
 
 		//If it doesn't work, comment this if
-		if ( Build.VERSION.SDK_INT >= 23 &&
+		if (Build.VERSION.SDK_INT >= 23 &&
 				ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-				ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED )
+				ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 			return;
 
 		try {
@@ -80,13 +80,13 @@ public class GPSTracker extends Service implements LocationListener {
 			isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
 
-			if ( isNetworkEnabled || isGPSEnabled ) {
+			if (isNetworkEnabled || isGPSEnabled) {
 				locationManager.requestLocationUpdates(MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, mFineCriteria, this, null);
 			}
 
 			Log.d("HunterTask", "getLocation done");
 
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
