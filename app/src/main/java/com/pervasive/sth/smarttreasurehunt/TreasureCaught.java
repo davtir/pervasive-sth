@@ -13,22 +13,22 @@ import java.io.File;
 
 public class TreasureCaught extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_treasure_caught);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_treasure_caught);
 
-        String picName = getIntent().getStringExtra("WINNER_PICTURE");
-        ImageView winnerImageView = (ImageView) findViewById(R.id.winner_imageview);
+		String picName = getIntent().getStringExtra("WINNER_PICTURE");
+		ImageView winnerImageView = (ImageView) findViewById(R.id.winner_imageview);
 
-        File picFile = new File(picName);
-        if  ( picFile.exists() ) {
-            Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
-            winnerImageView.setImageBitmap(bmap);
-        }
-    }
+		File picFile = new File(picName);
+		if (picFile.exists()) {
+			Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
+			winnerImageView.setImageBitmap(bmap);
+		}
+	}
 
-    public void onWinnerButtonClick(View view) {
-        finish();
-    }
+	public void onWinnerButtonClick(View view) {
+		finish();
+	}
 }

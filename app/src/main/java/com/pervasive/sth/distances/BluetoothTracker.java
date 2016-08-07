@@ -16,13 +16,13 @@ public class BluetoothTracker {
 
 	public BluetoothTracker(final Context cnt, BroadcastReceiver receiver) {
 		_adapter = BluetoothAdapter.getDefaultAdapter();
-		if ( _adapter == null ) {
+		if (_adapter == null) {
 			throw new RuntimeException("Cannot create Bluetooth adapter");
 		}
 	}
 
 	public void discover() {
-		if ( _adapter.isDiscovering() ) {
+		if (_adapter.isDiscovering()) {
 			_adapter.cancelDiscovery();
 		}
 		_adapter.startDiscovery();

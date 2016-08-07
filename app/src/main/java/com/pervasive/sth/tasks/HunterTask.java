@@ -25,100 +25,99 @@ import java.io.FileOutputStream;
  */
 public class HunterTask extends AsyncTask<Void, Void, Void> {
 
-    private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
-    Context _context;
-    WSInterface _webserver;
-    SensorsReader _sr;
-    Device _hunter;
-    String _treasureID;
-    TreasureStatus _treasureStatus;
+	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
+	Context _context;
+	WSInterface _webserver;
+	SensorsReader _sr;
+	Device _hunter;
+	String _treasureID;
+	TreasureStatus _treasureStatus;
 
-    SuggestionsGenerator _suggestionGenerator;
+	SuggestionsGenerator _suggestionGenerator;
 
-    public HunterTask(Context context, Device hunter) {
-        _context = context;
-        _treasureID = "";
-        _sr = new SensorsReader(context);
-        _hunter = hunter;
-        _webserver = new WSInterface();
-        _suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
-    }
+	public HunterTask(Context context, Device hunter) {
+		_context = context;
+		_treasureID = "";
+		_sr = new SensorsReader(context);
+		_hunter = hunter;
+		_webserver = new WSInterface();
+		_suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
+	}
 
-    public String getTreasureID() {
-        return _treasureID;
-    }
+	public String getTreasureID() {
+		return _treasureID;
+	}
 
-    @Override
-    protected Void doInBackground(Void... params) {
-        Log.d("HunterTask", "Started");
+	@Override
+	protected Void doInBackground(Void... params) {
+		Log.d("HunterTask", "Started");
 
-        // End when a cancel request is received
-        while ( !isCancelled() ) {
-            try {
-                _treasureStatus = _webserver.retrieveTreasureStatus();
-                if ( _treasureStatus.isFound() ) {
-                    Log.i("HunterTask", "The treasure have been found!");
-                    break;
-                }
-            } catch ( Exception e ) {
-                Log.e("HunterTask", e.getMessage());
-                continue;
-            }
+		// End when a cancel request is received
+		while (!isCancelled()) {
+			try {
+				_treasureStatus = _webserver.retrieveTreasureStatus();
+				if (_treasureStatus.isFound()) {
+					Log.i("HunterTask", "The treasure have been found!");
+					break;
+				}
+			} catch (Exception e) {
+				Log.e("HunterTask", e.getMessage());
+				continue;
+			}
 
-            // Get treasure string from WS
-            Device treasure;
-            try {
-                treasure = _webserver.retrieveDevice();
-                _treasureID = treasure.getMACAddress();
-            } catch ( Exception e ) {
-                // Error while executing get on WS
-                Log.e("HunterTask", e.getMessage());
-                continue;
-            }
+			// Get treasure string from WS
+			Device treasure;
+			try {
+				treasure = _webserver.retrieveDevice();
+				_treasureID = treasure.getMACAddress();
+			} catch (Exception e) {
+				// Error while executing get on WS
+				Log.e("HunterTask", e.getMessage());
+				continue;
+			}
 
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+			try {
+				Thread.sleep(15000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
-            Suggestion suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
+			Suggestion suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
 
-            Intent intent = new Intent(HunterActivity.SUGGESTION_ACTION);
-            intent.putExtra("SUGGESTION", suggestion);
-            _context.sendBroadcast(intent);
-        }
+			Intent intent = new Intent(HunterActivity.SUGGESTION_ACTION);
+			intent.putExtra("SUGGESTION", suggestion);
+			_context.sendBroadcast(intent);
+		}
 
-        try {
-            _webserver.deleteDevice(_hunter.getMACAddress());
-        } catch ( Exception e ) {
-            e.printStackTrace();
-        }
+		try {
+			_webserver.deleteDevice(_hunter.getMACAddress());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        Media picture = _treasureStatus.getWinner();
+		Media picture = _treasureStatus.getWinner();
 
-        File f = new File(pathName);
-        if (!f.exists())
-            f.mkdir();
-        FileOutputStream fo = null;
-        try {
-            fo = new FileOutputStream(picture.getMediaName());
-            fo.write(picture.getData());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		File f = new File(pathName);
+		if (!f.exists())
+			f.mkdir();
+		FileOutputStream fo = null;
+		try {
+			fo = new FileOutputStream(picture.getMediaName());
+			fo.write(picture.getData());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        if( _treasureStatus.isFound()) {
-            Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
-            winnerIntent.putExtra("WINNER_UPDATE", picture.getMediaName());
-            _context.sendBroadcast(winnerIntent);
-        }
-        else {
-            Intent intent = new Intent(HunterActivity.EXIT_ACTION);
-            intent.putExtra("EXIT_GAME", true);
-            _context.sendBroadcast(intent);
-        }
-        return null;
-    }
+		if (_treasureStatus.isFound()) {
+			Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
+			winnerIntent.putExtra("WINNER_UPDATE", picture.getMediaName());
+			_context.sendBroadcast(winnerIntent);
+		} else {
+			Intent intent = new Intent(HunterActivity.EXIT_ACTION);
+			intent.putExtra("EXIT_GAME", true);
+			_context.sendBroadcast(intent);
+		}
+		return null;
+	}
 }
 

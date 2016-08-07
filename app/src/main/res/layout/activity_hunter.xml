@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/MyAppTheme"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/app_th_hunterbg"
     tools:context="com.pervasive.sth.smarttreasurehunt.HunterActivity">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        style="@style/MyAppTheme"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,8 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:id="@+id/satellite_pic"
-                android:layout_gravity="center_vertical"
-               />
+                android:layout_gravity="center_vertical" />
 
             <ProgressBar
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -38,8 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="8"
                 android:id="@+id/gps_progress_bar"
-                android:layout_gravity="center_vertical"
-                />
+                android:layout_gravity="center_vertical" />
         </LinearLayout>
 
         <LinearLayout
@@ -55,8 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:id="@+id/radar_pic"
-                android:layout_gravity="center_vertical"
-                />
+                android:layout_gravity="center_vertical" />
 
             <ProgressBar
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -64,8 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="8"
                 android:id="@+id/bl_progress_bar"
-                android:layout_gravity="center_vertical"
-                />
+                android:layout_gravity="center_vertical" />
         </LinearLayout>
 
         <RelativeLayout
@@ -84,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="20dp"
                 android:textColor="@color/green"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/photo_suggestion"
@@ -92,14 +90,14 @@
                 android:layout_height="match_parent"
                 android:layout_margin="12dp"
                 android:layout_gravity="center"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
         </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/buttons_layout"
             android:orientation="horizontal"
-            android:layout_below = "@id/central_view"
+            android:layout_below="@id/central_view"
             android:layout_weight="2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,7 +109,7 @@
                 android:layout_width="0dp"
                 android:background="@null"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/audio_button"
@@ -119,7 +117,7 @@
                 android:layout_width="0dp"
                 android:background="@null"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/lux_button"
@@ -127,7 +125,7 @@
                 android:layout_width="0dp"
                 android:background="@null"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/temperature_button"
@@ -135,7 +133,7 @@
                 android:layout_width="0dp"
                 android:background="@null"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/accelerometer_button"
@@ -143,7 +141,7 @@
                 android:layout_width="0dp"
                 android:background="@null"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
 
         </LinearLayout>

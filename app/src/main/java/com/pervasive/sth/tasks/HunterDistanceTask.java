@@ -56,14 +56,14 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 		Log.d("HunterDistanceTask", "Started");
 
 		// End when a cancel request is received
-		while ( !isCancelled() ) {
+		while (!isCancelled()) {
 			try {
 				_treasureStatus = _webserver.retrieveTreasureStatus();
-				if ( _treasureStatus.isFound() ) {
+				if (_treasureStatus.isFound()) {
 					Log.i("HunterTask", "The treasure have been found!");
 					break;
 				}
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				Log.e("HunterTask", e.getMessage());
 				continue;
 			}
@@ -73,7 +73,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 			try {
 				treasure = _webserver.retrieveDevice();
 				_treasureID = treasure.getMACAddress();
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				// Error while executing get on WS
 				Log.e("HunterTask", e.getMessage());
 				continue;
@@ -85,7 +85,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 
 		try {
 			_webserver.deleteDevice(_hunter.getMACAddress());
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -117,7 +117,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 		_bluetooth.discover();
 		try {
 			Thread.sleep(sleeptime_ms);
-		} catch ( InterruptedException e ) {
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}

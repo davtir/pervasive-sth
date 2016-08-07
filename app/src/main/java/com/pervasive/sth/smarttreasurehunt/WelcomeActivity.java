@@ -21,13 +21,14 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * @brief	This class implements the activity associated
- * 			to the welcome screen of the application.
+ * @brief This class implements the activity associated
+ * to the welcome screen of the application.
  */
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -47,8 +48,8 @@ public class WelcomeActivity extends AppCompatActivity {
 	private BluetoothManager _bluetoothManager;
 
 	/**
-	 * @brief	This function implements the creation procedure
-	 *			of this activity
+	 * @brief This function implements the creation procedure
+	 * of this activity
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +67,7 @@ public class WelcomeActivity extends AppCompatActivity {
 		// Creating fake images
 		try {
 			createFakeImages(3);
-		} catch ( IOException e ) {
+		} catch (IOException e) {
 			Log.e(LOG_TAG, e.toString());
 			finish();
 		}
@@ -88,13 +89,13 @@ public class WelcomeActivity extends AppCompatActivity {
 		_bluetoothManager = (BluetoothManager) this.getSystemService(BLUETOOTH_SERVICE);
 
 		// If the bluetooth have not been activated yet ...
-		if ( !_bluetoothManager.getAdapter().isEnabled() ) {
+		if (!_bluetoothManager.getAdapter().isEnabled()) {
 			// ... request the activation to the user
 			requestBluetoothPermissions(this);
 		}
 
 		// If the GPS have not been activated yet ...
-		if ( !_gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+		if (!_gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			// ... request the activation to the user
 			requestGPSPermissions(this);
 		}
@@ -103,14 +104,14 @@ public class WelcomeActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param	imagesNumber: The number of images to be written
-	 * @throws	IOException
-	 * @brief	Generates 'imagesNumber' fake images on external storage
-	 * 			starting from fake images in drawable
+	 * @param    imagesNumber: The number of images to be written
+	 * @throws IOException
+	 * @brief Generates 'imagesNumber' fake images on external storage
+	 * starting from fake images in drawable
 	 */
 	private void createFakeImages(int imagesNumber) throws IOException {
 		String imagesPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
-		for ( int i = 0; i <= imagesNumber; ++i ) {
+		for (int i = 0; i <= imagesNumber; ++i) {
 			int fakeImageID = R.drawable.fake_image + i;
 			Log.d(this.getClass().getName(), "Creating fake image " + fakeImageID);
 
@@ -124,12 +125,12 @@ public class WelcomeActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param	blinkingText: The text view that needs to be animated
-	 * @param	blinkDelay: The blink delay in ms
-	 * @brief	Enables blinking animation to the text view in input
+	 * @param    blinkingText: The text view that needs to be animated
+	 * @param    blinkDelay: The blink delay in ms
+	 * @brief Enables blinking animation to the text view in input
 	 */
 	private void createBlinkingText(TextView blinkingText, int blinkDelay) {
-		if ( blinkingText != null ) {
+		if (blinkingText != null) {
 			Animation anim = new AlphaAnimation(0.0f, 1.0f);
 			anim.setDuration(blinkDelay);
 			anim.setStartOffset(20);
@@ -140,8 +141,8 @@ public class WelcomeActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param	context: The current context
-	 * @brief	Requests GPS activation to the user
+	 * @param    context: The current context
+	 * @brief Requests GPS activation to the user
 	 */
 	public void requestGPSPermissions(final Context context) {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
@@ -166,8 +167,8 @@ public class WelcomeActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param	context: The current context
-	 * @brief	Requests bluetooth activation to the user
+	 * @param    context: The current context
+	 * @brief Requests bluetooth activation to the user
 	 */
 	public void requestBluetoothPermissions(final Context context) {
 		AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
@@ -194,16 +195,16 @@ public class WelcomeActivity extends AppCompatActivity {
 	}
 
 	/**
-	 * @param	event: The event to be handled
-	 * @return	True if correctly handled, false otherwise
-	 * @brief	Handles touch event
+	 * @param    event: The event to be handled
+	 * @return True if correctly handled, false otherwise
+	 * @brief Handles touch event
 	 */
 	public boolean onTouchEvent(MotionEvent event) {
 		boolean bluetoothEnabled = _bluetoothManager.getAdapter().isEnabled();
 		boolean gpsEnabled = _gpsManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		if ( bluetoothEnabled && gpsEnabled) {
+		if (bluetoothEnabled && gpsEnabled) {
 			int action = event.getAction();
-			switch ( action ) {
+			switch (action) {
 				case MotionEvent.ACTION_DOWN:
 					startActivity(new Intent(this, MainActivity.class));
 					break;
@@ -213,10 +214,10 @@ public class WelcomeActivity extends AppCompatActivity {
 			return true;
 		} else {
 			Log.d(LOG_TAG, "Bluetooth or GPS not available yet.");
-			if ( !bluetoothEnabled ) {
+			if (!bluetoothEnabled) {
 				Toast.makeText(this, "Bluetooth is not available yet.", Toast.LENGTH_SHORT).show();
 			}
-			if ( !gpsEnabled ) {
+			if (!gpsEnabled) {
 				Toast.makeText(this, "GPS is not available yet.", Toast.LENGTH_SHORT).show();
 			}
 			return true;

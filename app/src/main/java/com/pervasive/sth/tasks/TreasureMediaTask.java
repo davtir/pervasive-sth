@@ -48,7 +48,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 		_context = context;
 		_webserver = new WSInterface();
 		File f = new File(pathName);
-		if ( !f.exists() )
+		if (!f.exists())
 			f.mkdir();
 
 		_frontPreview = frontPreview;
@@ -64,7 +64,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 		Log.d(this.getClass().getName(), "Entrato in mediaExecute");
 
-		while ( !isCancelled() ) {
+		while (!isCancelled()) {
 
 			Log.d(this.getClass().getName(), "ENTRATO TREASURE MEDIA TASK");
 			mRecorder = new MediaRecorder();
@@ -75,7 +75,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 			try {
 				mRecorder.prepare();
-			} catch ( IOException e ) {
+			} catch (IOException e) {
 				Log.e("TreasureMediaTask", e.getMessage());
 			}
 
@@ -83,7 +83,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 			try {
 				Thread.sleep(10000);
-			} catch ( InterruptedException e ) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
@@ -93,10 +93,10 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 			uploadAudio();
 
-			if ( getPictureSaved() ) {
+			if (getPictureSaved()) {
 				try {
 					_frontCamera.reconnect();
-				} catch ( IOException e ) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				_frontCamera.startPreview();
@@ -114,7 +114,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 			try {
 				Thread.sleep(30000);
-			} catch ( InterruptedException e ) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
@@ -138,7 +138,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 	private void uploadAudio() {
 		File f = new File(audioFileName);
 
-		if ( f.exists() ) {
+		if (f.exists()) {
 
 			try {
 
@@ -152,11 +152,11 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 				_webserver.uploadAudio(new Media(audioFileName, data));
 
 
-			} catch ( FileNotFoundException e ) {
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-			} catch ( IOException e ) {
+			} catch (IOException e) {
 				e.printStackTrace();
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -165,7 +165,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 	private void uploadPicture() {
 		File f = new File(pictureFileName);
 
-		if ( f.exists() ) {
+		if (f.exists()) {
 			try {
 
 				FileInputStream fis = new FileInputStream(f);
@@ -178,11 +178,11 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 				_webserver.uploadPicture(new Media(pictureFileName, data));
 
 
-			} catch ( FileNotFoundException e ) {
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
-			} catch ( IOException e ) {
+			} catch (IOException e) {
 				e.printStackTrace();
-			} catch ( Exception e ) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -200,9 +200,9 @@ class FrontCameraPicture implements Camera.PictureCallback {
 			FileOutputStream fo = new FileOutputStream(TreasureMediaTask.frontPictureFileName);
 			fo.write(data);
 			Log.d(this.getClass().getName(), "Picture written on data --------------------");
-		} catch ( FileNotFoundException e ) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch ( IOException e ) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -221,9 +221,9 @@ class BackCameraPicture implements Camera.PictureCallback {
 		try {
 			FileOutputStream fo = new FileOutputStream(TreasureMediaTask.backPictureFileName);
 			fo.write(data);
-		} catch ( FileNotFoundException e ) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch ( IOException e ) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

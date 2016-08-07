@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  style="@style/MyAppTheme"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/MyAppTheme"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,23 +26,20 @@
         android:layout_below="@id/display_treasure"
         android:layout_margin="10dp"
         android:onClick="onClickCaught"
-        android:layout_weight="1"
-        />
+        android:layout_weight="1" />
 
     <FrameLayout
         android:id="@+id/front_camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="0"
-        android:visibility="invisible"
-        />
+        android:visibility="invisible" />
 
     <FrameLayout
         android:id="@+id/back_camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="0"
-        android:visibility="invisible"
-        />
+        android:visibility="invisible" />
 
 </RelativeLayout>

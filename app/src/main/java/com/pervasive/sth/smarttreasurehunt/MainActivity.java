@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		TextView roleTextView = (TextView) this.findViewById(R.id.select_your_role_textview);
-		Typeface type = Typeface.createFromAsset(getAssets(),"fonts/TravelingTypewriter.ttf");
+		Typeface type = Typeface.createFromAsset(getAssets(), "fonts/TravelingTypewriter.ttf");
 		roleTextView.setTypeface(type);
 
 
@@ -49,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch ( requestCode ) {
+		switch (requestCode) {
 			case DISCOVERABLE_REQUEST_CODE:
-				if ( resultCode == 1 ) {
+				if (resultCode == 1) {
 					startActivity(new Intent(this, TreasureActivity.class));
 				}
 				break;
