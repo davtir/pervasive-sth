@@ -21,20 +21,24 @@ import android.util.Log;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 /**
- * Created by Alex on 30/04/2016.
+ *  @brief	This class manages the GPS utilities
  */
 public class GPSTracker extends Service implements LocationListener {
 
+	//
 	Context context;
 
+	//	Criteria used to define GPS accuracy
 	Criteria mFineCriteria;
 
+	// variables used to understand the level of GPS accuracy set by the user
 	boolean isGPSEnabled = false;
 	boolean isNetworkEnabled = false;
 
 	double latitude;
 	double longitude;
 
+	//	minimum distance required to update the GPS latitude and longitude
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
 	private static final long MIN_TIME_BW_UPDRATES = 10000;
 
