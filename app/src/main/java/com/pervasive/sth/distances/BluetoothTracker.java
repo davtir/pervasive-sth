@@ -6,28 +6,46 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 
+import com.pervasive.sth.exceptions.BluetoothCriticalException;
+
 /**
- * Created by davtir on 30/04/16.
+ * @brief	This class implements bluetooth facilities for
+ * 			discovery and distance computation tasks.
  */
 public class BluetoothTracker {
 
-	private BluetoothAdapter _adapter;
-	private static final double LIGHT_VELOCITY = 299792458;
+	private static final double LIGHT_VELOCITY = 299792458.0;
 
-	public BluetoothTracker(final Context cnt, BroadcastReceiver receiver) {
+	/*
+	 * The bluetooth adapter of the android device
+	 */
+	private BluetoothAdapter _adapter;
+
+	/**
+	 * @brief	The default constructor
+	 */
+	public BluetoothTracker() throws BluetoothCriticalException {
 		_adapter = BluetoothAdapter.getDefaultAdapter();
-		if (_adapter == null) {
-			throw new RuntimeException("Cannot create Bluetooth adapter");
+		if ( _adapter == null ) {
+			throw new BluetoothCriticalException("Cannot create Bluetooth adapter");
 		}
 	}
 
+	/**
+	 * @brief	Start the discovery procedure of the adapter
+	 */
 	public void discover() {
-		if (_adapter.isDiscovering()) {
+		if ( _adapter.isDiscovering() ) {
 			_adapter.cancelDiscovery();
 		}
 		_adapter.startDiscovery();
 	}
 
+	/**
+	 * @param	rssi: the RSSI value of the received bluetooth packets
+	 * @return	The computed distance
+	 * @brief	This functions returns the distance computed according to ....
+	 */
 	public static double calculateDistance(int rssi) {
 		double transmitted_power = 4.0; // dbm
 		double received_power = rssi; //dbm
@@ -37,6 +55,5 @@ public class BluetoothTracker {
 		double fade_margin = 10.0;
 
 		return Math.pow(10, (transmitted_power - received_power - path_loss_exp * 10 * Math.log10(frequency) + (constant) * path_loss_exp - fade_margin) / (10.0 * path_loss_exp));
-		//return Math.pow(10.0,((rssi-(-62.16))/-25.0));
 	}
 }

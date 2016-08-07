@@ -40,6 +40,8 @@ import java.io.IOException;
 
 public class TreasureActivity extends AppCompatActivity {
 
+	private static String LOG_TAG = TreasureActivity.class.getName();
+
 	static final int REQUEST_IMAGE_CAPTURE = 1;
 
 	private GPSTracker _gps;
@@ -83,7 +85,13 @@ public class TreasureActivity extends AppCompatActivity {
 
 		// Initialize GPS and Bluetooth trackers
 		_gps = new GPSTracker(this);
-		_gps.getLocation();
+		try {
+			_gps.getLocation();
+		} catch ( Exception e ) {
+			Log.e(LOG_TAG, e.toString());
+			finish();
+		}
+
 		_bluetooth = BluetoothAdapter.getDefaultAdapter();
 		_webserver = new WSInterface();
 
