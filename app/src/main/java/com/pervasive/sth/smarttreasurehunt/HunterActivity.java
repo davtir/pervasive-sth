@@ -163,7 +163,7 @@ public class HunterActivity extends AppCompatActivity {
         //_pictureButton.setEnabled(false);
 
         _gps = new GPSTracker(this);
-        _bluetooth = new BluetoothTracker(this, receiver);
+        _bluetooth = new BluetoothTracker();
 
         _gps.getLocation();
  //       _task = new HunterTask(this, _gps, _bluetooth);

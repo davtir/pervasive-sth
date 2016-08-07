@@ -6,18 +6,28 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 
+import com.pervasive.sth.exceptions.BluetoothCriticalException;
+
 /**
- * Created by davtir on 30/04/16.
+ * @brief	This class implements bluetooth facilities for
+ * 			discovery and distance computation tasks.
  */
 public class BluetoothTracker {
 
-	private BluetoothAdapter _adapter;
 	private static final double LIGHT_VELOCITY = 299792458;
 
-	public BluetoothTracker(final Context cnt, BroadcastReceiver receiver) {
+	/*
+	 * The bluetooth adapter of the android device
+	 */
+	private BluetoothAdapter _adapter;
+
+	/**
+	 * @brief	The default constructor
+	 */
+	public BluetoothTracker() {
 		_adapter = BluetoothAdapter.getDefaultAdapter();
 		if ( _adapter == null ) {
-			throw new RuntimeException("Cannot create Bluetooth adapter");
+			throw new BluetoothCriticalException("Cannot create Bluetooth adapter");
 		}
 	}
 
