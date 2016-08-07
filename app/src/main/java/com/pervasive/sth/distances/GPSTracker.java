@@ -1,9 +1,7 @@
 package com.pervasive.sth.distances;
 
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -13,97 +11,117 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import com.pervasive.sth.smarttreasurehunt.HunterActivity;
-
 /**
- * Created by Alex on 30/04/2016.
+ * @brief	This class implements the GPS funtionalities for distance computation
  */
 public class GPSTracker extends Service implements LocationListener {
 
-	Context context;
+	private final String LOG_TAG = GPSTracker.class.getName();
 
-	Criteria mFineCriteria;
+	/*
+	 * The parent activity environment
+	 */
+	Context _context;
 
-	boolean isGPSEnabled = false;
-	boolean isNetworkEnabled = false;
+	/*
+	 * Criteria used to define GPS accuracy
+	 */
+	Criteria _mFineCriteria;
 
-	double latitude;
-	double longitude;
+	/*
+	 * Variables used to understand the level of GPS accuracy set by the user
+	 */
+	boolean _isGPSEnabled = false;
+	boolean _isNetworkEnabled = false;
 
+	double _latitude;
+	double _longitude;
+
+	/*
+	 * Minimum distance required to update GPS latitude and longitude
+	 */
 	private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
+
+	/*
+	 * Minimum time required to update GPS latitude and longitude
+	 */
 	private static final long MIN_TIME_BW_UPDRATES = 10000;
 
-	protected LocationManager locationManager;
+	/*
+	 * Android location manager used to get the GPS location utilities
+	 */
+	protected LocationManager _locationManager;
 
+	/**
+	 *
+	 * @param context
+	 * @brief	Initialize class fields
+	 */
 	public GPSTracker(Context context) {
-		this.context = context;
-		mFineCriteria = new Criteria();
-		mFineCriteria.setAccuracy(Criteria.ACCURACY_FINE);
-		mFineCriteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
-		mFineCriteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
-		mFineCriteria.setBearingAccuracy(Criteria.ACCURACY_HIGH);
-		mFineCriteria.setPowerRequirement(Criteria.ACCURACY_HIGH);
-		mFineCriteria.setAltitudeRequired(true);
-		mFineCriteria.setBearingRequired(true);
+		_context = context;
+		_mFineCriteria = new Criteria();
+		_mFineCriteria.setAccuracy(Criteria.ACCURACY_FINE);
+		_mFineCriteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+		_mFineCriteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+		_mFineCriteria.setBearingAccuracy(Criteria.ACCURACY_HIGH);
+		_mFineCriteria.setPowerRequirement(Criteria.ACCURACY_HIGH);
+		_mFineCriteria.setAltitudeRequired(true);
+		_mFineCriteria.setBearingRequired(true);
 	}
 
+	/**
+	 * @brief	Return true if the device is reachable by the GPS signal,
+	 * 			false otherwise
+	 */
 	public boolean isReacheable() {
-		locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-		isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-		isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		_locationManager = (LocationManager) _context.getSystemService(LOCATION_SERVICE);
+		_isGPSEnabled = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		_isNetworkEnabled = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-		if (!isGPSEnabled && !isNetworkEnabled) {
-			return false;
-		} else {
-			return true;
-		}
+		return (_isGPSEnabled || _isNetworkEnabled);
 	}
 
-	public void getLocation() {
+	/**
+	 * @brief	This function requests to the system the coordinates values of the current device position
+	 */
+	public void getLocation() throws Exception {
 
-		//If it doesn't work, comment this if
+		// This is for Android API >0 =23
 		if (Build.VERSION.SDK_INT >= 23 &&
-				ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-				ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+				ContextCompat.checkSelfPermission(_context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+				ContextCompat.checkSelfPermission(_context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
 			return;
 
-		try {
-			// Acquire a reference to the system Location Manager
-			locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+		// Acquire a reference to the system Location Manager
+		_locationManager = (LocationManager) _context.getSystemService(LOCATION_SERVICE);
 
-			isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-			isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		_isGPSEnabled = _locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		_isNetworkEnabled = _locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-
-			if (isNetworkEnabled || isGPSEnabled) {
-				locationManager.requestLocationUpdates(MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, mFineCriteria, this, null);
-			}
-
-			Log.d("HunterTask", "getLocation done");
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		// If GPS is enabled then get location update
+		if ( _isNetworkEnabled || _isGPSEnabled ) {
+			_locationManager.requestLocationUpdates(MIN_TIME_BW_UPDRATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, _mFineCriteria, this, null);
 		}
+
+		Log.d(LOG_TAG, "getLocation done");
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
-		latitude = location.getLatitude();
-		longitude = location.getLongitude();
-		//Log.d("HunterTask", "LISTENER - Lat: " +  getLatitude() + " Lon: " + getLongitude());
+		_latitude = location.getLatitude();
+		_longitude = location.getLongitude();
 	}
 
 	public double getLatitude() {
-		return latitude;
+		return _latitude;
 	}
 
 	public double getLongitude() {
-		return longitude;
+		return _longitude;
 	}
 
 	@Override
@@ -127,26 +145,26 @@ public class GPSTracker extends Service implements LocationListener {
 		return null;
 	}
 
+	/**
+	 *
+	 * @param from_lat:	Treasure latitude
+	 * @param from_lon:	Treasure longitude
+	 * @return	Returns the distance computed between hunter and treasure coordinates.
+	 * @brief	This function returns the distance computed between hunter and treasure coordinates.
+	 */
 	public double gpsDistance(double from_lat, double from_lon) {
 		double earthRadius = 6371000.0; //meters
-		/*double dLat = Math.toRadians(from_lat-latitude);
-		double dLng = Math.toRadians(from_lon-longitude);
-        double a = Math.sin(dLat/2.0) * Math.sin(dLat/2.0) +
-                Math.cos(Math.toRadians(latitude)) * Math.cos(Math.toRadians(from_lat)) *
-                        Math.sin(dLng/2.0) * Math.sin(dLng/2.0);
-        double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double dist = (double) (earthRadius * c);*/
 		double Lat1 = Math.toRadians(from_lat);
-		double Lat2 = Math.toRadians(latitude);
-		double dLat = Math.toRadians(from_lat - latitude);
-		double dLng = Math.toRadians(from_lon - longitude);
+		double Lat2 = Math.toRadians(_latitude);
+		double dLat = Math.toRadians(from_lat - _latitude);
+		double dLng = Math.toRadians(from_lon - _longitude);
 		double a = Math.sin(dLat / 2.0) * Math.sin(dLat / 2.0) +
 				Math.cos(Lat1) * Math.cos(Lat2) *
 						Math.sin(dLng / 2.0) * Math.sin(dLng / 2.0);
 		double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = (double) (earthRadius * c);
-		Log.d("GPSTracker", "T_lat/lon = (" + from_lat + "," + from_lon + ")" + "H_Lat/Lon = (" + latitude + "," + longitude + ")");
-		Log.d("GPSTracker", "Distance = " + dist);
+		Log.d(LOG_TAG, "T_lat/lon = (" + from_lat + "," + from_lon + ")" + "H_Lat/Lon = (" + _latitude + "," + _longitude + ")");
+		Log.d(LOG_TAG, "Distance = " + dist);
 
 		return dist;
 	}
