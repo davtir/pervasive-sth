@@ -173,9 +173,12 @@ public class HunterActivity extends AppCompatActivity {
             finish();
         }
 
-        _gps.getLocation();
- //       _task = new HunterTask(this, _gps, _bluetooth);
-  //      _task.execute();
+        try {
+            _gps.getLocation();
+        } catch ( Exception e ) {
+            Log.e(LOG_TAG, e.toString());
+            finish();
+        }
 
         _receiverRegistered = false;
 
