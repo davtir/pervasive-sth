@@ -16,42 +16,74 @@ import java.util.Random;
 import com.pervasive.sth.entities.Media;
 
 /**
- * Created by Alex on 25/06/2016.
+ * @brief this class provides to generate random suggestions
  */
 public class SuggestionsGenerator {
 
-	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
+	private final String LOG_TAG = SuggestionsGenerator.class.getName();
 
-	public static int SUGGESTION_NUMBER = 5;
-	public static int ACCELEROMETER_SUGGESTION = 0;
-	public static int LUX_SUGGESTION = 1;
-	public static int TEMPERATURE_SUGGESTION = 2;
-	public static int PICTURE_SUGGESTION = 3;
-	public static int AUDIO_SUGGESTION = 4;
+	/*
+	 * Suggestions IDs
+	 */
+	public final static int SUGGESTION_NUMBER = 5;
+	public final static int ACCELEROMETER_SUGGESTION = 0;
+	public final static int LUX_SUGGESTION = 1;
+	public final static int TEMPERATURE_SUGGESTION = 2;
+	public final static int PICTURE_SUGGESTION = 3;
+	public final static int AUDIO_SUGGESTION = 4;
 
+	/*
+	 * array of suggestions probabilites
+	 */
 	private final double[] _suggestionProbs;
 
+	/*
+	 * The parent activity environment
+	 */
 	Context _context;
+
+	/*
+	 * Android sensors manager
+	 */
 	SensorsReader _sensorsReader;
+
+	/*
+	 * the hunter device
+	 */
 	Device _hunter;
+
+	/*
+	 * the web server interface
+	 */
 	WSInterface _webserver;
 
+	int _lastSensorSuggestionType = SUGGESTION_NUMBER;
+
+	/**
+	 *
+	 * @param context
+	 * @param hunter
+	 * @brief initialize the SuggestionsGenerator fields
+	 */
 	public SuggestionsGenerator(Context context, Device hunter) {
 		_context = context;
 		_sensorsReader = new SensorsReader(context);
 		_hunter = hunter;
 		_webserver = new WSInterface();
-
 		_suggestionProbs = new double[SUGGESTION_NUMBER];
 		initProbabilities();
 	}
 
-	//public static int GPS_DISTANCE_SUGGESTION = 4;
-
-
+	/**
+	 * @brief initialize suggestions probability values
+	 */
 	public void initProbabilities() {
+
+		// the counter of all available sensors
 		int sensorsCounter = 0;
-		int mediaCounter = 2;           // We can FAIRLY assume that a phone always has a camera and a microphone!!!
+
+		// counter of media adapters, We can fairly assume that a phone always has a camera and a microphone
+		int mediaCounter = 2;
 
 		if (_sensorsReader.isAccelerometerAvailable())
 			++sensorsCounter;
@@ -61,88 +93,120 @@ public class SuggestionsGenerator {
 			++sensorsCounter;
 		}
 
-		//INSERIRE IF SENSOR COUNTER = 0
-		double mediaProbs = 1.0 / (2.0 * (sensorsCounter + 1));
-		double sensorsProbs = 2 * mediaProbs;
+		// probability of each media suggestion (Pm)
+		double mediaProbs;
 
-		//Used to test media
-		//double mediaProbs = 0.5;
-		//double sensorsProbs = 0;
+		// probability of each sensor suggestion (Ps)
+		double sensorsProbs;
 
+		// ratio between sensorsProbs and mediaProbs (R)
+		double sensorsMediaRatio = 2;
+
+		// Given that R=Ps/Pm, Ps = R*Pm and that N*Ps + M*Pm = 1, we have that
+		sensorsProbs = 1.0/(sensorsCounter + mediaCounter / sensorsMediaRatio);
+		mediaProbs = sensorsProbs / sensorsMediaRatio;
+
+		//for the available sensors, set their probabilties equal to sensorProbs
 		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsReader.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);
 		_suggestionProbs[LUX_SUGGESTION] = _sensorsReader.isPhotoresistorAvailable() ? (sensorsProbs) : (0.0);
 		_suggestionProbs[TEMPERATURE_SUGGESTION] = _sensorsReader.isThermometerAvailable() ? (sensorsProbs) : (0.0);
+
+		//for each media (picture and microphone) set their probabilites equal to mediaProbs
 		_suggestionProbs[PICTURE_SUGGESTION] = mediaProbs;
 		_suggestionProbs[AUDIO_SUGGESTION] = mediaProbs;
 	}
 
-	// ESEGUIRE IN LOOP PER GESTIRE L' ASSENZA DI INFO PER LA SUGGESTION RICHIESTA
-	public Suggestion createRandomSuggestion(Device treasure) {
-		//int type = getRandomSuggestionType();
+	/**
+	 *
+	 * @param treasure
+	 * @return
+	 * @throws Exception
+	 * @brief this function creates a random suggestion among the available sensors/media
+	 */
+	public Suggestion createRandomSuggestion(Device treasure) throws Exception{
+
 		boolean skip = true;
 
 		Suggestion suggestion = null;
 		while (skip) {
 			int type = getRandomSuggestionType();
-			analizeSensors(treasure);               // Setta i valori sull' hunter ma non vengono usati. FORSE INUTILE!
 
-			if (type == ACCELEROMETER_SUGGESTION) {
-
-				suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
-				skip = false;
-			} else if (type == LUX_SUGGESTION && (treasure.getLuminosity() != -Float.MAX_VALUE && _sensorsReader.isPhotoresistorAvailable())) {
-				suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
-				skip = false;
-			} else if (type == TEMPERATURE_SUGGESTION && (treasure.getTemperature() != -Float.MAX_VALUE && _sensorsReader.isThermometerAvailable())) {
-				suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
-				skip = false;
-			} else if (type == PICTURE_SUGGESTION) {
-				Media picture;
-				try {
-					picture = _webserver.retrievePicture();
-					if (picture == null) {
-						// TODO
-					}
-					Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
-
-					File f = new File(picture.getMediaName());
-					if (!f.exists())
-						f.mkdir();
-					FileOutputStream fo = new FileOutputStream(picture.getMediaName());
-					fo.write(picture.getData());
-
-					Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
-
-					suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
+			//analizeSensors(treasure);
+			if(_lastSensorSuggestionType == type)
+				continue;
+			switch (type) {
+				case ACCELEROMETER_SUGGESTION:
+					suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
 					skip = false;
-
-				} catch (Exception e) {
-					Log.w(this.getClass().getName(), e.getMessage());
-				}
-			} else if (type == AUDIO_SUGGESTION) {
-				Media audio;
-				try {
-					audio = _webserver.retrieveAudio();
-					if (audio == null) {
-						// TODO
+					break;
+				case LUX_SUGGESTION:
+					if(treasure.getLuminosity() != -Float.MAX_VALUE && _sensorsReader.isPhotoresistorAvailable()) {
+						suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
+						skip = false;
 					}
-					Log.d(this.getClass().getName(), "AUDIO RETRIEVED FROM WEBSERVER------------");
+					break;
+				case TEMPERATURE_SUGGESTION:
+					if(treasure.getTemperature() != -Float.MAX_VALUE && _sensorsReader.isThermometerAvailable()) {
+						suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
+						skip = false;
+					}
+					break;
+				case PICTURE_SUGGESTION:
+					Media picture;
+					try {
+						picture = _webserver.retrievePicture();
+						if (picture == null) {
+							// TODO
+						}
+						Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
 
-					File f = new File(audio.getMediaName());
-					if (!f.exists())
-						f.mkdir();
-					FileOutputStream fo = new FileOutputStream(audio.getMediaName());
-					fo.write(audio.getData());
+						File f = new File(picture.getMediaName());
+						if (!f.exists())
+							f.mkdir();
+						FileOutputStream fo = new FileOutputStream(picture.getMediaName());
+						fo.write(picture.getData());
 
-					Log.d(this.getClass().getName(), "AUDIO WROTE ON SMARTPHONE------------");
+						Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
 
-					suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
-					skip = false;
+						suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
+						_lastSensorSuggestionType = type;
+						skip = false;
 
-				} catch (Exception e) {
-					Log.w(this.getClass().getName(), e.getMessage());
-				}
+					} catch (Exception e) {
+						Log.w(this.getClass().getName(), e.getMessage());
+					}
+					break;
+				case AUDIO_SUGGESTION:
+					Media audio;
+					try {
+						audio = _webserver.retrieveAudio();
+						if (audio == null) {
+							// TODO
+						}
+						Log.d(this.getClass().getName(), "AUDIO RETRIEVED FROM WEBSERVER------------");
+
+						File f = new File(audio.getMediaName());
+						if (!f.exists())
+							f.mkdir();
+						FileOutputStream fo = new FileOutputStream(audio.getMediaName());
+						fo.write(audio.getData());
+
+						Log.d(this.getClass().getName(), "AUDIO WROTE ON SMARTPHONE------------");
+
+						suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
+						_lastSensorSuggestionType = type;
+						skip = false;
+
+					} catch (Exception e) {
+						Log.w(this.getClass().getName(), e.getMessage());
+					}
+					break;
+				default:
+					break;
 			}
+
+			if(!skip)
+				_lastSensorSuggestionType = type;
 		}
 
 		return suggestion;
@@ -185,7 +249,7 @@ public class SuggestionsGenerator {
 		return -1;
 	}
 
-	private void analizeSensors(Device treasure) {
+	private void analizeSensors(Device treasure) throws Exception{
 		setDeviceSensors();
 		if (_sensorsReader.isPhotoresistorAvailable()) {
 			analizeLuxValues(treasure);
@@ -196,7 +260,7 @@ public class SuggestionsGenerator {
 		}
 	}
 
-	public void setDeviceSensors() {
+	public void setDeviceSensors() throws Exception{
 
 		float[] acc;
 

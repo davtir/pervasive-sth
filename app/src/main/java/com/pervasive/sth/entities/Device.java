@@ -1,110 +1,175 @@
 package com.pervasive.sth.entities;
 
+/**
+ * @brief this class represents an Android device
+ */
 public class Device {
-	private final String mac_address_;
-	private String name_;
-	private String role_;
-	private double latitude_;
-	private double longitude_;
-	private double luminosity_;
-	private double temperature_;
-	private double[] acceleration_;
-	private boolean found_;
 
-	public Device(String mac_address, String name, String role, double lat, double lon, double lux, double temp, double[] acc) throws RuntimeException {
-		if (mac_address == null || name == null || acc == null) {
-			throw new RuntimeException("Invalid mac address or name or acceleration.");
+	/*
+	 * the unique id of the device in the bluetooth network
+	 */
+	private final String _bt_address;
+
+	/*
+	 * the name of the device
+	 */
+	private String _name;
+
+	/*
+	 * the role of the device
+	 */
+	private String _role;
+
+	/*
+	 * the latitude of the device
+	 */
+	private double _latitude;
+
+	/*
+	 * the longitude of the device
+	 */
+	private double _longitude;
+
+	/*
+	 * the luminosity around the device
+	 */
+	private double _luminosity;
+
+	/*
+	 * the external temperature of the device
+	 */
+	private double _temperature;
+
+	/*
+	 * the acceleration of the carried device
+	 */
+	private double[] _acceleration;
+
+	/*
+	 * true if the treasure has been found, false otherwise
+	 */
+	private boolean _found;
+
+	/**
+	 *
+	 * @param bt_address
+	 * @param name
+	 * @param role
+	 * @param lat
+	 * @param lon
+	 * @param lux
+	 * @param temp
+	 * @param acc
+	 * @throws Exception
+	 * @brief inizialite the device fields
+	 */
+	public Device(String bt_address, String name, String role, double lat, double lon, double lux, double temp, double[] acc) throws Exception{
+		if (bt_address == null || name == null) {
+			throw new Exception("Invalid bt address or name.");
 		}
 
-		mac_address_ = mac_address;
-		name_ = name;
-		role_ = role;
-		latitude_ = lat;
-		longitude_ = lon;
-		luminosity_ = lux;
-		temperature_ = temp;
-		acceleration_ = acc;
-		found_ = false;
+		_bt_address = bt_address;
+		_name = name;
+		_role = role;
+		_latitude = lat;
+		_longitude = lon;
+		_luminosity = lux;
+		_temperature = temp;
+		if (acc == null)
+			_acceleration = new double[3];
+		else _acceleration = acc;
+		_found = false;
 	}
 
-	public Device(String mac_address, String name, String role) {
-		mac_address_ = mac_address;
-		name_ = name;
-		role_ = role;
-		latitude_ = 0.0;
-		longitude_ = 0.0;
-		luminosity_ = 0.0;
-		temperature_ = 0.0;
-		acceleration_ = new double[3];
+	/**
+	 *
+	 * @param bt_address
+	 * @param name
+	 * @param role
+	 * @throws Exception
+	 * @brief inizialite the device fields
+	 */
+	public Device(String bt_address, String name, String role) throws Exception{
+		if (bt_address == null || name == null) {
+			throw new Exception("Invalid bt address or name.");
+		}
+		_bt_address = bt_address;
+		_name = name;
+		_role = role;
+		_latitude = 0.0;
+		_longitude = 0.0;
+		_luminosity = 0.0;
+		_temperature = 0.0;
+		_acceleration = new double[3];
 	}
 
 	public double getLatitude() {
-		return latitude_;
+		return _latitude;
 	}
 
 	public double getLongitude() {
-		return longitude_;
+		return _longitude;
 	}
 
 	public double getLuminosity() {
-		return luminosity_;
+		return _luminosity;
 	}
 
 	public double getTemperature() {
-		return temperature_;
+		return _temperature;
 	}
 
 	public double[] getAcceleration() {
-		return acceleration_;
+		return _acceleration;
 	}
 
 	public void setLatitude(double lat) {
-		latitude_ = lat;
+		_latitude = lat;
 	}
 
 	public void setLongitude(double lon) {
-		longitude_ = lon;
+		_longitude = lon;
 	}
 
 	public void setLuminosity(double lux) {
-		luminosity_ = lux;
+		_luminosity = lux;
 	}
 
 	public void setTemperature(double temp) {
-		temperature_ = temp;
+		_temperature = temp;
 	}
 
-	public void setAcceleration(float[] acc) {
+	public void setAcceleration(float[] acc) throws Exception{
 		if (acc == null || acc.length != 3)
-			throw new RuntimeException("Invalid acceleration array length");
-		acceleration_[0] = acc[0];
-		acceleration_[1] = acc[1];
-		acceleration_[2] = acc[2];
+			throw new Exception("Invalid acceleration array length");
+		_acceleration[0] = acc[0];
+		_acceleration[1] = acc[1];
+		_acceleration[2] = acc[2];
 	}
 
 	public String getMACAddress() {
-		return mac_address_;
+		return _bt_address;
 	}
 
 	public String getName() {
-		return name_;
+		return _name;
 	}
 
 	public String getRole() {
-		return role_;
+		return _role;
 	}
 
 	public boolean isFound() {
-		return found_;
+		return _found;
 	}
 
 	public void setFound(boolean value) {
-		found_ = value;
+		_found = value;
 	}
 
 	@Override
 	public String toString() {
-		return "Device{" + "mac_address_=" + mac_address_ + ", name_=" + name_ + ", role_=" + role_ + ", latitude_=" + latitude_ + ", longitude_=" + longitude_ + ", luminosity_=" + luminosity_ + ", temperature_=" + temperature_ + ", acceleration_=" + acceleration_ + ", found_ =" + found_ + '}';
+		return "Device{" + "_bt_address=" + _bt_address + ", _name=" + _name + ", _role=" + _role + ", _latitude=" + _latitude + ", _longitude=" + _longitude + ", _luminosity=" + _luminosity + ", _temperature=" + _temperature + ", _acceleration=" + _acceleration + ", _found =" + _found + '}';
 	}
 
 

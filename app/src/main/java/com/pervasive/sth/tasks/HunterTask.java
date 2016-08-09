@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
  */
 public class HunterTask extends AsyncTask<Void, Void, Void> {
 
+	private final String LOG_TAG = HunterTask.class.getName();
 	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
 	Context _context;
 	WSInterface _webserver;
@@ -82,7 +83,14 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 				e.printStackTrace();
 			}
 
-			Suggestion suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
+			Suggestion suggestion = null;
+			try {
+				suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
+			} catch (Exception e) {
+				Log.e(LOG_TAG, e.toString());
+				this.cancel(true); //DA SISTEMAREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+				break;
+			}
 
 			Intent intent = new Intent(HunterActivity.SUGGESTION_ACTION);
 			intent.putExtra("SUGGESTION", suggestion);

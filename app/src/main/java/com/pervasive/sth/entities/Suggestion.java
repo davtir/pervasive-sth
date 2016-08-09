@@ -3,32 +3,43 @@ package com.pervasive.sth.entities;
 import java.io.Serializable;
 
 /**
- * Created by Alex on 25/06/2016.
+ * @brief this class represents the suggenstions
  */
 @SuppressWarnings("serial")
 public class Suggestion implements Serializable {
 
-	private final String message;
-	private final double result;
-	private final int type;
+	/*
+	 * the _message associated to the suggestion
+	 */
+	private final String _message;
+
+	/*
+	 * the possible values associated to the suggestion
+	 */
+	private final double _result;
+
+	/*
+	 * the type of the suggestion
+	 */
+	private final int _type;
 
 	public Suggestion(String mex, double res, int type) {
-		message = mex;
-		result = res;
-		this.type = type;
+		_message = mex;
+		_result = res;
+		_type = type;
 	}
 
 	public int getType() {
-		return type;
+		return _type;
 	}
 
 	public String getMessage() {
-		return message;
+		return _message;
 	}
 
 
 	public double getResult() {
-		return result;
+		return _result;
 	}
 
 }

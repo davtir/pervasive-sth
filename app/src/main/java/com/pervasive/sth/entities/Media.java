@@ -3,24 +3,37 @@ package com.pervasive.sth.entities;
 import java.util.Arrays;
 
 /**
- * Created by Alex on 29/05/2016.
+ * @brief this class represent the media files
  */
 public class Media {
 
-	private final String mediaName_;
-	private final byte[] data_;
+	/*
+	 * the name of the media file
+	 */
+	private final String _mediaName;
 
+	/*
+	 * array of bytes representing the media content
+	 */
+	private final byte[] _data;
+
+	/**
+	 *
+	 * @param mediaName
+	 * @param data
+	 * @brief initialize media file fields
+	 */
 	public Media(String mediaName, byte[] data) {
-		mediaName_ = mediaName;
-		data_ = data;
+		_mediaName = mediaName;
+		_data = data;
 	}
 
 	public String getMediaName() {
-		return mediaName_;
+		return _mediaName;
 	}
 
 	public byte[] getData() {
-		return data_;
+		return _data;
 	}
 
 	@Override
@@ -33,17 +46,17 @@ public class Media {
 		}
 
 		Media media = (Media) o;
-		if (mediaName_ != null ? !mediaName_.equals(media.mediaName_) : media.mediaName_ != null) {
+		if (_mediaName != null ? !_mediaName.equals(media._mediaName) : media._mediaName != null) {
 			return false;
 		}
-		return Arrays.equals(data_, media.data_);
+		return Arrays.equals(_data, media._data);
 
 	}
 
 	@Override
 	public int hashCode() {
-		int result = mediaName_ != null ? mediaName_.hashCode() : 0;
-		result = 31 * result + Arrays.hashCode(data_);
+		int result = _mediaName != null ? _mediaName.hashCode() : 0;
+		result = 31 * result + Arrays.hashCode(_data);
 		return result;
 	}
 }

@@ -182,7 +182,12 @@ public class HunterActivity extends AppCompatActivity {
 
         _receiverRegistered = false;
 
-        _hunter = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "H");
+        try {
+            _hunter = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "H");
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+            finish();
+        }
     }
 
     protected void onResume() {

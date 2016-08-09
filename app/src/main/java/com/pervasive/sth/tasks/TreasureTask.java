@@ -17,6 +17,7 @@ import com.pervasive.sth.sensors.SensorsReader;
  */
 public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
+	private final String LOG_TAG = TreasureTask.class.getName();
 	Context _context;
 	GPSTracker _gps;
 	WSInterface _webserver;
@@ -63,7 +64,13 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			_treasure.setLatitude(_gps.getLatitude());
 			_treasure.setLongitude(_gps.getLongitude());
 
-			setDeviceSensors();
+			try {
+				setDeviceSensors();
+			} catch (Exception e) {
+				Log.e(LOG_TAG, e.toString());
+				this.cancel(true); //DA SISTEMAREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+				break;
+			}
 
 			//Log.d(this.getClass().getName(), "Mean acceleration value: " + _sr.getAverageResultantAcceleration());
 
@@ -103,7 +110,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 		return null;
 	}
 
-	public void setDeviceSensors() {
+	public void setDeviceSensors() throws Exception{
 
 		if (_sr.isPhotoresistorAvailable())
 			_treasure.setLuminosity(_sr.getLuminosity());
