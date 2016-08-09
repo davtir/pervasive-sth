@@ -13,12 +13,14 @@ import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.entities.TreasureStatus;
+import com.pervasive.sth.exceptions.TreasureNotFoundYetException;
 import com.pervasive.sth.rest.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by davtir on 15/05/16.
@@ -103,28 +105,28 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			e.printStackTrace();
 		}
 
-		Media picture = _treasureStatus.getWinner();
-
-		File f = new File(pathName);
-		if (!f.exists())
-			f.mkdir();
-		FileOutputStream fo = null;
+		Media picture;
 		try {
+			picture = _treasureStatus.getWinner();
+			File f = new File(pathName);
+			if ( !f.exists() ) {
+				f.mkdir();
+			}
+			FileOutputStream fo = null;
 			fo = new FileOutputStream(picture.getMediaName());
 			fo.write(picture.getData());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		if (_treasureStatus.isFound()) {
 			Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
 			winnerIntent.putExtra("WINNER_UPDATE", picture.getMediaName());
 			_context.sendBroadcast(winnerIntent);
-		} else {
+		} catch ( Exception e ) {
+			Log.e(LOG_TAG, e.toString());
 			Intent intent = new Intent(HunterActivity.EXIT_ACTION);
 			intent.putExtra("EXIT_GAME", true);
 			_context.sendBroadcast(intent);
+			this.cancel(true);
 		}
+
 		return null;
 	}
 }

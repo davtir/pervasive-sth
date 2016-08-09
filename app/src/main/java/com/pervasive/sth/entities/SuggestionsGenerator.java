@@ -48,15 +48,18 @@ public class SuggestionsGenerator {
 	SensorsReader _sensorsReader;
 
 	/*
-	 * the hunter device
+	 * The hunter device
 	 */
 	Device _hunter;
 
 	/*
-	 * the web server interface
+	 * The web server interface
 	 */
 	WSInterface _webserver;
 
+	/*
+	 *	The last generated suggestion. Used to avoid consecutive suggestions of the same type
+	 */
 	int _lastSensorSuggestionType = SUGGESTION_NUMBER;
 
 	/**
@@ -78,11 +81,11 @@ public class SuggestionsGenerator {
 	 * @brief initialize suggestions probability values
 	 */
 	public void initProbabilities() {
-
+		Log.d(LOG_TAG, "Initializing probabilities...");
 		// the counter of all available sensors
 		int sensorsCounter = 0;
 
-		// counter of media adapters, We can fairly assume that a phone always has a camera and a microphone
+		// counter of media adapters, we can fairly assume that a phone always has a camera and a microphone
 		int mediaCounter = 2;
 
 		if (_sensorsReader.isAccelerometerAvailable())
@@ -114,6 +117,9 @@ public class SuggestionsGenerator {
 		//for each media (picture and microphone) set their probabilites equal to mediaProbs
 		_suggestionProbs[PICTURE_SUGGESTION] = mediaProbs;
 		_suggestionProbs[AUDIO_SUGGESTION] = mediaProbs;
+
+		Log.d(LOG_TAG, "Sensors probability is Ps = " + sensorsProbs);
+		Log.d(LOG_TAG, "Media probability is Pm = " + mediaProbs);
 	}
 
 	/**
@@ -123,183 +129,161 @@ public class SuggestionsGenerator {
 	 * @throws Exception
 	 * @brief this function creates a random suggestion among the available sensors/media
 	 */
-	public Suggestion createRandomSuggestion(Device treasure) throws Exception{
-
+	public Suggestion createRandomSuggestion(Device treasure) throws Exception {
+		Suggestion suggestion = null;
 		boolean skip = true;
 
-		Suggestion suggestion = null;
-		while (skip) {
+		// Loop until a valid random suggestion is generated
+		while ( skip ) {
+			// Get suggestion type uniformly at random
 			int type = getRandomSuggestionType();
 
-			//analizeSensors(treasure);
-			if(_lastSensorSuggestionType == type)
+			// If the generated suggestion is equal the previous one, then generate another type
+			if ( _lastSensorSuggestionType == type )
 				continue;
-			switch (type) {
+
+			switch ( type ) {
+
+				// Accelerometer suggestion
 				case ACCELEROMETER_SUGGESTION:
+					Log.d(LOG_TAG, "Accelerometer suggestion selected (type = " + type + ")");
 					suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
 					skip = false;
 					break;
+
+				// Luminosity suggestion
 				case LUX_SUGGESTION:
-					if(treasure.getLuminosity() != -Float.MAX_VALUE && _sensorsReader.isPhotoresistorAvailable()) {
+					if ( treasure.getLuminosity() != -Float.MAX_VALUE ) {
+						Log.d(LOG_TAG, "Luminosity suggestion selected (type = " + type + ")");
 						suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
 						skip = false;
 					}
 					break;
+
+				// Temperature suggestion
 				case TEMPERATURE_SUGGESTION:
-					if(treasure.getTemperature() != -Float.MAX_VALUE && _sensorsReader.isThermometerAvailable()) {
+					if ( treasure.getTemperature() != -Float.MAX_VALUE ) {
+						Log.d(LOG_TAG, "Temperature suggestion selected (type = " + type + ")");
 						suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
 						skip = false;
 					}
 					break;
+
+				// Picture suggestion
 				case PICTURE_SUGGESTION:
-					Media picture;
-					try {
-						picture = _webserver.retrievePicture();
-						if (picture == null) {
-							// TODO
-						}
-						Log.d(this.getClass().getName(), "PICTURE RETRIEVED FROM WEBSERVER------------");
+					Log.d(LOG_TAG, "Picture suggestion selected (type = " + type + "). Retrieving picture from web server...");
+					Media picture = _webserver.retrievePicture();
 
-						File f = new File(picture.getMediaName());
-						if (!f.exists())
-							f.mkdir();
-						FileOutputStream fo = new FileOutputStream(picture.getMediaName());
-						fo.write(picture.getData());
-
-						Log.d(this.getClass().getName(), "PHOTO WROTE ON SMARTPHONE------------");
-
-						suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
-						_lastSensorSuggestionType = type;
-						skip = false;
-
-					} catch (Exception e) {
-						Log.w(this.getClass().getName(), e.getMessage());
+					File picFile = new File(picture.getMediaName());
+					File picDir = new File(picFile.getParent());
+					if ( !picDir.exists() ) {
+						picDir.mkdir();
 					}
+					FileOutputStream picOutStream = new FileOutputStream(picFile);
+					picOutStream.write(picture.getData());
+
+					suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
+					_lastSensorSuggestionType = type;
+					skip = false;
 					break;
+
+				// Audio suggestion
 				case AUDIO_SUGGESTION:
-					Media audio;
-					try {
-						audio = _webserver.retrieveAudio();
-						if (audio == null) {
-							// TODO
-						}
-						Log.d(this.getClass().getName(), "AUDIO RETRIEVED FROM WEBSERVER------------");
+					Log.d(LOG_TAG, "Audio suggestion selected (type = " + type + "). Retrieving audio from web server...");
+					Media audio = _webserver.retrieveAudio();
 
-						File f = new File(audio.getMediaName());
-						if (!f.exists())
-							f.mkdir();
-						FileOutputStream fo = new FileOutputStream(audio.getMediaName());
-						fo.write(audio.getData());
-
-						Log.d(this.getClass().getName(), "AUDIO WROTE ON SMARTPHONE------------");
-
-						suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
-						_lastSensorSuggestionType = type;
-						skip = false;
-
-					} catch (Exception e) {
-						Log.w(this.getClass().getName(), e.getMessage());
+					File audioFile = new File(audio.getMediaName());
+					File audioDir = new File(audioFile.getParent());
+					if ( !audioDir.exists() ) {
+						audioDir.mkdir();
 					}
+					FileOutputStream audioOutStream = new FileOutputStream(audio.getMediaName());
+					audioOutStream.write(audio.getData());
+
+					suggestion = new Suggestion(audio.getMediaName(), 0.0, type);
+					_lastSensorSuggestionType = type;
+					skip = false;
 					break;
+
+				// Unknown suggestion
 				default:
+					Log.w(LOG_TAG, "Unknown suggestion type. ( type = " + type + ").");
 					break;
 			}
 
-			if(!skip)
+			// If the suggestion have been correctly created, then update the last generated suggestion type
+			if ( !skip ) {
 				_lastSensorSuggestionType = type;
+			}
 		}
-
 		return suggestion;
 	}
 
+	/**
+	 * @return	The random generated suggestion type
+	 * @brief	Generates suggestions type uniformly at random, according to the probabilities
+	 * 			previously computed
+	 */
 	private int getRandomSuggestionType() {
+		Log.d(LOG_TAG, "Generating a random suggestion type...");
+
 		Random rndGen = new Random();
 
 		double random = Math.abs(rndGen.nextInt()) / (double) Integer.MAX_VALUE;
-		Log.d(this.getClass().getName(), "*********The random number generated is: " + random);
-
 		if (random <= _suggestionProbs[AUDIO_SUGGESTION]) {
 			return AUDIO_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[AUDIO_SUGGESTION];
-
 		if (random <= _suggestionProbs[PICTURE_SUGGESTION]) {
 			return PICTURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[PICTURE_SUGGESTION];
-
 		if (random <= _suggestionProbs[TEMPERATURE_SUGGESTION]) {
 			return TEMPERATURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[TEMPERATURE_SUGGESTION];
-
 		if (random <= _suggestionProbs[LUX_SUGGESTION]) {
 			return LUX_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[LUX_SUGGESTION];
-
 		if (random <= _suggestionProbs[ACCELEROMETER_SUGGESTION]) {
 			return ACCELEROMETER_SUGGESTION;
 		}
 
-		return -1;
+		// An invalid suggestion
+		return SUGGESTION_NUMBER;
 	}
 
-	private void analizeSensors(Device treasure) throws Exception{
-		setDeviceSensors();
-		if (_sensorsReader.isPhotoresistorAvailable()) {
-			analizeLuxValues(treasure);
-		}
-
-		if (_sensorsReader.isThermometerAvailable()) {
-			analizeTemperatureValues(treasure);
-		}
-	}
-
-	public void setDeviceSensors() throws Exception{
-
-		float[] acc;
-
-		if (_sensorsReader.isPhotoresistorAvailable()) {
-			_hunter.setLuminosity(_sensorsReader.getLuminosity());
-		} else _hunter.setLuminosity(-Float.MAX_VALUE);
-
-		if (_sensorsReader.isThermometerAvailable()) {
-			_hunter.setTemperature(_sensorsReader.getTemperature());
-		} else _hunter.setTemperature(-Float.MAX_VALUE);
-
-		acc = _sensorsReader.getAcceleration();
-		if (_sensorsReader.isAccelerometerAvailable() && acc != null) {
-			_hunter.setAcceleration(_sensorsReader.getAcceleration());
-		} else {
-			float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
-			_hunter.setAcceleration(a);
-		}
-	}
-
+	/**
+	 *
+	 * @param treasure
+	 * @return	The message string resulting from the comparison between treasure and hunter luminosity values
+	 * @brief	This function compares luminosity values of treasure and hunter devices
+	 * 			and returns a message string which depends on the result of the comparison
+	 */
 	public String analizeLuxValues(Device treasure) {
-
-		double t_threshold;
+		Log.d(LOG_TAG, "Comparing luminosity values between treasure and hunter");
+		double t_threshold = 0.0;
+		double h_threshold = 0.0;
 		double t_lux = treasure.getLuminosity();
 		if (t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD))
-			Log.d(this.getClass().getName(), "Pija lo shuttle");
+			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_JOURNEY_ON_THE_SUN_THRESHOLD) for treasure luminosity.");
 		else if (t_lux >= (t_threshold = SensorsReader.LUX_DAYLIGHT_THRESHOLD))
-			Log.d(this.getClass().getName(), "Ben illuminato");
+			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_DAYLIGHT_THRESHOLD) for treasure luminosity.");
 		else if (t_lux >= (t_threshold = SensorsReader.LUX_TWILIGHT_THRESHOLD))
-			Log.d(this.getClass().getName(), "Non molto illuminato");
+			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_TWILIGHT_THRESHOLD) for treasure luminosity.");
 		else if (t_lux >= (t_threshold = SensorsReader.LUX_DARK_THRESHOLD))
-			Log.d(this.getClass().getName(), "Scuro zi");
+			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_DARK_THRESHOLD) for treasure luminosity.");
 
-		double h_lux = _hunter.getLuminosity();
-		double h_threshold = SensorsReader.getLuxThreshold(h_lux);
+		h_threshold = SensorsReader.getLuxThreshold(_sensorsReader.getLuminosity());
 		String msg;
-		if (h_threshold < t_threshold)
+		if ( h_threshold < t_threshold )
 			msg = "Seems like the treasure is in a brighter place than you!";
-		else if (h_threshold > t_threshold)
+		else if ( h_threshold > t_threshold )
 			msg = "Seems like the treasure is in a darker place than you!";
 		else msg = "Seems like you and the treasure are in a place with the same brightness!";
 
@@ -307,9 +291,16 @@ public class SuggestionsGenerator {
 
 	}
 
+	/**
+	 *
+	 * @param	treasure
+	 * @return	The message string resulting from the comparison between treasure and hunter temperature values
+	 * @brief	This function compares temperature values of treasure and hunter devices
+	 * 			and returns a message string which depends on the result of the comparison
+	 */
 	public String analizeTemperatureValues(Device treasure) {
 		double t_temp = treasure.getTemperature();
-		double h_temp = _hunter.getTemperature();
+		double h_temp = _sensorsReader.getTemperature();
 		double deltaT = t_temp - h_temp;
 
 		String msg;
@@ -323,6 +314,14 @@ public class SuggestionsGenerator {
 		return msg;
 	}
 
+	/**
+	 *
+	 * @param	treasure
+	 * @return	A message string which depends on the value of the resultant of the 3-axis accelerometer
+	 * 			values of the treasure
+	 * @brief	This function returns a message string which depends on the value of the resultant
+	 * 			of the 3-axis accelerometer values of the treasure
+	 */
 	public String createAccelerometerMessage(Device treasure) {
 
 		String msg;

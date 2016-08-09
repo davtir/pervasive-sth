@@ -117,6 +117,10 @@ public class WelcomeActivity extends AppCompatActivity {
 
 			Bitmap bm = BitmapFactory.decodeResource(getResources(), fakeImageID);
 			File file = new File(imagesPath, "fake_image" + i + ".png");
+			File parentDir = new File(file.getParent());
+			if ( !parentDir.exists() ) {
+				parentDir.mkdir();
+			}
 			FileOutputStream outStream = new FileOutputStream(file);
 			bm.compress(Bitmap.CompressFormat.PNG, 100, outStream);
 			outStream.flush();

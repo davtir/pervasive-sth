@@ -77,8 +77,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	 * @param h
 	 * @brief updates the photo surface preview
 	 */
-	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		if (_holder.getSurface() == null)
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		if ( _holder.getSurface() == null )
 			return;
 		try {
 			_camera.stopPreview();

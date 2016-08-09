@@ -164,7 +164,7 @@ public class GPSTracker extends Service implements LocationListener {
 		double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = (double) (earthRadius * c);
 		Log.d(LOG_TAG, "T_lat/lon = (" + from_lat + "," + from_lon + ")" + "H_Lat/Lon = (" + _latitude + "," + _longitude + ")");
-		Log.d(LOG_TAG, "Distance = " + dist);
+		Log.d(LOG_TAG, "Computed distance = " + dist);
 
 		return dist;
 	}

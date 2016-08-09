@@ -3,7 +3,7 @@ package com.pervasive.sth.entities;
 import java.util.Arrays;
 
 /**
- * @brief this class represent the media files
+ * @brief this class represent media files
  */
 public class Media {
 
@@ -46,7 +46,7 @@ public class Media {
 		}
 
 		Media media = (Media) o;
-		if (_mediaName != null ? !_mediaName.equals(media._mediaName) : media._mediaName != null) {
+		if ( _mediaName != null ? !_mediaName.equals(media._mediaName) : media._mediaName != null ) {
 			return false;
 		}
 		return Arrays.equals(_data, media._data);

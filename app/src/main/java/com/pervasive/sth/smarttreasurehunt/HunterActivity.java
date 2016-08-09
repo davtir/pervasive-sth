@@ -450,7 +450,7 @@ public class HunterActivity extends AppCompatActivity {
                 if( deviceAddress.equals(_task.getTreasureID()) ) {
                    // _BLTValue.setText(Math.round(BluetoothTracker.calculateDistance(RSSI)*100)/100 + " m");
                     updateBLProximityBars(BluetoothTracker.calculateDistance(RSSI));
-                    Toast.makeText(context, "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(context, "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m", Toast.LENGTH_LONG).show();
                                     //"\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
                 }
             } else if(EXIT_ACTION.equals(mIntentAction)) {
@@ -459,7 +459,7 @@ public class HunterActivity extends AppCompatActivity {
                     }
             } else if(GPS_ACTION.equals(mIntentAction)) {
                 updateGPSProximityBars(intent.getDoubleExtra("GPS_DISTANCE", 0.0));
-                Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
+               // Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
             } else if (WINNER_ACTION.equals(mIntentAction)) {
                 String pathName = intent.getStringExtra("WINNER_UPDATE");
                 Intent winnerIntent = new Intent(context, TreasureCaught.class);
