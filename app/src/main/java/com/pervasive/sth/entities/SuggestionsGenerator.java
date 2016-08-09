@@ -226,27 +226,27 @@ public class SuggestionsGenerator {
 		Random rndGen = new Random();
 
 		double random = Math.abs(rndGen.nextInt()) / (double) Integer.MAX_VALUE;
-		if (random < _suggestionProbs[AUDIO_SUGGESTION]) {
+		if (random <= _suggestionProbs[AUDIO_SUGGESTION]) {
 			return AUDIO_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[AUDIO_SUGGESTION];
-		if (random < _suggestionProbs[PICTURE_SUGGESTION]) {
+		if (random <= _suggestionProbs[PICTURE_SUGGESTION]) {
 			return PICTURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[PICTURE_SUGGESTION];
-		if (random < _suggestionProbs[TEMPERATURE_SUGGESTION]) {
+		if (random <= _suggestionProbs[TEMPERATURE_SUGGESTION]) {
 			return TEMPERATURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[TEMPERATURE_SUGGESTION];
-		if (random < _suggestionProbs[LUX_SUGGESTION]) {
+		if (random <= _suggestionProbs[LUX_SUGGESTION]) {
 			return LUX_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[LUX_SUGGESTION];
-		if (random < _suggestionProbs[ACCELEROMETER_SUGGESTION]) {
+		if (random <= _suggestionProbs[ACCELEROMETER_SUGGESTION]) {
 			return ACCELEROMETER_SUGGESTION;
 		}
 
