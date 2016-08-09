@@ -6,21 +6,18 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
-import com.pervasive.sth.distances.BluetoothTracker;
-import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.entities.TreasureStatus;
-import com.pervasive.sth.exceptions.TreasureNotFoundYetException;
-import com.pervasive.sth.rest.WSInterface;
+import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
+import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Created by davtir on 15/05/16.
@@ -38,7 +35,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 
 	SuggestionsGenerator _suggestionGenerator;
 
-	public HunterTask(Context context, Device hunter) {
+	public HunterTask(Context context, Device hunter) throws InvalidRESTClientParametersException {
 		_context = context;
 		_treasureID = "";
 		_sr = new SensorsReader(context);

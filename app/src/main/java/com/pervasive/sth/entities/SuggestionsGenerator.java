@@ -1,19 +1,15 @@
 package com.pervasive.sth.entities;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
-import com.pervasive.sth.rest.WSInterface;
+import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
+import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Random;
-
-import com.pervasive.sth.entities.Media;
 
 /**
  * @brief this class provides to generate random suggestions
@@ -68,7 +64,7 @@ public class SuggestionsGenerator {
 	 * @param hunter
 	 * @brief initialize the SuggestionsGenerator fields
 	 */
-	public SuggestionsGenerator(Context context, Device hunter) {
+	public SuggestionsGenerator(Context context, Device hunter) throws InvalidRESTClientParametersException {
 		_context = context;
 		_sensorsReader = new SensorsReader(context);
 		_hunter = hunter;
@@ -230,27 +226,27 @@ public class SuggestionsGenerator {
 		Random rndGen = new Random();
 
 		double random = Math.abs(rndGen.nextInt()) / (double) Integer.MAX_VALUE;
-		if (random <= _suggestionProbs[AUDIO_SUGGESTION]) {
+		if (random < _suggestionProbs[AUDIO_SUGGESTION]) {
 			return AUDIO_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[AUDIO_SUGGESTION];
-		if (random <= _suggestionProbs[PICTURE_SUGGESTION]) {
+		if (random < _suggestionProbs[PICTURE_SUGGESTION]) {
 			return PICTURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[PICTURE_SUGGESTION];
-		if (random <= _suggestionProbs[TEMPERATURE_SUGGESTION]) {
+		if (random < _suggestionProbs[TEMPERATURE_SUGGESTION]) {
 			return TEMPERATURE_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[TEMPERATURE_SUGGESTION];
-		if (random <= _suggestionProbs[LUX_SUGGESTION]) {
+		if (random < _suggestionProbs[LUX_SUGGESTION]) {
 			return LUX_SUGGESTION;
 		}
 
 		random -= _suggestionProbs[LUX_SUGGESTION];
-		if (random <= _suggestionProbs[ACCELEROMETER_SUGGESTION]) {
+		if (random < _suggestionProbs[ACCELEROMETER_SUGGESTION]) {
 			return ACCELEROMETER_SUGGESTION;
 		}
 

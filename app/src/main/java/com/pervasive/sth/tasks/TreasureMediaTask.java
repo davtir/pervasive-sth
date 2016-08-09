@@ -7,14 +7,12 @@ import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
 import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.CameraPreview;
-import com.pervasive.sth.rest.WSInterface;
+import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
+import com.pervasive.sth.network.WSInterface;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,7 +40,7 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 	Camera _frontCamera;
 	//Camera _backCamera;
 
-	public TreasureMediaTask(Context context, CameraPreview frontPreview, CameraPreview backPreview) {
+	public TreasureMediaTask(Context context, CameraPreview frontPreview, CameraPreview backPreview) throws InvalidRESTClientParametersException {
 		Log.d(this.getClass().getName(), "Inizio Costruttore");
 
 		_context = context;

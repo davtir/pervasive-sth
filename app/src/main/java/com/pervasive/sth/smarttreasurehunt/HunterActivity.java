@@ -36,6 +36,7 @@ import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.exceptions.BluetoothCriticalException;
+import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.tasks.HunterDistanceTask;
 import com.pervasive.sth.tasks.HunterTask;
 import com.pervasive.sth.entities.Device;
@@ -221,14 +222,19 @@ public class HunterActivity extends AppCompatActivity {
 
         Log.d("HunterTask", "Starting task");
         // Start treasure task
-        if ( _task == null || _task.isCancelled() ) {
-            _task = new HunterTask(this, _hunter);
-            _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        }
+        try {
+            if ( _task == null || _task.isCancelled() ) {
+                _task = new HunterTask(this, _hunter);
+                _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
 
-        if ( _distance == null || _distance.isCancelled() ) {
-            _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
-           _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            if ( _distance == null || _distance.isCancelled() ) {
+                _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
+                _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+        } catch ( InvalidRESTClientParametersException e ) {
+            Log.e(LOG_TAG, e.toString());
+            finish();
         }
     }
 

@@ -2,26 +2,16 @@ package com.pervasive.sth.tasks;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaRecorder;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
 
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
-import com.pervasive.sth.entities.Media;
-import com.pervasive.sth.entities.Suggestion;
-import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.entities.TreasureStatus;
-import com.pervasive.sth.rest.WSInterface;
-import com.pervasive.sth.sensors.SensorsReader;
+import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
+import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Created by Alex on 29/05/2016.
@@ -38,7 +28,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 	double distance;
 
 
-	public HunterDistanceTask(Context context, GPSTracker gps, BluetoothTracker ble, Device hunter) {
+	public HunterDistanceTask(Context context, GPSTracker gps, BluetoothTracker ble, Device hunter) throws InvalidRESTClientParametersException {
 		_context = context;
 		_gps = gps;
 		_bluetooth = ble;

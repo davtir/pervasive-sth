@@ -8,8 +8,7 @@ import android.util.Log;
 
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
-import com.pervasive.sth.rest.RESTClient;
-import com.pervasive.sth.rest.WSInterface;
+import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 
 /**
