@@ -22,7 +22,7 @@ public class WSInterface {
 	/*
 	 * The server URI
 	 */
-	private static final String BASE_URI = "http://192.168.0.241:8084/STHServer/webresources";
+	private static final String BASE_URI = "http://192.168.0.231:8084/STHServer/webresources";
 	//private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
 	//private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
 

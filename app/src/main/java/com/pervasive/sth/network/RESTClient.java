@@ -65,7 +65,7 @@ public class RESTClient {
 	 * @brief	Sets header name and value to the HTTP header
 	 */
 	public void addHeader(String name, String value) throws InvalidRESTClientParametersException {
-		if ( _headerName == null || value == null ) {
+		if ( name == null || value == null ) {
 			throw new InvalidRESTClientParametersException("Invalid parameters ( name = " + name + ", value = " + value + ")");
 		}
 		_headerName = name;
