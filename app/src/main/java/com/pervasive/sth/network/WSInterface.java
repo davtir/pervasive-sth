@@ -22,7 +22,7 @@ public class WSInterface {
 	/*
 	 * The server URI
 	 */
-	private static final String BASE_URI = "http://192.168.0.231:8084/STHServer/webresources";
+	private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
 	//private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
 	//private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
 
@@ -107,7 +107,7 @@ public class WSInterface {
 
 		double[] acc = device.getAcceleration();
 
-		jsonDevice.put("ID", device.getMACAddress());
+		jsonDevice.put("ID", device.getBtAddress());
 		jsonDevice.put("NAME", device.getName());
 		jsonDevice.put("ROLE", device.getRole());
 		jsonDevice.put("LATITUDE", device.getLatitude());

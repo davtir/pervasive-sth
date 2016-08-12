@@ -3,8 +3,10 @@ package com.pervasive.sth.entities;
 import android.content.Context;
 import android.util.Log;
 
+import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
+import com.pervasive.sth.sensors.Photoresistor;
 import com.pervasive.sth.sensors.SensorsReader;
 
 import java.io.File;
@@ -64,7 +66,7 @@ public class SuggestionsGenerator {
 	 * @param hunter
 	 * @brief initialize the SuggestionsGenerator fields
 	 */
-	public SuggestionsGenerator(Context context, Device hunter) throws InvalidRESTClientParametersException {
+	public SuggestionsGenerator(Context context, Device hunter) throws InvalidRESTClientParametersException, DeviceSensorCriticalException {
 		_context = context;
 		_sensorsReader = new SensorsReader(context);
 		_hunter = hunter;
@@ -106,7 +108,7 @@ public class SuggestionsGenerator {
 		mediaProbs = sensorsProbs / sensorsMediaRatio;
 
 		//for the available sensors, set their probabilties equal to sensorProbs
-		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsReader.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);
+		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsReader.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);	// Set it to -Double MAX
 		_suggestionProbs[LUX_SUGGESTION] = _sensorsReader.isPhotoresistorAvailable() ? (sensorsProbs) : (0.0);
 		_suggestionProbs[TEMPERATURE_SUGGESTION] = _sensorsReader.isThermometerAvailable() ? (sensorsProbs) : (0.0);
 
@@ -230,6 +232,7 @@ public class SuggestionsGenerator {
 			return AUDIO_SUGGESTION;
 		}
 
+		// check if random is >= 0
 		random -= _suggestionProbs[AUDIO_SUGGESTION];
 		if (random <= _suggestionProbs[PICTURE_SUGGESTION]) {
 			return PICTURE_SUGGESTION;
@@ -266,16 +269,16 @@ public class SuggestionsGenerator {
 		double t_threshold = 0.0;
 		double h_threshold = 0.0;
 		double t_lux = treasure.getLuminosity();
-		if (t_lux >= (t_threshold = SensorsReader.LUX_JOURNEY_ON_THE_SUN_THRESHOLD))
+		if (t_lux >= (t_threshold = Photoresistor.LUX_JOURNEY_ON_THE_SUN_THRESHOLD))
 			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_JOURNEY_ON_THE_SUN_THRESHOLD) for treasure luminosity.");
-		else if (t_lux >= (t_threshold = SensorsReader.LUX_DAYLIGHT_THRESHOLD))
+		else if (t_lux >= (t_threshold = Photoresistor.LUX_DAYLIGHT_THRESHOLD))
 			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_DAYLIGHT_THRESHOLD) for treasure luminosity.");
-		else if (t_lux >= (t_threshold = SensorsReader.LUX_TWILIGHT_THRESHOLD))
+		else if (t_lux >= (t_threshold = Photoresistor.LUX_TWILIGHT_THRESHOLD))
 			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_TWILIGHT_THRESHOLD) for treasure luminosity.");
-		else if (t_lux >= (t_threshold = SensorsReader.LUX_DARK_THRESHOLD))
+		else if (t_lux >= (t_threshold = Photoresistor.LUX_DARK_THRESHOLD))
 			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_DARK_THRESHOLD) for treasure luminosity.");
 
-		h_threshold = SensorsReader.getLuxThreshold(_sensorsReader.getLuminosity());
+		h_threshold = Photoresistor.getLuxThreshold(_sensorsReader.getPhotoresistor().getLuminosityValue());
 		String msg;
 		if ( h_threshold < t_threshold )
 			msg = "Seems like the treasure is in a brighter place than you!";
@@ -296,7 +299,7 @@ public class SuggestionsGenerator {
 	 */
 	public String analizeTemperatureValues(Device treasure) {
 		double t_temp = treasure.getTemperature();
-		double h_temp = _sensorsReader.getTemperature();
+		double h_temp = _sensorsReader.getThermometer().getThermometerValues();
 		double deltaT = t_temp - h_temp;
 
 		String msg;

@@ -6,7 +6,7 @@ package com.pervasive.sth.exceptions;
  */
 public class BluetoothCriticalException extends Exception {
 
-	public  BluetoothCriticalException() {
+	public BluetoothCriticalException() {
 		super();
 	}
 

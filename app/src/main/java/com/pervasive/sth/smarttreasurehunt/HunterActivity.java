@@ -36,6 +36,7 @@ import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.exceptions.BluetoothCriticalException;
+import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.tasks.HunterDistanceTask;
 import com.pervasive.sth.tasks.HunterTask;
@@ -227,12 +228,16 @@ public class HunterActivity extends AppCompatActivity {
                 _task = new HunterTask(this, _hunter);
                 _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
-
+            Log.d("LOG_TAG", "HERE I AM");
             if ( _distance == null || _distance.isCancelled() ) {
                 _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
                 _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
-        } catch ( InvalidRESTClientParametersException e ) {
+        } catch ( InvalidRESTClientParametersException e) {
+            Log.e(LOG_TAG, e.toString());
+            finish();
+        } catch ( DeviceSensorCriticalException e ) {
+            Log.d("LOG_TAG", "HERE I AM2");
             Log.e(LOG_TAG, e.toString());
             finish();
         }

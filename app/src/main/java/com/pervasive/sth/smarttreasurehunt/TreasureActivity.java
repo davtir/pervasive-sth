@@ -91,12 +91,12 @@ public class TreasureActivity extends AppCompatActivity {
 			try {
 				_task = new TreasureTask(this, _gps, treasure);
 			} catch (RuntimeException e) {
-				Log.e("TreasureActivity", e.getMessage());
+				Log.e("TreasureActivity", e.toString());
 				Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
 				finish();
 				return;
 			} catch (Exception e) {
-				//  Log.e("TreasureActivity", e.getMessage());
+				Log.e("TreasureActivity", e.toString());
 				finish();
 				return;
 			}

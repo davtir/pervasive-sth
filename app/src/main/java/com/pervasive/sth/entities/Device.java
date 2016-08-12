@@ -147,7 +147,7 @@ public class Device {
 		_acceleration[2] = acc[2];
 	}
 
-	public String getMACAddress() {
+	public String getBtAddress() {
 		return _bt_address;
 	}
 

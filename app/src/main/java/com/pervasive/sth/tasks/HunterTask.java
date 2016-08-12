@@ -2,6 +2,7 @@ package com.pervasive.sth.tasks;
 
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
@@ -11,6 +12,8 @@ import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.Suggestion;
 import com.pervasive.sth.entities.SuggestionsGenerator;
 import com.pervasive.sth.entities.TreasureStatus;
+import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
+import com.pervasive.sth.exceptions.DeviceSensorException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
@@ -35,13 +38,20 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 
 	SuggestionsGenerator _suggestionGenerator;
 
-	public HunterTask(Context context, Device hunter) throws InvalidRESTClientParametersException {
+	public HunterTask(Context context, Device hunter) throws InvalidRESTClientParametersException, DeviceSensorCriticalException {
 		_context = context;
 		_treasureID = "";
-		_sr = new SensorsReader(context);
 		_hunter = hunter;
 		_webserver = new WSInterface();
 		_suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
+		_sr = new SensorsReader(context);
+		try {
+			_sr.startSensorListener(Sensor.TYPE_LIGHT);
+			_sr.startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
+			_sr.startSensorListener(Sensor.TYPE_AMBIENT_TEMPERATURE);
+		} catch ( DeviceSensorException e ) {
+			Log.w(LOG_TAG, e.getMessage());
+		}
 	}
 
 	public String getTreasureID() {
@@ -69,7 +79,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			Device treasure;
 			try {
 				treasure = _webserver.retrieveDevice();
-				_treasureID = treasure.getMACAddress();
+				_treasureID = treasure.getBtAddress();
 			} catch (Exception e) {
 				// Error while executing get on WS
 				Log.e("HunterTask", e.getMessage());
@@ -97,7 +107,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 		}
 
 		try {
-			_webserver.deleteDevice(_hunter.getMACAddress());
+			_webserver.deleteDevice(_hunter.getBtAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

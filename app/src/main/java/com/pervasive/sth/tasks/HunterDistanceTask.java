@@ -62,7 +62,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 			Device treasure;
 			try {
 				treasure = _webserver.retrieveDevice();
-				_treasureID = treasure.getMACAddress();
+				_treasureID = treasure.getBtAddress();
 			} catch (Exception e) {
 				// Error while executing get on WS
 				Log.e("HunterTask", e.getMessage());
@@ -74,7 +74,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 		}
 
 		try {
-			_webserver.deleteDevice(_hunter.getMACAddress());
+			_webserver.deleteDevice(_hunter.getBtAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

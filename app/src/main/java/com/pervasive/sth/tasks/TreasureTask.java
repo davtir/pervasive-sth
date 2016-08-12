@@ -3,11 +3,13 @@ package com.pervasive.sth.tasks;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.hardware.Sensor;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
+import com.pervasive.sth.exceptions.DeviceSensorException;
 import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsReader;
 
@@ -31,6 +33,13 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 		_webserver = new WSInterface();
 		_treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
 		_sr = new SensorsReader(context);
+		try {
+			_sr.startSensorListener(Sensor.TYPE_LIGHT);
+			_sr.startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
+			_sr.startSensorListener(Sensor.TYPE_AMBIENT_TEMPERATURE);
+		} catch ( DeviceSensorException e ) {
+			Log.w(LOG_TAG, e.getMessage());
+		}
 	}
 
 	@Override
@@ -44,7 +53,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			treasure_exist = false;
 		}
 
-		if (treasure_exist && retrieved != null && !retrieved.getMACAddress().equals(_treasure.getMACAddress()))
+		if (treasure_exist && retrieved != null && !retrieved.getBtAddress().equals(_treasure.getBtAddress()))
 			throw new RuntimeException("Treasure already exists.");
 
 		_found = false;
@@ -101,7 +110,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
                 _webserver.updateTreasureStatus(_treasure.isFound(), _winner);
             }*/
 
-			_webserver.deleteDevice(_treasure.getMACAddress());
+			_webserver.deleteDevice(_treasure.getBtAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -112,17 +121,17 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 	public void setDeviceSensors() throws Exception{
 
 		if (_sr.isPhotoresistorAvailable())
-			_treasure.setLuminosity(_sr.getLuminosity());
+			_treasure.setLuminosity(_sr.getPhotoresistor().getLuminosityValue());
 		else
 			_treasure.setLuminosity(-Float.MAX_VALUE);
 
 		if (_sr.isThermometerAvailable())
-			_treasure.setTemperature(_sr.getTemperature());
+			_treasure.setTemperature(_sr.getThermometer().getThermometerValues());
 		else
 			_treasure.setTemperature(-Float.MAX_VALUE);
 
 		if (_sr.isAccelerometerAvailable()) {
-			_treasure.setAcceleration(_sr.getMeanAcceleration());
+			_treasure.setAcceleration(_sr.getCumulativeAccelerometer().getMeanAcceleration());
 		} else {
 			float[] a = {-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
 			_treasure.setAcceleration(a);
