@@ -9,7 +9,7 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 
 /**
- * @brief	This class handle the device photoresistor sensor
+ * @brief	This class implements the photoresistor sensor facilities
  */
 public class Photoresistor implements SensorEventListener  {
 
@@ -23,14 +23,20 @@ public class Photoresistor implements SensorEventListener  {
  	 */
 	private float _luminosityValue;
 
+	/*
+	 * True if it is listening for sensor changes
+	 */
 	public boolean _isListening;
 
 	/*
 	 *	Luminosity thresholds
 	 */
 	public static final double LUX_DARK_THRESHOLD = 0.0;
+
 	public static final double LUX_TWILIGHT_THRESHOLD = 5;
+
 	public static final double LUX_DAYLIGHT_THRESHOLD = 1000;
+
 	public static final double LUX_JOURNEY_ON_THE_SUN_THRESHOLD = 5000;
 
 	/**
@@ -64,6 +70,9 @@ public class Photoresistor implements SensorEventListener  {
 		return _photoresistor;
 	}
 
+	/**
+	 * @brief Start listening for sensor value changes
+	 */
 	public void startListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager == null ) {
 			throw new DeviceSensorCriticalException("Invalid sensor manager in input");
@@ -75,11 +84,21 @@ public class Photoresistor implements SensorEventListener  {
 		}
 	}
 
+	/**
+	 * @brief Stop listening for sensor value changes
+	 */
 	public void stopListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager != null && _isListening ) {
 			manager.unregisterListener(this);
 			_isListening = false;
 		}
+	}
+
+	/**
+	 * @brief Returns true if it is listening for sensor value changes
+	 */
+	public boolean isListening() {
+		return _isListening;
 	}
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) { }

@@ -16,7 +16,7 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
-import com.pervasive.sth.sensors.SensorsReader;
+import com.pervasive.sth.sensors.SensorsHandler;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
 	Context _context;
 	WSInterface _webserver;
-	SensorsReader _sr;
+	SensorsHandler _sr;
 	Device _hunter;
 	String _treasureID;
 	TreasureStatus _treasureStatus;
@@ -44,7 +44,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 		_hunter = hunter;
 		_webserver = new WSInterface();
 		_suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
-		_sr = new SensorsReader(context);
+		_sr = new SensorsHandler(context);
 		try {
 			_sr.startSensorListener(Sensor.TYPE_LIGHT);
 			_sr.startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);

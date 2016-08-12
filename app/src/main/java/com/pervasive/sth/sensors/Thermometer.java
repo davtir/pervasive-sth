@@ -9,21 +9,24 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 
 /**
- * Created by davtir on 12/08/16.
+ * @brief This class implements the thermometer sensor facilities
  */
 public class Thermometer implements SensorEventListener {
 
 	/*
 	 * The handler to the accelerometer sensor
 	 */
-	protected final Sensor _thermometer;
+	private final Sensor _thermometer;
 
 	/*
 	 * Temperature in Celsius degree
 	 */
-	protected float _thermometerValue;
+	private float _thermometerValue;
 
-	protected boolean _isListening;
+	/*
+	 * True if it is listening for sensor changes
+	 */
+	private boolean _isListening;
 
 	/**
 	 * @brief Initialize sensor manager and sensor handler
@@ -56,10 +59,16 @@ public class Thermometer implements SensorEventListener {
 		return _thermometer;
 	}
 
+	/**
+	 * @brief Returns true if it is listening for sensor value changes
+	 */
 	public boolean isListening() {
 		return _isListening;
 	}
 
+	/**
+	 * @brief Start listening for sensor value changes
+	 */
 	public void startListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager == null ) {
 			throw new DeviceSensorCriticalException("Invalid sensor manager in input");
@@ -71,6 +80,9 @@ public class Thermometer implements SensorEventListener {
 		}
 	}
 
+	/**
+	 * @brief Stop listening for sensor value changes
+	 */
 	public void stopListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager != null && _isListening ) {
 			manager.unregisterListener(this);

@@ -7,7 +7,7 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.Photoresistor;
-import com.pervasive.sth.sensors.SensorsReader;
+import com.pervasive.sth.sensors.SensorsHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ public class SuggestionsGenerator {
 	/*
 	 * Android sensors manager
 	 */
-	SensorsReader _sensorsReader;
+	SensorsHandler _sensorsHandler;
 
 	/*
 	 * The hunter device
@@ -68,7 +68,7 @@ public class SuggestionsGenerator {
 	 */
 	public SuggestionsGenerator(Context context, Device hunter) throws InvalidRESTClientParametersException, DeviceSensorCriticalException {
 		_context = context;
-		_sensorsReader = new SensorsReader(context);
+		_sensorsHandler = new SensorsHandler(context);
 		_hunter = hunter;
 		_webserver = new WSInterface();
 		_suggestionProbs = new double[SUGGESTION_NUMBER];
@@ -86,11 +86,11 @@ public class SuggestionsGenerator {
 		// counter of media adapters, we can fairly assume that a phone always has a camera and a microphone
 		int mediaCounter = 2;
 
-		if (_sensorsReader.isAccelerometerAvailable())
+		if ( _sensorsHandler.isAccelerometerAvailable())
 			++sensorsCounter;
-		if (_sensorsReader.isThermometerAvailable())
+		if ( _sensorsHandler.isThermometerAvailable())
 			++sensorsCounter;
-		if (_sensorsReader.isPhotoresistorAvailable()) {
+		if ( _sensorsHandler.isPhotoresistorAvailable()) {
 			++sensorsCounter;
 		}
 
@@ -108,9 +108,9 @@ public class SuggestionsGenerator {
 		mediaProbs = sensorsProbs / sensorsMediaRatio;
 
 		//for the available sensors, set their probabilties equal to sensorProbs
-		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsReader.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);	// Set it to -Double MAX
-		_suggestionProbs[LUX_SUGGESTION] = _sensorsReader.isPhotoresistorAvailable() ? (sensorsProbs) : (0.0);
-		_suggestionProbs[TEMPERATURE_SUGGESTION] = _sensorsReader.isThermometerAvailable() ? (sensorsProbs) : (0.0);
+		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsHandler.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);	// Set it to -Double MAX
+		_suggestionProbs[LUX_SUGGESTION] = _sensorsHandler.isPhotoresistorAvailable() ? (sensorsProbs) : (0.0);
+		_suggestionProbs[TEMPERATURE_SUGGESTION] = _sensorsHandler.isThermometerAvailable() ? (sensorsProbs) : (0.0);
 
 		//for each media (picture and microphone) set their probabilites equal to mediaProbs
 		_suggestionProbs[PICTURE_SUGGESTION] = mediaProbs;
@@ -278,7 +278,7 @@ public class SuggestionsGenerator {
 		else if (t_lux >= (t_threshold = Photoresistor.LUX_DARK_THRESHOLD))
 			Log.d(LOG_TAG, "Selected threshold " + t_threshold + " (LUX_DARK_THRESHOLD) for treasure luminosity.");
 
-		h_threshold = Photoresistor.getLuxThreshold(_sensorsReader.getPhotoresistor().getLuminosityValue());
+		h_threshold = Photoresistor.getLuxThreshold(_sensorsHandler.getPhotoresistor().getLuminosityValue());
 		String msg;
 		if ( h_threshold < t_threshold )
 			msg = "Seems like the treasure is in a brighter place than you!";
@@ -299,7 +299,7 @@ public class SuggestionsGenerator {
 	 */
 	public String analizeTemperatureValues(Device treasure) {
 		double t_temp = treasure.getTemperature();
-		double h_temp = _sensorsReader.getThermometer().getThermometerValues();
+		double h_temp = _sensorsHandler.getThermometer().getThermometerValues();
 		double deltaT = t_temp - h_temp;
 
 		String msg;

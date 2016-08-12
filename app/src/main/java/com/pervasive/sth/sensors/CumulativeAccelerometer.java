@@ -8,16 +8,28 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 
 /**
- * Created by davtir on 12/08/16.
+ * @brief This class implements the cumulative accelerometer facilities
  */
 public class CumulativeAccelerometer extends Accelerometer {
 
-	long _validSamples;
+	/*
+	 * The number of samples that listened that are not considered as outlier
+	 */
+	private long _validSamples;
 
-	float _outlierThreshold;
+	/*
+	 * The lower threshold for outlier samples identification
+	 */
+	private float _outlierThreshold;
 
-	float[] _cumulativeAcceleration;
+	/*
+	 * Cumulative values for the acceleration
+	 */
+	private float[] _cumulativeAcceleration;
 
+	/**
+	 * @brief Initialize the instance
+	 */
 	public CumulativeAccelerometer(Sensor accelerometer, float outlierThreshold) throws DeviceSensorCriticalException, DeviceSensorException {
 		super(accelerometer);
 		_cumulativeAcceleration = new float[3];
@@ -25,6 +37,30 @@ public class CumulativeAccelerometer extends Accelerometer {
 		_outlierThreshold = outlierThreshold;
 	}
 
+	/**
+	 * @brief Returns the cumulative values for the acceleration
+	 */
+	public float[] getCumulativeAcceleration() {
+		return _cumulativeAcceleration;
+	}
+
+	/**
+	 * @brief Returns the number of valid samples currently recorded
+	 */
+	public long getCurrentlyValidSamples() {
+		return _validSamples;
+	}
+
+	/**
+	 * @brief Sets the threshold to identify outlier samples
+	 */
+	public void setOutlierThreshold(float value) {
+		_outlierThreshold = value;
+	}
+
+	/**
+	 * @brief Returns the mean value for the acceleration
+	 */
 	public float[] getMeanAcceleration() {
 		float[] res = {0.0f, 0.0f, 0.0f};
 

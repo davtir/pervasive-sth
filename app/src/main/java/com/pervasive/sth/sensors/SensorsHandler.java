@@ -2,8 +2,6 @@ package com.pervasive.sth.sensors;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
@@ -11,18 +9,40 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 
 /**
- * Created by davtir on 16/05/16.
+ * @brief This class implements the support for handling device sensors
  */
-public class SensorsReader {
-	Context _cnt;
-	SensorManager _manager;
-	Photoresistor _photoresistor;
-	Thermometer _thermometer;
-	CumulativeAccelerometer _accelerometer;
+public class SensorsHandler {
+	/*
+	 * The activity context
+	 */
+	private Context _cnt;
 
-	private static final String LOG_TAG = SensorsReader.class.getName();
+	/*
+	 * The android sensor manager
+	 */
+	private SensorManager _manager;
 
-	public SensorsReader(Context cnt) throws DeviceSensorCriticalException {
+	/*
+	 * The photoresistor sensor
+	 */
+	private Photoresistor _photoresistor;
+
+	/*
+	 * The thermometer sensor
+	 */
+	private Thermometer _thermometer;
+
+	/*
+	 * The cumulative accelerometer sensor
+	 */
+	private CumulativeAccelerometer _accelerometer;
+
+	private static final String LOG_TAG = SensorsHandler.class.getName();
+
+	/**
+	 * @brief Initialize the SensorHandler instance
+	 */
+	public SensorsHandler(Context cnt) throws DeviceSensorCriticalException {
 		_cnt = cnt;
 		_manager = (SensorManager) cnt.getSystemService(Context.SENSOR_SERVICE);
 
@@ -45,6 +65,27 @@ public class SensorsReader {
 		}
 	}
 
+	/**
+	 * @brief	Starts all supported sensors listeners
+	 */
+	public void startAllSupportedSensorsListeners()throws DeviceSensorCriticalException, DeviceSensorException {
+		startSensorListener(Sensor.TYPE_LIGHT);
+		startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
+		startSensorListener(Sensor.TYPE_AMBIENT_TEMPERATURE);
+	}
+
+	/**
+	 * @brief	Stops all supported sensors listeners
+	 */
+	public void stopAllSupportedSensorsListeners()throws DeviceSensorCriticalException, DeviceSensorException {
+		stopSensorListener(Sensor.TYPE_LIGHT);
+		stopSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
+		stopSensorListener(Sensor.TYPE_AMBIENT_TEMPERATURE);
+	}
+
+	/**
+	 * @brief Starts the listener of the given sensor type
+	 */
 	public void startSensorListener(int sensorType) throws DeviceSensorCriticalException, DeviceSensorException {
 		switch ( sensorType ) {
 			case Sensor.TYPE_LIGHT:
@@ -66,6 +107,9 @@ public class SensorsReader {
 		}
 	}
 
+	/**
+	 * @brief Stops the listener of the given sensor type
+	 */
 	public void stopSensorListener(int sensorType) throws DeviceSensorCriticalException {
 		switch ( sensorType ) {
 			case Sensor.TYPE_LIGHT:
@@ -87,26 +131,44 @@ public class SensorsReader {
 		}
 	}
 
+	/**
+	 * @brief Returns the photoresistor object
+	 */
 	public Photoresistor getPhotoresistor() {
 		return _photoresistor;
 	}
 
+	/**
+	 * @brief Returns the cumulative accelerometer object
+	 */
 	public CumulativeAccelerometer getCumulativeAccelerometer() {
 		return _accelerometer;
 	}
 
+	/**
+	 * @brief Returns the thermometer object
+	 */
 	public Thermometer getThermometer() {
 		return _thermometer;
 	}
 
+	/**
+	 * @brief	Returns true if photoresistor is supported by the device, false otherwise
+	 */
 	public boolean isPhotoresistorAvailable() {
 		return (_photoresistor != null);
 	}
 
+	/**
+	 * @brief	Returns true if thermometer is supported by the device, false otherwise
+	 */
 	public boolean isThermometerAvailable() {
 		return (_manager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE) != null);
 	}
 
+	/**
+	 * @brief	Returns true if accelerometer is supported by the device, false otherwise
+	 */
 	public boolean isAccelerometerAvailable() {
 		return (_manager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null);
 	}

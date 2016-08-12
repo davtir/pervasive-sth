@@ -10,7 +10,7 @@ import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 
 /**
- * Created by davtir on 12/08/16.
+ * @brief This class implements the device accelerometer facilities
  */
 public class Accelerometer implements SensorEventListener {
 
@@ -26,6 +26,9 @@ public class Accelerometer implements SensorEventListener {
 	 */
 	protected float[] _accelerometerValues;
 
+	/*
+	 * True if it is listening for sensor changes
+	 */
 	protected boolean _isListening;
 
 	/**
@@ -61,10 +64,16 @@ public class Accelerometer implements SensorEventListener {
 		return _accelerometer;
 	}
 
+	/**
+	 * @brief Returns true if it is listening for sensor value changes
+	 */
 	public boolean isListening() {
 		return _isListening;
 	}
 
+	/**
+	 * @brief Start listening for sensor value changes
+	 */
 	public void startListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager == null ) {
 			throw new DeviceSensorCriticalException("Invalid sensor manager in input");
@@ -76,6 +85,9 @@ public class Accelerometer implements SensorEventListener {
 		}
 	}
 
+	/**
+	 * Stops listening for sensor value changes
+	 */
 	public void stopListening(SensorManager manager) throws DeviceSensorCriticalException {
 		if ( manager != null && _isListening ) {
 			manager.unregisterListener(this);
@@ -83,8 +95,10 @@ public class Accelerometer implements SensorEventListener {
 		}
 	}
 
+	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
+	@Override
 	public void onSensorChanged(SensorEvent event) {
 		if ( event.sensor.getType() == _accelerometer.getType() ) {
 			_accelerometerValues = event.values;

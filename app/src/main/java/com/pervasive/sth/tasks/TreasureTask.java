@@ -11,7 +11,7 @@ import com.pervasive.sth.distances.GPSTracker;
 import com.pervasive.sth.entities.Device;
 import com.pervasive.sth.exceptions.DeviceSensorException;
 import com.pervasive.sth.network.WSInterface;
-import com.pervasive.sth.sensors.SensorsReader;
+import com.pervasive.sth.sensors.SensorsHandler;
 
 /**
  * Created by davtir on 15/05/16.
@@ -25,14 +25,14 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 	Device _treasure;
 	public static boolean _found = false;
 	public static Bitmap _winner = null;
-	SensorsReader _sr;
+	SensorsHandler _sr;
 
 	public TreasureTask(Context context, GPSTracker gps, Device dev) throws Exception {
 		_context = context;
 		_gps = gps;
 		_webserver = new WSInterface();
 		_treasure = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "T");
-		_sr = new SensorsReader(context);
+		_sr = new SensorsHandler(context);
 		try {
 			_sr.startSensorListener(Sensor.TYPE_LIGHT);
 			_sr.startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
