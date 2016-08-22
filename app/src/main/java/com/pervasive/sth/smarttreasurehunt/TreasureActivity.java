@@ -1,6 +1,8 @@
 package com.pervasive.sth.smarttreasurehunt;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -45,8 +47,6 @@ public class TreasureActivity extends AppCompatActivity {
 		Log.d(this.getClass().getName(), "Setting up camera.");
 		try {
 			Log.d(this.getClass().getName(), "Front camera opened;");
-
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -200,6 +200,19 @@ public class TreasureActivity extends AppCompatActivity {
 				finish();
 			}
 		}
+	}
+
+	private void showErrorDialog(String message) {
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		alertDialog.setTitle("Internal Error");
+		alertDialog.setMessage(message);
+		alertDialog.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+			}
+		});
+		alertDialog.show();
 	}
 }
 

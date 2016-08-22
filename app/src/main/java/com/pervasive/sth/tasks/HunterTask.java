@@ -23,21 +23,55 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 /**
- * Created by davtir on 15/05/16.
+ * @brief This class implements the task associated to the hunter device
  */
 public class HunterTask extends AsyncTask<Void, Void, Void> {
 
 	private final String LOG_TAG = HunterTask.class.getName();
+
+	/*
+	 * The external storage path for media files
+	 */
 	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
+
+	/*
+	 * The activity context
+	 */
 	Context _context;
+
+	/*
+	 * The interface for the interaction with the web server
+	 */
 	WSInterface _webserver;
+
+	/*
+	 * The sensor handler object
+	 */
 	SensorsHandler _sr;
+
+	/*
+	 * The hunter device
+	 */
 	Device _hunter;
+
+	/*
+	 * The treasure device ID
+	 */
 	String _treasureID;
+
+	/*
+	 * The trasure device status
+	 */
 	TreasureStatus _treasureStatus;
 
+	/*
+	 * The suggestion generator module
+	 */
 	SuggestionsGenerator _suggestionGenerator;
 
+	/**
+	 * @brief Initialize the HunterTask instance
+	 */
 	public HunterTask(Context context, Device hunter) throws InvalidRESTClientParametersException, DeviceSensorCriticalException {
 		_context = context;
 		_treasureID = "";
@@ -46,9 +80,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 		_suggestionGenerator = new SuggestionsGenerator(_context, _hunter);
 		_sr = new SensorsHandler(context);
 		try {
-			_sr.startSensorListener(Sensor.TYPE_LIGHT);
-			_sr.startSensorListener(Sensor.TYPE_LINEAR_ACCELERATION);
-			_sr.startSensorListener(Sensor.TYPE_AMBIENT_TEMPERATURE);
+			_sr.startAllSupportedSensorsListeners();
 		} catch ( DeviceSensorException e ) {
 			Log.w(LOG_TAG, e.getMessage());
 		}
@@ -60,18 +92,18 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 
 	@Override
 	protected Void doInBackground(Void... params) {
-		Log.d("HunterTask", "Started");
+		Log.d(LOG_TAG, "Hunter task correctly started.");
 
 		// End when a cancel request is received
-		while (!isCancelled()) {
+		while ( !isCancelled() ) {
 			try {
 				_treasureStatus = _webserver.retrieveTreasureStatus();
-				if (_treasureStatus.isFound()) {
-					Log.i("HunterTask", "The treasure have been found!");
+				if ( _treasureStatus.isFound() ) {
+					Log.i(LOG_TAG, "The treasure have been found by a player.");
 					break;
 				}
-			} catch (Exception e) {
-				Log.e("HunterTask", e.getMessage());
+			} catch ( Exception e ) {
+				Log.e(LOG_TAG, e.toString());
 				continue;
 			}
 
@@ -82,7 +114,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 				_treasureID = treasure.getBtAddress();
 			} catch (Exception e) {
 				// Error while executing get on WS
-				Log.e("HunterTask", e.getMessage());
+				Log.e("LOG_TAG", e.getMessage());
 				continue;
 			}
 

@@ -63,7 +63,7 @@ public class WelcomeActivity extends AppCompatActivity {
 		// Set content view AFTER ABOVE sequence (to avoid crash)
 		setContentView(R.layout.activity_welcome);
 
-		// Creating fake images
+		// Creating fake images ( CHECK IF CAN BE AVOIDED )
 		try {
 			createFakeImages(3);
 		} catch ( IOException e ) {

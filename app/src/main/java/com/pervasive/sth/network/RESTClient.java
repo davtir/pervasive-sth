@@ -6,12 +6,15 @@ package com.pervasive.sth.network;
  * and open the template in the editor.
  */
 
+import com.pervasive.sth.exceptions.HTTPBadResponseException;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -90,6 +93,11 @@ public class RESTClient {
 		StringEntity entity = new StringEntity(payload, HTTP.UTF_8);
 		httpPost.setEntity(entity);
 		HttpResponse response = httpClient.execute(httpPost);
+		StatusLine line = response.getStatusLine();
+		if ( line.getStatusCode() >= HttpStatus.SC_BAD_REQUEST ) {
+			throw new HTTPBadResponseException(line.toString());
+		}
+
 		HttpEntity entity1 = response.getEntity();
 		return EntityUtils.toString(entity1);
 	}

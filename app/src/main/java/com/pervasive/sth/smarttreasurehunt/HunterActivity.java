@@ -1,10 +1,12 @@
 package com.pervasive.sth.smarttreasurehunt;
 
 import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -27,9 +29,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.pervasive.sth.distances.BluetoothTracker;
 import com.pervasive.sth.distances.GPSTracker;
@@ -51,12 +51,12 @@ public class HunterActivity extends AppCompatActivity {
     private final String LOG_TAG = HunterActivity.class.getName();
     private static final int WINNER_REQUEST_CODE = 1;
 
-    public static String EXIT_ACTION = "com.pervasive.sth.smarttreasurehunt.EXIT_GAME";
-    public static String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
-    public static String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
-    public static String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
-    public static String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
-    public static String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
+    public static final String EXIT_ACTION = "com.pervasive.sth.smarttreasurehunt.EXIT_GAME";
+    public static final String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
+    public static final String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
+    public static final String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
+    public static final String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
+    public static final String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
 
     private final String externalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
 
@@ -71,8 +71,6 @@ public class HunterActivity extends AppCompatActivity {
     private HunterDistanceTask _distance;
     private Device _hunter;
 
-    private RelativeLayout _rl;
-
     private ProgressBar gpsProgressBar;
     private ProgressBar BLProgressBar;
 
@@ -82,7 +80,6 @@ public class HunterActivity extends AppCompatActivity {
     private ImageView radar;
     private Typewriter textualSuggestion;
     private ImageView photoSuggestion;
-    private Handler textHandler = new Handler();
     private String messageReceived;
 
     private ImageView _photoButton;
@@ -94,6 +91,7 @@ public class HunterActivity extends AppCompatActivity {
     private String[] fakeTextSuggestions;
 
     boolean _receiverRegistered;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,42 +157,35 @@ public class HunterActivity extends AppCompatActivity {
         _accelerometerButton.setEnabled(false);
         _accelerometerButton.setClickable(false);
 
-        _rl = new RelativeLayout(this);
-
-       // _audioButton = (Button)this.findViewById(R.id.audio_button);
-        //_audioButton.setEnabled(false);
-
-        //_pictureButton = (Button)this.findViewById(R.id.pic_button);
-        //_pictureButton.setEnabled(false);
-
         _gps = new GPSTracker(this);
-        try {
-            _bluetooth = new BluetoothTracker();
-        } catch (BluetoothCriticalException e) {
-            Log.e(LOG_TAG, e.toString());
-            finish();
-        }
-
-        try {
-            _gps.getLocation();
-        } catch ( Exception e ) {
-            Log.e(LOG_TAG, e.toString());
-            finish();
-        }
-
-        _receiverRegistered = false;
-
-        try {
-            _hunter = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "H");
-        } catch (Exception e) {
-            Log.e(LOG_TAG, e.toString());
-            finish();
-        }
     }
 
     protected void onResume() {
         Log.d("HunterTask", "onResume() invoked.");
         super.onResume();
+
+		try {
+			_bluetooth = new BluetoothTracker();
+		} catch (BluetoothCriticalException e) {
+			Log.e(LOG_TAG, e.toString());
+			showErrorDialog("An internal error occurs:\n" + e.getMessage());
+		}
+
+		try {
+			_gps.getLocation();
+		} catch ( Exception e ) {
+			Log.e(LOG_TAG, e.toString());
+			showErrorDialog("An internal error occurs:\n" + e.getMessage());
+		}
+
+		_receiverRegistered = false;
+
+		try {
+			_hunter = new Device(BluetoothAdapter.getDefaultAdapter().getAddress(), BluetoothAdapter.getDefaultAdapter().getName(), "H");
+		} catch (Exception e) {
+			Log.e(LOG_TAG, e.toString());
+			showErrorDialog("An internal error occurs:\n" + e.getMessage());
+		}
 
         if ( !_receiverRegistered ) {
             // Register for broadcasts when a device is discovered
@@ -228,18 +219,16 @@ public class HunterActivity extends AppCompatActivity {
                 _task = new HunterTask(this, _hunter);
                 _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
-            Log.d("LOG_TAG", "HERE I AM");
             if ( _distance == null || _distance.isCancelled() ) {
                 _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
                 _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         } catch ( InvalidRESTClientParametersException e) {
             Log.e(LOG_TAG, e.toString());
-            finish();
+			showErrorDialog("An internal error occurs:\n" + e.getMessage());
         } catch ( DeviceSensorCriticalException e ) {
-            Log.d("LOG_TAG", "HERE I AM2");
             Log.e(LOG_TAG, e.toString());
-            finish();
+			showErrorDialog("An internal error occurs:\n" + e.getMessage());
         }
     }
 
@@ -261,35 +250,24 @@ public class HunterActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
-        Log.d("HunterTask", "onStop() invoked.");
-
-
-        if ( _receiverRegistered ) {
-            unregisterReceiver(receiver);
-            _receiverRegistered = false;
-        }
-
-        // Stop treasure task
-        if ( _task != null && !_task.isCancelled() )
-            _task.cancel(true);
-        if ( _distance != null && !_distance.isCancelled() )
-            _distance.cancel(true);
     }
 
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("HunterTask", "onDestroy() invoked.");
+    }
 
-        if ( _receiverRegistered ) {
-            unregisterReceiver(receiver);
-            _receiverRegistered = false;
-        }
 
-        // Stop treasure task
-        if ( _task != null && !_task.isCancelled() )
-            _task.cancel(true);
-        if ( _distance != null && !_distance.isCancelled() )
-            _distance.cancel(true);
+    private void showErrorDialog(String message) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Internal Error");
+        alertDialog.setMessage(message);
+        alertDialog.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        alertDialog.show();
     }
 
     public void initFakeTextSuggestion() {
