@@ -37,37 +37,37 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 	/*
 	 * The activity context
 	 */
-	Context _context;
+	private Context _context;
 
 	/*
 	 * The interface for the interaction with the web server
 	 */
-	WSInterface _webserver;
+	private WSInterface _webserver;
 
 	/*
 	 * The sensor handler object
 	 */
-	SensorsHandler _sr;
+	private SensorsHandler _sr;
 
 	/*
 	 * The hunter device
 	 */
-	Device _hunter;
+	private Device _hunter;
 
 	/*
 	 * The treasure device ID
 	 */
-	String _treasureID;
+	private String _treasureID;
 
 	/*
 	 * The trasure device status
 	 */
-	TreasureStatus _treasureStatus;
+	private TreasureStatus _treasureStatus;
 
 	/*
 	 * The suggestion generator module
 	 */
-	SuggestionsGenerator _suggestionGenerator;
+	private SuggestionsGenerator _suggestionGenerator;
 
 	/**
 	 * @brief Initialize the HunterTask instance

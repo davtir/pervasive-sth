@@ -49,8 +49,15 @@ import java.util.Random;
 public class HunterActivity extends AppCompatActivity {
 
     private final String LOG_TAG = HunterActivity.class.getName();
+
+    /*
+     * Intent sent by HunterTask to notify that there is a winner
+     */
     private static final int WINNER_REQUEST_CODE = 1;
 
+    /*
+     * Action codes for the interaction between the HunterActivity and the HunterTask
+     */
     public static final String EXIT_ACTION = "com.pervasive.sth.smarttreasurehunt.EXIT_GAME";
     public static final String GPS_ACTION = "com.pervasive.sth.smarttreasurehunt.GPS_UPDATE";
     public static final String AUDIO_ACTION = "com.pervasive.sth.smarttreasurehunt.AUDIO_UPDATE";
@@ -58,40 +65,76 @@ public class HunterActivity extends AppCompatActivity {
     public static final String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
     public static final String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
 
-    private final String externalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
-
-    private int suggestionProbability; //A number between 0 and 100
-    private int fakeSuggestionProbability = 20; // equivale alla percentuale di possibilità di avere un fake suggestion
-    private int totalFakeImages = 4; //Number of Images (from fake_image0 to fake_image3
-    private Random _random;
-
+    /*
+     * Gps handler for distance computations
+     */
     private GPSTracker _gps;
+
+    /*
+     * Bluetooth handler for distance computations
+     */
     private BluetoothTracker _bluetooth;
+
+    /*
+     * Asynchronous task that deals with sensors of the Hunter device
+     */
     private HunterTask _task;
+
+    /*
+     * Asynchronous task that deals with distance computations of the Hunter device
+     */
     private HunterDistanceTask _distance;
+
+    /*
+     * Hunter Device
+     */
     private Device _hunter;
 
+    /*
+     * Progress bar for GPS distance computation:
+     */
     private ProgressBar gpsProgressBar;
+
+    /*
+     * Progress bar for Bluetooth distance computation: [0-20] meters
+     */
     private ProgressBar BLProgressBar;
 
+    /*
+     * Storage path for audio and picture retrieved from webserver
+     */
     private String _audioPath, _picturePath;
 
-    private ImageView satellite;
-    private ImageView radar;
-    private Typewriter textualSuggestion;
-    private ImageView photoSuggestion;
+    /*
+     * Suggestion message received from the HunterTask
+     */
     private String messageReceived;
 
+    /*
+     * Animated Font
+     */
+    private Typewriter textualSuggestion;
+
+    /*
+     * flag for intent already registered in the broadcast receiver
+     */
+    boolean _receiverRegistered;
+
+    /*
+     * GUI components
+     */
+    private ImageView satellite;
+    private ImageView radar;
+    private ImageView photoSuggestion;
     private ImageView _photoButton;
     private ImageView _audioButton;
     private ImageView _luxButton;
     private ImageView _temperatureButton;
     private ImageView _accelerometerButton;
 
-    private String[] fakeTextSuggestions;
-
-    boolean _receiverRegistered;
-
+	/**
+	 * @brief initialization of Hunter activity components
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,10 +146,6 @@ public class HunterActivity extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_hunter);
-
-        _random = new Random();
-        initFakeTextSuggestion();
-
 
         satellite = (ImageView) this.findViewById(R.id.satellite_pic);
         satellite.setImageResource(R.drawable.app_th_iconsatellite);
@@ -126,13 +165,12 @@ public class HunterActivity extends AppCompatActivity {
         gpsProgressBar.setProgress(0);
         BLProgressBar.setProgress(0);
 
-        textualSuggestion = (Typewriter) this.findViewById(R.id.textual_suggestion);
         photoSuggestion = (ImageView) this.findViewById(R.id.photo_suggestion);
+        textualSuggestion = (Typewriter) this.findViewById(R.id.textual_suggestion);
 
         Typeface type = Typeface.createFromAsset(getAssets(),"fonts/TravelingTypewriter.ttf");
         textualSuggestion.setTypeface(type);
         textualSuggestion.setTextSize(20);
-
         textualSuggestion.setCharacterDelay(50);
 
         _photoButton = (ImageButton) findViewById(R.id.photo_button);
@@ -142,7 +180,6 @@ public class HunterActivity extends AppCompatActivity {
         _audioButton = (ImageButton) findViewById(R.id.audio_button);
         _audioButton.setImageResource(R.drawable.appth_sound_off);
         _audioButton.setEnabled(false);
-
 
         _luxButton = (ImageButton) findViewById(R.id.lux_button);
         _luxButton.setImageResource(R.drawable.appth_light_off);
@@ -160,6 +197,9 @@ public class HunterActivity extends AppCompatActivity {
         _gps = new GPSTracker(this);
     }
 
+    /*
+     * Initialization on Hunter activity while resumed
+     */
     protected void onResume() {
         Log.d("HunterTask", "onResume() invoked.");
         super.onResume();
@@ -188,6 +228,7 @@ public class HunterActivity extends AppCompatActivity {
 		}
 
         if ( !_receiverRegistered ) {
+
             // Register for broadcasts when a device is discovered
             registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
 
@@ -197,28 +238,36 @@ public class HunterActivity extends AppCompatActivity {
             // Register for broadcast when discovery has started
             registerReceiver( receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
 
+            // Register for broadcast when the game is ended
             registerReceiver ( receiver, new IntentFilter(EXIT_ACTION));
 
+            // Register for broadcasts when GPS distance is updated
             registerReceiver ( receiver, new IntentFilter(GPS_ACTION));
 
+            // Register for broadcasts when audio file is received
             registerReceiver( receiver, new IntentFilter(AUDIO_ACTION));
 
+            // Register for broadcasts when picture file is received
             registerReceiver( receiver, new IntentFilter(PICTURE_ACTION));
 
+            // Register for broadcasts when a suggestions is received
             registerReceiver( receiver, new IntentFilter(SUGGESTION_ACTION));
 
+            // Register for broadcasts when a winner is declared
             registerReceiver(receiver, new IntentFilter(WINNER_ACTION));
 
             _receiverRegistered = true;
         }
 
-        Log.d("HunterTask", "Starting task");
-        // Start treasure task
+        // Start tasks
+        Log.d(LOG_TAG, "Starting Hunter Task");
         try {
             if ( _task == null || _task.isCancelled() ) {
                 _task = new HunterTask(this, _hunter);
                 _task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
+
+            Log.d(LOG_TAG, "Starting Distance Task");
             if ( _distance == null || _distance.isCancelled() ) {
                 _distance = new HunterDistanceTask(this, _gps, _bluetooth, _hunter);
                 _distance.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -232,6 +281,9 @@ public class HunterActivity extends AppCompatActivity {
         }
     }
 
+	/**
+     * @brief stop tasks and unregister intent actions
+     */
     protected void onPause() {
         super.onPause();
         Log.d("HunterTask", "onPause() invoked.");
@@ -270,65 +322,44 @@ public class HunterActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void initFakeTextSuggestion() {
-        fakeTextSuggestions = new String[10];
-        fakeTextSuggestions[0] ="Blabla0";
-        fakeTextSuggestions[1] ="Blabla1";
-        fakeTextSuggestions[2] ="Blabla2";
-        fakeTextSuggestions[3] ="Blabla3";
-        fakeTextSuggestions[4] ="Blabla4";
-        fakeTextSuggestions[5] ="Blabla5";
-        fakeTextSuggestions[6] ="Blabla6";
-        fakeTextSuggestions[7] ="Blabla7";
-        fakeTextSuggestions[8] ="Blabla8";
-        fakeTextSuggestions[9] ="Blabla9";
-    }
 
-    public void selectRealOrFakeTextSuggestion() {
-        suggestionProbability = (int) (Math.random()*100);
-        Log.d(this.getLocalClassName(), "Probability = "+suggestionProbability);
-
-        if(suggestionProbability < fakeSuggestionProbability) {
-            int fakeTextSuggestionIndex = _random.nextInt(fakeTextSuggestions.length);
-            Log.d(this.getLocalClassName(), "fakeTextSuggestionIndex = "+fakeTextSuggestionIndex);
-            messageReceived = fakeTextSuggestions[fakeTextSuggestionIndex];
-        }
-    }
-
+	/**
+     * @brief lux button handler
+     */
     public void onLuxButtonClick(View v) {
 
         _luxButton.setEnabled(false);
         _luxButton.setClickable(false);
         _luxButton.setImageResource(R.drawable.appth_light_off);
 
-        selectRealOrFakeTextSuggestion();
-
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
         textualSuggestion.animateText(messageReceived);
     }
 
+    /**
+     * @brief Temperature button handler
+     */
     public void onTemperatureButtonClick(View v) {
         _temperatureButton.setEnabled(false);
         _temperatureButton.setClickable(false);
         _temperatureButton.setImageResource(R.drawable.appth_temp_off);
 
-        selectRealOrFakeTextSuggestion();
-
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
         textualSuggestion.animateText(messageReceived);
     }
 
+    /**
+     * @brief Accelerometer button handler
+     */
     public void onAccelerometerButtonClick(View v) {
         _accelerometerButton.setEnabled(false);
         _accelerometerButton.setClickable(false);
         _accelerometerButton.setImageResource(R.drawable.appth_movement_off);
 
-        selectRealOrFakeTextSuggestion();
-
         textualSuggestion.setText(messageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
@@ -337,6 +368,9 @@ public class HunterActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * @brief Audio button handler
+     */
     public void onAudioButtonClick(View v) {
 
         _audioButton.setEnabled(false);
@@ -353,6 +387,9 @@ public class HunterActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * @brief Picture button handler
+     */
     public void onPicButtonClick(View v) {
 
         _photoButton.setEnabled(false);
@@ -362,38 +399,23 @@ public class HunterActivity extends AppCompatActivity {
         textualSuggestion.setVisibility(View.INVISIBLE);
         Log.d(this.getClass().getName(), "*************"+_picturePath);
 
-        suggestionProbability = (int) (Math.random()*100);
+        File picFile = new File(_picturePath);
 
-        Log.d(this.getLocalClassName(), "Probability = "+suggestionProbability);
-
-        File picFile;
-
-        if(suggestionProbability < fakeSuggestionProbability) {
-
-            int fakeImageNumber = _random.nextInt(totalFakeImages); //return an integer between 0 and totalFakeImages-1
-            Log.d(this.getLocalClassName(), "FakeImageNumber "+fakeImageNumber);
-            String fakeImageURI = "/fake_image"+fakeImageNumber+".png";
-            picFile = new File(externalStoragePath + fakeImageURI);
-            if  ( picFile.exists() ) {
-                Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
-                photoSuggestion.setImageBitmap(bmap);
-            }
+        if (picFile.exists()) {
+            Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
+            Matrix rotation = new Matrix();
+            rotation.postRotate((float) -90.0);
+            Bitmap bmapRotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), rotation, true);
+            photoSuggestion.setImageBitmap(bmapRotated);
         }
-        else {
-            picFile = new File(_picturePath);
 
-            if (picFile.exists()) {
-                Bitmap bmap = BitmapFactory.decodeFile(picFile.getAbsolutePath());
-                Matrix rotation = new Matrix();
-                rotation.postRotate((float) -90.0);
-                Bitmap bmapRotated = Bitmap.createBitmap(bmap, 0, 0, bmap.getWidth(), bmap.getHeight(), rotation, true);
-                photoSuggestion.setImageBitmap(bmapRotated);
-            }
-        }
 
         photoSuggestion.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * @brief Update the bluetooth progress bar
+     */
     public void updateBLProximityBars(double dist) {
         int progress = 100 - ((int) Math.round((dist * 100.0 / 20.0)));
         if(android.os.Build.VERSION.SDK_INT >= 11){
@@ -407,6 +429,9 @@ public class HunterActivity extends AppCompatActivity {
             BLProgressBar.setProgress(progress);
     }
 
+    /**
+     * @brief Update the GPS progress bar
+     */
     public void updateGPSProximityBars(double dist) {
         int progress = 100 - ((int) Math.round((dist * 100.0 / 20.0)));
         if(android.os.Build.VERSION.SDK_INT >= 11){
@@ -420,44 +445,65 @@ public class HunterActivity extends AppCompatActivity {
             gpsProgressBar.setProgress(progress);
     }
 
+
+    /**
+     * @brief Close the activity when a winner is declared
+     */
     public void onActivityResult(int reqCode, int resultCode, Intent data) {
         if (reqCode == WINNER_REQUEST_CODE) {
             finish();
         }
     }
 
+
+    /**
+     * @brief Handles the incoming intents
+     */
     private final BroadcastReceiver receiver = new BroadcastReceiver(){
         @Override
         public void onReceive(Context context, Intent intent) {
+
             String mIntentAction = intent.getAction();
-            if(BluetoothDevice.ACTION_FOUND.equals(mIntentAction)) {
+
+            // Handle the bluetooth distance update
+            if(mIntentAction.equals(BluetoothDevice.ACTION_FOUND)) {
                 int RSSI = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String deviceName = device.getName();
                 String deviceAddress = device.getAddress();
                 Log.d("Receiver", "Received ID: " + deviceAddress + " TreasureID " + _task.getTreasureID());
                 if( deviceAddress.equals(_task.getTreasureID()) ) {
-                   // _BLTValue.setText(Math.round(BluetoothTracker.calculateDistance(RSSI)*100)/100 + " m");
                     updateBLProximityBars(BluetoothTracker.calculateDistance(RSSI));
                     //Toast.makeText(context, "BLUETOOTH: " + deviceName + " : " + RSSI + " (dBm) ->" + BluetoothTracker.calculateDistance(RSSI) + " m", Toast.LENGTH_LONG).show();
-                                    //"\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
+                    //"\nGPS Distance: " + _task.getDistance(), Toast.LENGTH_LONG).show();
                 }
-            } else if(EXIT_ACTION.equals(mIntentAction)) {
+            }
+
+            // Handle the exit intent request
+            else if(mIntentAction.equals(EXIT_ACTION)) {
                     if ( intent.getBooleanExtra("EXIT_GAME", false) ) {
                         finish();
                     }
-            } else if(GPS_ACTION.equals(mIntentAction)) {
+            }
+
+            // Handle the GPS distance update
+            else if(mIntentAction.equals(GPS_ACTION)) {
                 updateGPSProximityBars(intent.getDoubleExtra("GPS_DISTANCE", 0.0));
                // Toast.makeText(context, "GPS Distance: " + intent.getDoubleExtra("GPS_DISTANCE", 0.0), Toast.LENGTH_LONG).show();
-            } else if (WINNER_ACTION.equals(mIntentAction)) {
+            }
+
+            // Handle the winner intent request, sending the intent to the winner activity
+            else if (mIntentAction.equals(WINNER_ACTION)) {
                 String pathName = intent.getStringExtra("WINNER_UPDATE");
                 Intent winnerIntent = new Intent(context, TreasureCaught.class);
                 winnerIntent.putExtra("WINNER_PICTURE", pathName);
                 startActivityForResult( winnerIntent, WINNER_REQUEST_CODE);
 
-            } else if ( SUGGESTION_ACTION.equals(mIntentAction)) {
+            }
+
+            // Handle the suggtestion received action
+            else if ( mIntentAction.equals(SUGGESTION_ACTION)) {
                 Suggestion received = (Suggestion)(intent.getSerializableExtra("SUGGESTION"));
-                Log.d(this.getClass().getName(), "++++++++++++++++++++++++++++++++++++++++++++++++++TYPE: " + received.getType());
+                Log.d(LOG_TAG, "TYPE: " + received.getType());
 
                 if( received.getType() == SuggestionsGenerator.LUX_SUGGESTION) {
                     messageReceived = received.getMessage();
@@ -470,15 +516,15 @@ public class HunterActivity extends AppCompatActivity {
                     _temperatureButton.setEnabled(true);
                     _temperatureButton.setClickable(true);
                     _temperatureButton.setImageResource(R.drawable.appth_temp_on);
+
                 } else if ( received.getType() == SuggestionsGenerator.PICTURE_SUGGESTION) {
-                    Log.d(this.getClass().getName(), "Media received");
-                    Log.d(this.getClass().getName(), "****************************"+received.getMessage());
+                    Log.d(LOG_TAG, "Media received");
+                    Log.d(LOG_TAG, received.getMessage());
                     _picturePath = received.getMessage();
                     _photoButton.setEnabled(true);
                     _photoButton.setClickable(true);
                     _photoButton.setImageResource(R.drawable.appth_photo_on);
 
-                    //Toast.makeText(context, "Picture Received", Toast.LENGTH_LONG).show();
                 } else if ( received.getType() == SuggestionsGenerator.AUDIO_SUGGESTION){
                     Log.d(this.getClass().getName(), "Media received");
                     _audioPath = received.getMessage();
@@ -486,7 +532,6 @@ public class HunterActivity extends AppCompatActivity {
                     _audioButton.setClickable(true);
                     _audioButton.setImageResource(R.drawable.appth_sound_on);
 
-                    //Toast.makeText(context, "Audio Received", Toast.LENGTH_LONG).show();
                 } else if ( received.getType() == SuggestionsGenerator.ACCELEROMETER_SUGGESTION) {
                     messageReceived = received.getMessage();
                     _accelerometerButton.setEnabled(true);
@@ -502,6 +547,9 @@ public class HunterActivity extends AppCompatActivity {
 
 }
 
+/**
+ * Font Animation Thread
+ */
 class Typewriter extends TextView {
 
     private CharSequence mText;

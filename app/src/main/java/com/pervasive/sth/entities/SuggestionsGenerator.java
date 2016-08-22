@@ -1,6 +1,9 @@
 package com.pervasive.sth.entities;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Log;
 
 import com.pervasive.sth.exceptions.DeviceSensorCriticalException;
@@ -19,6 +22,10 @@ import java.util.Random;
 public class SuggestionsGenerator {
 
 	private final String LOG_TAG = SuggestionsGenerator.class.getName();
+	/*
+	 * Media folder installed in the device
+	 */
+	private final String externalStoragePath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/STH";
 
 	/*
 	 * Suggestions IDs
@@ -60,6 +67,21 @@ public class SuggestionsGenerator {
 	 */
 	int _lastSensorSuggestionType = SUGGESTION_NUMBER;
 
+	/*
+	 * Probability to generate a fake suggestion
+	 */
+	private final double fakeSuggestionProbability = 0.2; // equivale alla percentuale di possibilità di avere un fake suggestion
+
+	/*
+	 * Number of fake images
+	 */
+	private final int totalFakeImages = 4; //Number of Images (from fake_image0 to fake_image3
+
+	/*
+	 * Array of fake text suggestions
+	 */
+	private String[] fakeTextSuggestions;
+
 	/**
 	 *
 	 * @param context
@@ -73,6 +95,30 @@ public class SuggestionsGenerator {
 		_webserver = new WSInterface();
 		_suggestionProbs = new double[SUGGESTION_NUMBER];
 		initProbabilities();
+		initFakeTextSuggestion();
+	}
+
+	public void initFakeTextSuggestion() {
+		fakeTextSuggestions = new String[10];
+		fakeTextSuggestions[0] ="Blabla0";
+		fakeTextSuggestions[1] ="Blabla1";
+		fakeTextSuggestions[2] ="Blabla2";
+		fakeTextSuggestions[3] ="Blabla3";
+		fakeTextSuggestions[4] ="Blabla4";
+		fakeTextSuggestions[5] ="Blabla5";
+		fakeTextSuggestions[6] ="Blabla6";
+		fakeTextSuggestions[7] ="Blabla7";
+		fakeTextSuggestions[8] ="Blabla8";
+		fakeTextSuggestions[9] ="Blabla9";
+	}
+
+	/**
+	 * @brief return false if a fake suggestion must be generated, true otherwise
+	 */
+	public boolean selectRealOrFakeTextSuggestion() {
+		double suggestionProbability = (Math.random());
+		Log.d(LOG_TAG, "Probability = "+suggestionProbability);
+		return(suggestionProbability > fakeSuggestionProbability);
 	}
 
 	/**
@@ -140,12 +186,16 @@ public class SuggestionsGenerator {
 			if ( _lastSensorSuggestionType == type )
 				continue;
 
+
 			switch ( type ) {
 
 				// Accelerometer suggestion
 				case ACCELEROMETER_SUGGESTION:
 					Log.d(LOG_TAG, "Accelerometer suggestion selected (type = " + type + ")");
-					suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
+					if(selectRealOrFakeTextSuggestion())
+						suggestion = new Suggestion(createAccelerometerMessage(treasure), 0.0, type);
+					else
+						suggestion = new Suggestion(fakeTextSuggestions[(int)(Math.random()*fakeTextSuggestions.length)],0.0,type);
 					skip = false;
 					break;
 
@@ -153,7 +203,10 @@ public class SuggestionsGenerator {
 				case LUX_SUGGESTION:
 					if ( treasure.getLuminosity() != -Float.MAX_VALUE ) {
 						Log.d(LOG_TAG, "Luminosity suggestion selected (type = " + type + ")");
-						suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
+						if(selectRealOrFakeTextSuggestion())
+							suggestion = new Suggestion(analizeLuxValues(treasure), 0.0, type);
+						else
+							suggestion = new Suggestion(fakeTextSuggestions[(int)(Math.random()*fakeTextSuggestions.length)],0.0,type);
 						skip = false;
 					}
 					break;
@@ -162,7 +215,10 @@ public class SuggestionsGenerator {
 				case TEMPERATURE_SUGGESTION:
 					if ( treasure.getTemperature() != -Float.MAX_VALUE ) {
 						Log.d(LOG_TAG, "Temperature suggestion selected (type = " + type + ")");
-						suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
+						if(selectRealOrFakeTextSuggestion())
+							suggestion = new Suggestion(analizeTemperatureValues(treasure), 0.0, type);
+						else
+							suggestion = new Suggestion(fakeTextSuggestions[(int)(Math.random()*fakeTextSuggestions.length)],0.0,type);
 						skip = false;
 					}
 					break;
@@ -170,18 +226,34 @@ public class SuggestionsGenerator {
 				// Picture suggestion
 				case PICTURE_SUGGESTION:
 					Log.d(LOG_TAG, "Picture suggestion selected (type = " + type + "). Retrieving picture from web server...");
-					Media picture = _webserver.retrievePicture();
 
-					File picFile = new File(picture.getMediaName());
-					File picDir = new File(picFile.getParent());
-					if ( !picDir.exists() ) {
-						picDir.mkdir();
+					File picFile;
+
+					if(selectRealOrFakeTextSuggestion()) {
+
+						Media picture = _webserver.retrievePicture();
+
+						picFile = new File(picture.getMediaName());
+						File picDir = new File(picFile.getParent());
+						if (!picDir.exists()) {
+							picDir.mkdir();
+						}
+						FileOutputStream picOutStream = new FileOutputStream(picFile);
+						picOutStream.write(picture.getData());
+
+						suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
+						_lastSensorSuggestionType = type;
+
+					}	else {
+
+						int fakeImageNumber = (int)(Math.random()*totalFakeImages);
+						Log.d(LOG_TAG, "FakeImageNumber "+fakeImageNumber);
+						String fakeImageURI = "/fake_image"+fakeImageNumber+".png";
+						picFile = new File(externalStoragePath + fakeImageURI);
+						if  (!picFile.exists())
+							break;
+						suggestion = new Suggestion(picFile.getAbsolutePath(), 0.0, type);
 					}
-					FileOutputStream picOutStream = new FileOutputStream(picFile);
-					picOutStream.write(picture.getData());
-
-					suggestion = new Suggestion(picture.getMediaName(), 0.0, type);
-					_lastSensorSuggestionType = type;
 					skip = false;
 					break;
 

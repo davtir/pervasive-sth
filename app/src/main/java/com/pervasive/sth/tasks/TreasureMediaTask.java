@@ -13,6 +13,7 @@ import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.CameraPreview;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
+import com.sun.jna.platform.win32.WinNT;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,50 +22,73 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * Created by Alex on 29/05/2016.
+ * @brief This class implements the asynchronous task for treasure medias
  */
 public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
+	private final String LOG_TAG = TreasureMediaTask.class.getName();
+	/*
+	 * Device storage path for media files
+	 */
 	private final String pathName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
+
+	/*
+	 * Audio file path
+	 */
 	private final String audioFileName = pathName + "/treasure_audio.3gp";
-	public final static String frontPictureFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH" + "/front_treasure_pic.bmp";
-	public final static String backPictureFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH" + "/back_treasure_pic.bmp";
+
+	/*
+	 * Picture file path
+	 */
 	public final static String pictureFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH" + "/front_treasure_pic.bmp";
+
+	/*
+	 * Microphone handler
+	 */
 	private MediaRecorder mRecorder = null;
+
+	/*
+	 * Web server interface
+	 */
 	WSInterface _webserver;
+
+
 	Context _context;
+
+
 	public static boolean pictureSaved = true;
 
+	/*
+	 * Front camera preview
+	 */
 	CameraPreview _frontPreview;
-	CameraPreview _backPreview;
+
+	/*
+	 * Fronnt camera handler
+	 */
 	Camera _frontCamera;
-	//Camera _backCamera;
 
-	public TreasureMediaTask(Context context, CameraPreview frontPreview, CameraPreview backPreview) throws InvalidRESTClientParametersException {
-		Log.d(this.getClass().getName(), "Inizio Costruttore");
-
+	/**
+	 * @brief Initialize the object
+	 */
+	public TreasureMediaTask(Context context, CameraPreview frontPreview) throws InvalidRESTClientParametersException {
 		_context = context;
 		_webserver = new WSInterface();
 		File f = new File(pathName);
-		if (!f.exists())
+		if ( !f.exists() ) {
 			f.mkdir();
+		}
 
 		_frontPreview = frontPreview;
-		_backPreview = backPreview;
 		_frontCamera = _frontPreview.getCamera();
-		//_backCamera = _backPreview.getCamera();
-
-		Log.d(this.getClass().getName(), "Fine Costruttore");
 	}
 
 	@Override
 	protected Void doInBackground(Void... params) {
 
-		Log.d(this.getClass().getName(), "Entrato in mediaExecute");
+		Log.d(LOG_TAG, "TreasureMediaTask started");
 
 		while (!isCancelled()) {
-
-			Log.d(this.getClass().getName(), "ENTRATO TREASURE MEDIA TASK");
 			mRecorder = new MediaRecorder();
 			mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 			mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -74,7 +98,8 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 			try {
 				mRecorder.prepare();
 			} catch (IOException e) {
-				Log.e("TreasureMediaTask", e.getMessage());
+				Log.e(LOG_TAG, e.getMessage());
+				this.cancel(true);
 			}
 
 			mRecorder.start();
@@ -82,33 +107,34 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			}
 
 			mRecorder.stop();
-
 			mRecorder.release();
 
+			/*
+			 * Upload audio file on web server
+			 */
 			uploadAudio();
 
 			if (getPictureSaved()) {
 				try {
 					_frontCamera.reconnect();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(LOG_TAG, e.getMessage());
+					this.cancel(true);
 				}
+
 				_frontCamera.startPreview();
-				Log.d(this.getClass().getName(), "BEFORE TAKING PICTURE");
 				_frontCamera.takePicture(null, null, new FrontCameraPicture());
-				//_backCamera.takePicture(null, null, new BackCameraPicture());
 				setPictureSaved(false);
-				//_frontCamera.release();
 			}
 
-
+			/*
+			 * Upload audio file on web server
+			 */
 			uploadPicture();
-
-			Log.d(this.getClass().getName(), "Picture taken");
 
 			try {
 				Thread.sleep(30000);
@@ -119,73 +145,65 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 
 		}
 
-		//_frontCamera.release();
-		//_backCamera.release();
-
 		return null;
 	}
 
+	/**
+	 * @brief Set the pictureSaved to the given value
+	 */
 	public static synchronized void setPictureSaved(boolean bool) {
 		pictureSaved = bool;
 	}
 
+	/**
+	 * @brief Returns the picture saved boolean
+	 */
 	public static synchronized boolean getPictureSaved() {
 		return pictureSaved;
 	}
 
+	/**
+	 * @brief Uploads the recorded audio file onn the web server
+	 */
 	private void uploadAudio() {
 		File f = new File(audioFileName);
 
-		if (f.exists()) {
-
+		if ( f.exists() ) {
 			try {
-
 				FileInputStream fis = new FileInputStream(f);
-
 				byte[] data = new byte[(int) f.length()];
-
 				fis.read(data);
-
-
 				_webserver.uploadAudio(new Media(audioFileName, data));
-
-
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			}
 		}
 	}
 
+	/**
+	 * @brief Uploads the captured image file onn the web server
+	 */
 	private void uploadPicture() {
 		File f = new File(pictureFileName);
-
 		if (f.exists()) {
 			try {
-
 				FileInputStream fis = new FileInputStream(f);
-
 				byte[] data = new byte[(int) f.length()];
-
 				fis.read(data);
-
-
 				_webserver.uploadPicture(new Media(pictureFileName, data));
-
-
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			}
 		}
 	}
-
 }
 
 class FrontCameraPicture implements Camera.PictureCallback {
@@ -195,34 +213,14 @@ class FrontCameraPicture implements Camera.PictureCallback {
 
 
 		try {
-			FileOutputStream fo = new FileOutputStream(TreasureMediaTask.frontPictureFileName);
+			FileOutputStream fo = new FileOutputStream(TreasureMediaTask.pictureFileName);
 			fo.write(data);
-			Log.d(this.getClass().getName(), "Picture written on data --------------------");
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Log.w(FrontCameraPicture.class.getName(), e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.w(FrontCameraPicture.class.getName(), e.getMessage());
 		}
 
-		//camera.stopPreview();
-		//camera.setPreviewCallback(null);
-		//camera.release();
 		TreasureMediaTask.setPictureSaved(true);
-	}
-}
-
-class BackCameraPicture implements Camera.PictureCallback {
-
-	@Override
-	public void onPictureTaken(byte[] data, Camera camera) {
-		Log.d(this.getClass().getName(), "Entered");
-		try {
-			FileOutputStream fo = new FileOutputStream(TreasureMediaTask.backPictureFileName);
-			fo.write(data);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

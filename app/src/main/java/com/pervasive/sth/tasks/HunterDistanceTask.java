@@ -14,20 +14,37 @@ import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
 
 /**
- * Created by Alex on 29/05/2016.
+ * @brief Hunter Task that deals with distance computations
  */
 public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 
-	Context _context;
-	GPSTracker _gps;
-	BluetoothTracker _bluetooth;
-	WSInterface _webserver;
-	Device _hunter;
-	String _treasureID;
-	TreasureStatus _treasureStatus;
-	double distance;
+	private Context _context;
 
+	// GPS handler
+	private GPSTracker _gps;
 
+	//Bluetooth handler
+	private BluetoothTracker _bluetooth;
+
+	// Web server interface
+	private WSInterface _webserver;
+
+	// Hunter device
+	private Device _hunter;
+
+	// Treasure device
+	private String _treasureID;
+
+	// Actual status of the treasure
+	private TreasureStatus _treasureStatus;
+
+	private double distance;
+
+	private final String LOG_TAG = HunterDistanceTask.class.getName();
+
+	/**
+	 * @brief Initialize the object
+	 */
 	public HunterDistanceTask(Context context, GPSTracker gps, BluetoothTracker ble, Device hunter) throws InvalidRESTClientParametersException {
 		_context = context;
 		_gps = gps;
@@ -37,35 +54,32 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 		_webserver = new WSInterface();
 	}
 
-	public String getTreasureID() {
-		return _treasureID;
-	}
-
 	@Override
 	protected Void doInBackground(Void... params) {
-		Log.d("HunterDistanceTask", "Started");
+		Log.d(LOG_TAG, "HunterDistanceTask started");
 
 		// End when a cancel request is received
 		while (!isCancelled()) {
+			// Get the treasure status from the web server
 			try {
 				_treasureStatus = _webserver.retrieveTreasureStatus();
 				if (_treasureStatus.isFound()) {
-					Log.i("HunterTask", "The treasure have been found!");
+					Log.i(LOG_TAG, "The treasure have been found!");
 					break;
 				}
 			} catch (Exception e) {
-				Log.e("HunterTask", e.getMessage());
+				Log.w(LOG_TAG, e.getMessage());
 				continue;
 			}
 
-			// Get treasure string from WS
+			// Get treasure from WS
 			Device treasure;
 			try {
 				treasure = _webserver.retrieveDevice();
 				_treasureID = treasure.getBtAddress();
 			} catch (Exception e) {
 				// Error while executing get on WS
-				Log.e("HunterTask", e.getMessage());
+				Log.e(LOG_TAG, e.getMessage());
 				continue;
 			}
 
@@ -73,15 +87,19 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 			startBluetoothDiscovery(10000);
 		}
 
-		try {
+
+/*		try {
 			_webserver.deleteDevice(_hunter.getBtAddress());
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		return null;
 	}
 
+	/**
+	 * @brief Sends an intent to the hunter activity in order to notify an update of the GPS distance
+	 */
 	private void notifyGpsDistance(Device treasure) {
 
 		// Get treasure coordinates
@@ -94,7 +112,7 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 
 		// Compute gps distance
 		distance = _gps.gpsDistance(t_lat, t_lon);
-		Log.d("HunterTask", "Distance from treasure: " + distance + " m");
+		Log.d(LOG_TAG, "Distance from treasure: " + distance + " m");
 
 		// Notify computed distance to HunterActivity
 		Intent intent = new Intent(HunterActivity.GPS_ACTION);
@@ -102,13 +120,16 @@ public class HunterDistanceTask extends AsyncTask<Void, Void, Void> {
 		_context.sendBroadcast(intent);
 	}
 
+	/**
+	 * @brief Starts the discovery procedure of the bluetooth
+	 */
 	private void startBluetoothDiscovery(long sleeptime_ms) {
 		// Start bluetooth discovery
 		_bluetooth.discover();
 		try {
 			Thread.sleep(sleeptime_ms);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Log.w(LOG_TAG, e.getMessage());
 		}
 	}
 }

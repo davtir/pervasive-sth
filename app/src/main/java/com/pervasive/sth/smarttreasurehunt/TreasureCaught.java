@@ -11,6 +11,9 @@ import android.widget.ImageView;
 
 import java.io.File;
 
+/**
+ * @brief Display the winner GUI and retrieve the winner picture
+ */
 public class TreasureCaught extends AppCompatActivity {
 
 	@Override
