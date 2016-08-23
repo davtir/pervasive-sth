@@ -70,12 +70,12 @@ public class SuggestionsGenerator {
 	/*
 	 * Probability to generate a fake suggestion
 	 */
-	private final double fakeSuggestionProbability = 0.2; // equivale alla percentuale di possibilità di avere un fake suggestion
+	private final double fakeSuggestionProbability = 0.4;
 
 	/*
 	 * Number of fake images
 	 */
-	private final int totalFakeImages = 4; //Number of Images (from fake_image0 to fake_image3
+	private final int totalFakeImages = 4;
 
 	/*
 	 * Array of fake text suggestions
@@ -100,16 +100,16 @@ public class SuggestionsGenerator {
 
 	public void initFakeTextSuggestion() {
 		fakeTextSuggestions = new String[10];
-		fakeTextSuggestions[0] ="Blabla0";
-		fakeTextSuggestions[1] ="Blabla1";
-		fakeTextSuggestions[2] ="Blabla2";
-		fakeTextSuggestions[3] ="Blabla3";
-		fakeTextSuggestions[4] ="Blabla4";
-		fakeTextSuggestions[5] ="Blabla5";
-		fakeTextSuggestions[6] ="Blabla6";
-		fakeTextSuggestions[7] ="Blabla7";
-		fakeTextSuggestions[8] ="Blabla8";
-		fakeTextSuggestions[9] ="Blabla9";
+		fakeTextSuggestions[0] ="Follow the white rabbit...";
+		fakeTextSuggestions[1] ="What if the real treasure was the path, and not the goal?";
+		fakeTextSuggestions[2] ="The treasure is inside your heart. Joking, move up and find it!";
+		fakeTextSuggestions[3] ="Are you really searching for a treasure? What are you, a pirate? YARRRRRR!";
+		fakeTextSuggestions[4] ="What about a 30 cum laude? Mhh maybe is not the good suggestion now.";
+		fakeTextSuggestions[5] ="Turn right.";
+		fakeTextSuggestions[6] ="No, you should have turned left!";
+		fakeTextSuggestions[7] ="FATAL ERROR. The device will be destroyed in 10 seconds.";
+		fakeTextSuggestions[8] ="Error 404: Tip not found";
+		fakeTextSuggestions[9] ="STAY OUT OF MY TERRITORY. (W.W.)";
 	}
 
 	/**
@@ -152,6 +152,10 @@ public class SuggestionsGenerator {
 		// Given that R=Ps/Pm, Ps = R*Pm and that N*Ps + M*Pm = 1, we have that
 		sensorsProbs = 1.0/(sensorsCounter + mediaCounter / sensorsMediaRatio);
 		mediaProbs = sensorsProbs / sensorsMediaRatio;
+
+		//For testing media
+		//mediaProbs = 0.5;
+		//sensorsProbs = 0.0;
 
 		//for the available sensors, set their probabilties equal to sensorProbs
 		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsHandler.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);	// Set it to -Double MAX
