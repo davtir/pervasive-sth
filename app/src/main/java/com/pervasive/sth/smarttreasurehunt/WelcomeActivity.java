@@ -65,7 +65,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
 		// Creating fake images ( CHECK IF CAN BE AVOIDED )
 		try {
-			createFakeImages(3);
+			createFakeImages(4);
 		} catch ( IOException e ) {
 			Log.e(LOG_TAG, e.toString());
 			finish();
@@ -111,8 +111,8 @@ public class WelcomeActivity extends AppCompatActivity {
 	 */
 	private void createFakeImages(int imagesNumber) throws IOException {
 		String imagesPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
-		for ( int i = 0; i <= imagesNumber; ++i ) {
-			int fakeImageID = R.drawable.fake_image + i;
+		for ( int i = 0; i < imagesNumber; ++i ) {
+			int fakeImageID = R.drawable.fake_image0 + i;
 			Log.d(this.getClass().getName(), "Creating fake image " + fakeImageID);
 
 			Bitmap bm = BitmapFactory.decodeResource(getResources(), fakeImageID);

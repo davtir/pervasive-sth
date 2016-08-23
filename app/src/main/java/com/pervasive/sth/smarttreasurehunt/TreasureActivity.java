@@ -11,6 +11,9 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +43,8 @@ public class TreasureActivity extends AppCompatActivity {
 	 * Starts the activity for capturing the winner picture
 	 */
 	static final int REQUEST_IMAGE_CAPTURE = 1;
+
+	public static final int EXCEPTION_THROWN = 0;
 
 	public static final String EXCEPTION_ACTION = "com.pervasive.sth.smarttreasurehunt.EXCEPTION_ACTION";
 
@@ -141,12 +146,8 @@ public class TreasureActivity extends AppCompatActivity {
 				Log.e(LOG_TAG, e.toString());
 				showErrorDialog(e.getMessage());
 			}
-			try {
-				_task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			} catch ( Exception e ) {
-				Log.e(LOG_TAG, e.toString());
-				showErrorDialog(e.getMessage());
-			}
+
+			_task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 
 		// Start treasure media task
@@ -164,12 +165,8 @@ public class TreasureActivity extends AppCompatActivity {
 				showErrorDialog(e.getMessage());
 				return;
 			}
-			try {
-				_media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-			} catch ( Exception e ) {
-				Log.e(LOG_TAG, e.toString());
-				showErrorDialog(e.getMessage());
-			}
+
+			_media.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 

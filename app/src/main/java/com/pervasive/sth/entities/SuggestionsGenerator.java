@@ -70,7 +70,7 @@ public class SuggestionsGenerator {
 	/*
 	 * Probability to generate a fake suggestion
 	 */
-	private final double fakeSuggestionProbability = 0.4;
+	private final double fakeSuggestionProbability = 1;
 
 	/*
 	 * Number of fake images
