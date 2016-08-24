@@ -44,9 +44,9 @@ public class TreasureActivity extends AppCompatActivity {
 	 */
 	static final int REQUEST_IMAGE_CAPTURE = 1;
 
-	public static final int EXCEPTION_THROWN = 0;
+	public static final String EXCEPTION_THROWN = "com.pervasive.sth.smarttreasurehunt.EXCEPTION_ACTION";
 
-	public static final String EXCEPTION_ACTION = "com.pervasive.sth.smarttreasurehunt.EXCEPTION_ACTION";
+	public static final String EXCEPTION_NAME = "TASK_EXCEPTION";
 
 	/*
 	 * Starts the GPS handler for getting lat and lon coordinates of the device
@@ -128,7 +128,7 @@ public class TreasureActivity extends AppCompatActivity {
 		_receiverRegistered = false;
 		if ( !_receiverRegistered ) {
 			// Register for broadcasts when a device is discovered
-			registerReceiver(receiver, new IntentFilter(EXCEPTION_ACTION));
+			registerReceiver(receiver, new IntentFilter(EXCEPTION_THROWN));
 
 			_receiverRegistered = true;
 		}
@@ -172,6 +172,10 @@ public class TreasureActivity extends AppCompatActivity {
 
 	protected void onPause() {
 		super.onPause();
+		if ( _receiverRegistered ) {
+			unregisterReceiver(receiver);
+			_receiverRegistered = false;
+		}
 		Log.d(LOG_TAG, "onPause() invoked.");
 	}
 
@@ -252,9 +256,9 @@ public class TreasureActivity extends AppCompatActivity {
 
 			String mIntentAction = intent.getAction();
 
-			if ( mIntentAction.equals(TreasureActivity.EXCEPTION_ACTION) ) {
-				Log.e(TreasureActivity.class.getName(), intent.getStringExtra("EXCEPTION_NAME"));
-				showErrorDialog(intent.getStringExtra("EXCEPTION_NAME"));
+			if ( mIntentAction.equals(TreasureActivity.EXCEPTION_THROWN) ) {
+				Log.e(LOG_TAG, intent.getStringExtra(TreasureActivity.EXCEPTION_NAME));
+				showErrorDialog(intent.getStringExtra(TreasureActivity.EXCEPTION_NAME));
 			}
 		}
 	};

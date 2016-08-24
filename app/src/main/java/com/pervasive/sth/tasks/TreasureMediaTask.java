@@ -3,6 +3,7 @@ package com.pervasive.sth.tasks;
 import android.content.Context;
 
 
+import android.content.Intent;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import com.pervasive.sth.entities.Media;
 import com.pervasive.sth.entities.CameraPreview;
 import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
+import com.pervasive.sth.smarttreasurehunt.TreasureActivity;
 import com.sun.jna.platform.win32.WinNT;
 
 import java.io.File;
@@ -50,10 +52,10 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 	/*
 	 * Web server interface
 	 */
-	WSInterface _webserver;
+	private WSInterface _webserver;
 
 
-	Context _context;
+	private Context _context;
 
 
 	public static boolean pictureSaved = true;
@@ -61,12 +63,15 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 	/*
 	 * Front camera preview
 	 */
-	CameraPreview _frontPreview;
+	private CameraPreview _frontPreview;
 
 	/*
-	 * Fronnt camera handler
+	 * Front camera handler
 	 */
-	Camera _frontCamera;
+	private Camera _frontCamera;
+
+	private RuntimeException _throwException;
+
 
 	/**
 	 * @brief Initialize the object
@@ -99,7 +104,8 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 				mRecorder.prepare();
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
-				this.cancel(true);
+				_throwException = new RuntimeException(e.getMessage());
+				return null;
 			}
 
 			mRecorder.start();
@@ -118,12 +124,13 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 			 */
 			uploadAudio();
 
-			if (getPictureSaved()) {
+			if ( getPictureSaved() ) {
 				try {
 					_frontCamera.reconnect();
 				} catch (IOException e) {
 					Log.e(LOG_TAG, e.getMessage());
-					this.cancel(true);
+					_throwException = new RuntimeException(e.getMessage());
+					return null;
 				}
 
 				_frontCamera.startPreview();
@@ -202,6 +209,17 @@ public class TreasureMediaTask extends AsyncTask<Void, Void, Void> {
 			} catch (Exception e) {
 				Log.w(LOG_TAG, e.getMessage());
 			}
+		}
+	}
+
+	@Override
+	protected void onPostExecute(Void aVoid) {
+		super.onPostExecute(aVoid);
+		Log.d(LOG_TAG, "onPostExecute() called");
+		if ( _throwException != null ) {
+			Intent intent = new Intent(TreasureActivity.EXCEPTION_THROWN);
+			intent.putExtra(TreasureActivity.EXCEPTION_NAME, _throwException.getMessage());
+			_context.sendBroadcast(intent);
 		}
 	}
 }

@@ -55,6 +55,8 @@ public class HunterActivity extends AppCompatActivity {
      */
     private static final int WINNER_REQUEST_CODE = 1;
 
+    public static final String EXCEPTION_NAME = "TASK_EXCEPTION";
+
     /*
      * Action codes for the interaction between the HunterActivity and the HunterTask
      */
@@ -64,6 +66,7 @@ public class HunterActivity extends AppCompatActivity {
     public static final String PICTURE_ACTION = "com.pervasive.sth.smarttreasurehunt.PICTURE_UPDATE";
     public static final String SUGGESTION_ACTION = "com.pervasive.sth.smarttreasurehunt.SUGGESTION_UPDATE";
     public static final String WINNER_ACTION = "com.pervasive.sth.smarttreasurehunt.WINNER_UPDATE";
+    public static final String EXCEPTION_ACTION = "com.pervasive.sth.smarttreasurehunt.EXCEPTION_ACTION";
 
     /*
      * Gps handler for distance computations
@@ -118,7 +121,7 @@ public class HunterActivity extends AppCompatActivity {
     /*
      * flag for intent already registered in the broadcast receiver
      */
-    boolean _receiverRegistered;
+    private boolean _receiverRegistered;
 
     /*
      * GUI components
@@ -256,6 +259,9 @@ public class HunterActivity extends AppCompatActivity {
             // Register for broadcasts when a winner is declared
             registerReceiver(receiver, new IntentFilter(WINNER_ACTION));
 
+            // Register for broadcasts when a winner is declared
+            registerReceiver(receiver, new IntentFilter(EXCEPTION_ACTION));
+
             _receiverRegistered = true;
         }
 
@@ -364,8 +370,6 @@ public class HunterActivity extends AppCompatActivity {
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
         textualSuggestion.animateText(messageReceived);
-
-
     }
 
     /**
@@ -397,7 +401,7 @@ public class HunterActivity extends AppCompatActivity {
         _photoButton.setImageResource(R.drawable.appth_photo_off);
 
         textualSuggestion.setVisibility(View.INVISIBLE);
-        Log.d(this.getClass().getName(), "*************"+_picturePath);
+        Log.d(this.getClass().getName(), "*************" + _picturePath);
 
         File picFile = new File(_picturePath);
 
@@ -538,6 +542,9 @@ public class HunterActivity extends AppCompatActivity {
                     _accelerometerButton.setClickable(true);
                     _accelerometerButton.setImageResource(R.drawable.appth_movement_on);
                 }
+            } else if ( mIntentAction.equals(EXCEPTION_ACTION) ) {
+                Log.e(LOG_TAG, intent.getStringExtra(TreasureActivity.EXCEPTION_NAME));
+                showErrorDialog(intent.getStringExtra(TreasureActivity.EXCEPTION_NAME));
             }
         }
     };

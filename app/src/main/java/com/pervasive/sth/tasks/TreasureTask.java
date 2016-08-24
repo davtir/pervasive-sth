@@ -108,7 +108,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			_webserver.updateTreasureStatus(_treasure.isFound(), null);
 		} catch (Exception e) {
 			_throwException = new RuntimeException(e.getMessage());
-			this.cancel(true);
+			return null;
 		}
 
 		while (!isCancelled()) {
@@ -121,7 +121,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			} catch (Exception e) {
 				Log.e(LOG_TAG, e.toString());
 				_throwException = new RuntimeException(e.getMessage());
-				this.cancel(true);
+				return null;
 			}
 
 			Log.d(LOG_TAG, "Updating treasure data...");
@@ -129,8 +129,9 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			try {
 				_webserver.updateDeviceEntry(_treasure);
 			} catch (Exception e) {
+				Log.e(LOG_TAG, e.toString());
 				_throwException = new RuntimeException(e.getMessage());
-				this.cancel(true);
+				return null;
 			}
 
 			// Sleep for 10 seconds
@@ -143,11 +144,6 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 
 		_treasure.setFound(_found);
 		Log.d(LOG_TAG, "Treasure status: " + _found);
-		try {
-			_webserver.deleteDevice(_treasure.getBtAddress());
-		} catch (Exception e) {
-			Log.w(LOG_TAG, e.getMessage());
-		}
 
 		return null;
 	}
@@ -192,10 +188,15 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void aVoid) {
 		super.onPostExecute(aVoid);
+		try {
+			_webserver.deleteDevice(_treasure.getBtAddress());
+		} catch ( Exception e ) {
+		}
+
 		Log.d(LOG_TAG, "onPostExecute() called");
 		if ( _throwException != null ) {
-			Intent intent = new Intent(TreasureActivity.EXCEPTION_ACTION);
-			intent.putExtra("EXCEPTION_NAME", _throwException.getMessage());
+			Intent intent = new Intent(TreasureActivity.EXCEPTION_THROWN);
+			intent.putExtra(TreasureActivity.EXCEPTION_NAME, _throwException.getMessage());
 			_context.sendBroadcast(intent);
 		}
 	}

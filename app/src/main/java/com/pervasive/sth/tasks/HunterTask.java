@@ -18,6 +18,7 @@ import com.pervasive.sth.exceptions.InvalidRESTClientParametersException;
 import com.pervasive.sth.network.WSInterface;
 import com.pervasive.sth.sensors.SensorsHandler;
 import com.pervasive.sth.smarttreasurehunt.HunterActivity;
+import com.pervasive.sth.smarttreasurehunt.TreasureActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,6 +70,8 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 	 */
 	private SuggestionsGenerator _suggestionGenerator;
 
+	private Exception _throwException;
+
 	/**
 	 * @brief Initialize the HunterTask instance
 	 */
@@ -114,7 +117,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 				_treasureID = treasure.getBtAddress();
 			} catch (Exception e) {
 				// Error while executing get on WS
-				Log.e("LOG_TAG", e.getMessage());
+				Log.e(LOG_TAG, e.getMessage());
 				continue;
 			}
 
@@ -129,8 +132,8 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 				suggestion = _suggestionGenerator.createRandomSuggestion(treasure);
 			} catch (Exception e) {
 				Log.e(LOG_TAG, e.toString());
-				this.cancel(true); //DA SISTEMAREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-				break;
+				_throwException = new RuntimeException(e.getMessage());
+				return null;
 			}
 
 			Intent intent = new Intent(HunterActivity.SUGGESTION_ACTION);
@@ -140,8 +143,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 
 		try {
 			_webserver.deleteDevice(_hunter.getBtAddress());
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch ( Exception e ) {
 		}
 
 		Media picture;
@@ -163,10 +165,20 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			Intent intent = new Intent(HunterActivity.EXIT_ACTION);
 			intent.putExtra("EXIT_GAME", true);
 			_context.sendBroadcast(intent);
-			this.cancel(true);
+			return null;
 		}
-
 		return null;
+	}
+
+	@Override
+	protected void onPostExecute(Void aVoid) {
+		super.onPostExecute(aVoid);
+		Log.d(LOG_TAG, "onPostExecute() called");
+		if ( _throwException != null ) {
+			Intent intent = new Intent(TreasureActivity.EXCEPTION_THROWN);
+			intent.putExtra(TreasureActivity.EXCEPTION_NAME, _throwException.getMessage());
+			_context.sendBroadcast(intent);
+		}
 	}
 }
 

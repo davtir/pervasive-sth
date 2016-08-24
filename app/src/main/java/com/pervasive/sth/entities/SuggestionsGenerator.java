@@ -70,7 +70,7 @@ public class SuggestionsGenerator {
 	/*
 	 * Probability to generate a fake suggestion
 	 */
-	private final double fakeSuggestionProbability = 1;
+	private final double fakeSuggestionProbability = 0.4;
 
 	/*
 	 * Number of fake images
@@ -152,10 +152,6 @@ public class SuggestionsGenerator {
 		// Given that R=Ps/Pm, Ps = R*Pm and that N*Ps + M*Pm = 1, we have that
 		sensorsProbs = 1.0/(sensorsCounter + mediaCounter / sensorsMediaRatio);
 		mediaProbs = sensorsProbs / sensorsMediaRatio;
-
-		//For testing media
-		//mediaProbs = 0.5;
-		//sensorsProbs = 0.0;
 
 		//for the available sensors, set their probabilties equal to sensorProbs
 		_suggestionProbs[ACCELEROMETER_SUGGESTION] = _sensorsHandler.isAccelerometerAvailable() ? (sensorsProbs) : (0.0);	// Set it to -Double MAX
