@@ -112,6 +112,7 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 		}
 
 		while (!isCancelled()) {
+			Log.d(LOG_TAG, "is !Cancelled? " + !isCancelled());
 			// Get lat and lon coordinates
 			_treasure.setLatitude(_gps.getLatitude());
 			_treasure.setLongitude(_gps.getLongitude());
@@ -142,8 +143,14 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 			}
 		}
 
+		Log.d(LOG_TAG, "is !Cancelled? " + !isCancelled());
 		_treasure.setFound(_found);
 		Log.d(LOG_TAG, "Treasure status: " + _found);
+		try {
+			_webserver.deleteDevice(_treasure.getBtAddress());
+		} catch (Exception e) {
+			Log.w(LOG_TAG, e.getMessage());
+		}
 
 		return null;
 	}
@@ -188,11 +195,6 @@ public class TreasureTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void aVoid) {
 		super.onPostExecute(aVoid);
-		try {
-			_webserver.deleteDevice(_treasure.getBtAddress());
-		} catch ( Exception e ) {
-		}
-
 		Log.d(LOG_TAG, "onPostExecute() called");
 		if ( _throwException != null ) {
 			Intent intent = new Intent(TreasureActivity.EXCEPTION_THROWN);

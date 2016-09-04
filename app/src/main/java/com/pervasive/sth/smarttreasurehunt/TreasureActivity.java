@@ -190,9 +190,9 @@ public class TreasureActivity extends AppCompatActivity {
 
 		// Stop treasure task
 		if (_task != null && !_task.isCancelled())
-			_task.cancel(true);
+			_task.cancel(false);
 		if (_media != null && !_media.isCancelled())
-			_media.cancel(true);
+			_media.cancel(false);
 	}
 
 	public void onClickCaught(View v) {
@@ -200,9 +200,9 @@ public class TreasureActivity extends AppCompatActivity {
 		TreasureTask.setFound(true);
 		//TreasureTask.setWinner(imageBitmap);
 		if (_task != null && !_task.isCancelled())
-			_task.cancel(true);
+			_task.cancel(false);
 		if (_media != null && !_media.isCancelled())
-			_media.cancel(true);
+			_media.cancel(false);
 
 		_frontPreview.getCamera().release();
 

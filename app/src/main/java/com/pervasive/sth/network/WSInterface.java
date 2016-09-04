@@ -23,8 +23,9 @@ public class WSInterface {
 	 * The server URI
 	 */
 	//private static final String BASE_URI = "http://192.168.1.2:8084/STHServer/webresources";
-	private static final String BASE_URI = "http://192.168.1.8:8084/STHServer/webresources";
-	//private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
+	//private static final String BASE_URI = "http://192.168.1.6:8084/STHServer/webresources";
+	//private static final String BASE_URI = "http://192.168.1.8:8084/STHServer/webresources";
+	private static final String BASE_URI = "http://pervasive.acsys.it:8080/STHServer/webresources";
 
 	/*
 	 * The WS entry point for the treasure device

@@ -301,9 +301,9 @@ public class HunterActivity extends AppCompatActivity {
 
         // Stop treasure task
         if ( _task != null && !_task.isCancelled() )
-            _task.cancel(true);
+            _task.cancel(false);
         if ( _distance != null && !_distance.isCancelled() )
-            _distance.cancel(true);
+            _distance.cancel(false);
     }
 
     protected void onStop() {
@@ -437,7 +437,7 @@ public class HunterActivity extends AppCompatActivity {
      * @brief Update the GPS progress bar
      */
     public void updateGPSProximityBars(double dist) {
-        int progress = 100 - ((int) Math.round((dist * 100.0 / 20.0)));
+        int progress = 100 - ((int) Math.round((dist * 100.0 / 100.0)));
         if(android.os.Build.VERSION.SDK_INT >= 11){
             // will update the "progress" propriety of seekbar until it reaches progress
             ObjectAnimator animation = ObjectAnimator.ofInt(gpsProgressBar, "progress", progress);
