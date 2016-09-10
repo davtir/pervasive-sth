@@ -91,6 +91,14 @@ If the device is the treasure, it posts this data on the web server.
 Otherwise, if the device is the hunter, it retrieves treasure data from the web server and compares them to its 
 own in order to recognize significant changes in the environmental conditions.
 
+SCREENSHOTS
+-------------------------
+![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+
 INSTALLATION INSTRUCTIONS
 -------------------------
 
