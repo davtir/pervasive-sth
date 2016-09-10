@@ -26,12 +26,14 @@ based on devices sensors (i.e., suggestions about the environmental conditions p
 (i.e, suggestions about the distance among players and treasure).
 
 
-TECHONOLOGIES
+TECHNOLOGIES
 -------------
 
 The main technologies used for this project are:
 
-* Android
+* Android, Android Studio 2.1
+* NetBeans 8.1
+* Tomcat 8.0
 * Global Positioning System (GPS): Used for outdoor distance measurement
 * Assisted-GPS (A-GPS): Used for outdoor/indoor distance measurement 
 * Bluetooth: Used for nearby distance measurement
@@ -41,7 +43,6 @@ The main technologies used for this project are:
 	* Thermometer
 	* Microphone
 	* Accelerometer
-	* Gyroscope
 * RESTful Web Server: Used for storing players and treasure metadata
 
 
@@ -51,7 +52,7 @@ ARCHITECTURE
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/arch.jpg)
 
 The system architecture is composed by:
-* Web Server: Keeps informations about players and treasure (ID, Name, sensors data, coordinates)
+* Web Server: Keeps informations about the treasure (Bluetooth ID, Name, coordinates, media data, sensors data)
 * Treasure Device: After the registration on the Web Server, periodically updates its own data on the web server in order to make available this informations 
 			 to the players.
 			 Moreover, continuously sends advertising packets via Bluetooth in order to be sensed by nearby hunter devices.
@@ -61,11 +62,17 @@ The system architecture is composed by:
 
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/flow.jpg)
 
-* StartupActivity: Displays authors and course informations
+
+ACTIVITIES
+============
+* WelcomeActivity: Displays authors and course informations
 * MainActivity:	Let the players choose the role of the device (Treasure, Hunter)
 * TreasureActivity: Embed the treasure task described above
-* HunterActivity:	Embed the hunter task described above
-* EndingActivity: Notifies to the players (via Web Server) that the game is ended.
+* HunterActivity: Embed the hunter task described above
+* TreasureCaught: Displays the winner photo to all the players
+
+Tasks:
+* TreasureCaught: Notifies to the players (via Web Server) that the game is ended.
 
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/sensorflow.jpg)
 
