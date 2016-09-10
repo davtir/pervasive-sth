@@ -141,11 +141,6 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			_context.sendBroadcast(intent);
 		}
 
-		try {
-			_webserver.deleteDevice(_hunter.getBtAddress());
-		} catch ( Exception e ) {
-		}
-
 		Media picture;
 		try {
 			picture = _treasureStatus.getWinner();
