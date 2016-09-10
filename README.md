@@ -99,22 +99,5 @@ INSTALLATION INSTRUCTIONS
 * Run the SmartTreasureHunt app from your android device.
 * Enjoy the hunt!
 
-CURRENT STATUS
---------------
-Committed tasks:
-* Main functionalities - the game is playable
-* Web server/Web service
-* GPS/A-GPS and Bluetooth connections
-* Sensors data read:photoresistor, thermometer, accelerometer, gyroscope. (Not available to the players yet)
-
-In progress tasks:
-* Provide microphone sensor data
-* Make sensors data available to the players
-* Increase indoor accuracy (statistical approach, ad hoc algorithms).
-* Increase application robustness
-* User friendly interface
-* Testing phase	
-
-
 
    
