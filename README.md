@@ -25,6 +25,11 @@ The goal of the game is to let players find an hidden device treasure by using t
 based on devices sensors (i.e., suggestions about the environmental conditions percept by the treasure device) and GPS/Bluetooth technologies 
 (i.e, suggestions about the distance among players and treasure).
 
+REPOSITORY LINKS
+------------
+[[Android App Repository](https://github.com/davtir/pervasive-sth)]
+
+[[Web Server Repository](https://github.com/davtir/ws-sth)]
 
 TECHNOLOGIES
 -------------
@@ -52,7 +57,7 @@ ARCHITECTURE
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/arch.jpg)
 
 The system architecture is composed by:
-* Web Server: Keeps informations about the treasure (Bluetooth ID, Name, coordinates, media data, sensors data). [[WS Repository link](https://github.com/davtir/ws-sth)]
+* Web Server: Keeps informations about the treasure (Bluetooth ID, Name, coordinates, media data, sensors data).
 * Treasure Device: After the registration on the Web Server, periodically updates its own data on the web server in order to make available this informations 
 			 to the players.
 			 Moreover, continuously sends advertising packets via Bluetooth in order to be sensed by nearby hunter devices.
@@ -98,6 +103,7 @@ INSTALLATION INSTRUCTIONS
 * Install the SmartTreasureHunt app on your android device.
 * Run the SmartTreasureHunt app from your android device.
 * Enjoy the hunt!
+
 
 
    
