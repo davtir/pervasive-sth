@@ -64,15 +64,20 @@ The system architecture is composed by:
 
 
 ACTIVITIES
-============
+------------
 * WelcomeActivity: Displays authors and course informations
 * MainActivity:	Let the players choose the role of the device (Treasure, Hunter)
 * TreasureActivity: Embed the treasure task described above
 * HunterActivity: Embed the hunter task described above
 * TreasureCaught: Displays the winner photo to all the players
 
-Tasks:
-* TreasureCaught: Notifies to the players (via Web Server) that the game is ended.
+TASKS
+------------
+* HunterTask: periodically generates random suggestions based on sensors and media data retrieved from the treasure through the webserver
+* HunterDistanceTask: periodically executes the bluetooth discovery process and retrieves gps treasure's coordinates from webserver. Then, it computes an approximation of the distance between the hunter and treasure devices.
+* TreasureTask: continuously updates treasure status and sensors data on the webserver.
+* TreasureMediaTask: continuously updates treasure media data on the webserver.
+ 
 
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/sensorflow.jpg)
 
