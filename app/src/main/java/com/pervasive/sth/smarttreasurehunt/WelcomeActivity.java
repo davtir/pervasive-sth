@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -63,13 +64,9 @@ public class WelcomeActivity extends AppCompatActivity {
 		// Set content view AFTER ABOVE sequence (to avoid crash)
 		setContentView(R.layout.activity_welcome);
 
-		// Creating fake images ( CHECK IF CAN BE AVOIDED )
-		try {
-			createFakeImages(4);
-		} catch ( IOException e ) {
-			Log.e(LOG_TAG, e.toString());
-			finish();
-		}
+		// Starting the loadImagesTask Asynctask
+		LoadImagesTask loadImagesTask = new LoadImagesTask(this);
+		loadImagesTask.execute();
 
 		Typeface type = Typeface.createFromAsset(getAssets(), "fonts/TravelingTypewriter.ttf");
 
@@ -101,31 +98,6 @@ public class WelcomeActivity extends AppCompatActivity {
 		}
 
 		Log.d(LOG_TAG, "WelcomeActivity have been created.");
-	}
-
-	/**
-	 * @param	imagesNumber: The number of images to be written
-	 * @throws	IOException
-	 * @brief	Generates 'imagesNumber' fake images on external storage
-	 * 			starting from fake images in drawable
-	 */
-	private void createFakeImages(int imagesNumber) throws IOException {
-		String imagesPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
-		for ( int i = 0; i < imagesNumber; ++i ) {
-			int fakeImageID = R.drawable.fake_image0 + i;
-			Log.d(this.getClass().getName(), "Creating fake image " + fakeImageID);
-
-			Bitmap bm = BitmapFactory.decodeResource(getResources(), fakeImageID);
-			File file = new File(imagesPath, "fake_image" + i + ".png");
-			File parentDir = new File(file.getParent());
-			if ( !parentDir.exists() ) {
-				parentDir.mkdir();
-			}
-			FileOutputStream outStream = new FileOutputStream(file);
-			bm.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-			outStream.flush();
-			outStream.close();
-		}
 	}
 
 	/**
@@ -227,4 +199,51 @@ public class WelcomeActivity extends AppCompatActivity {
 		return true;
 	}
 
+	/**
+	 * @brief AsyncTask that loads fakeImages used later in HunterActivity.
+	 */
+	public class LoadImagesTask extends AsyncTask<Void, Void, Void> {
+
+		/*
+	 	 * Tag string for logs
+	 	*/
+		private final String LOG_TAG = LoadImagesTask.class.getName();
+		/*
+	 	 * Number of fake Images to be load
+	 	*/
+		private static final int FAKE_IMAGES_NUMBER = 4;
+
+		private Context _context;
+
+		public LoadImagesTask(Context context) {
+			_context = context;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+
+			try {
+				String imagesPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/STH";
+				for (int i = 0; i < FAKE_IMAGES_NUMBER; ++i) {
+					int fakeImageID = R.drawable.fake_image0 + i;
+					Log.d(this.getClass().getName(), "Creating fake image " + fakeImageID);
+
+					Bitmap bm = BitmapFactory.decodeResource(_context.getResources(), fakeImageID);
+					File file = new File(imagesPath, "fake_image" + i + ".png");
+					File parentDir = new File(file.getParent());
+					if (!parentDir.exists()) {
+						parentDir.mkdir();
+					}
+					FileOutputStream outStream = new FileOutputStream(file);
+					bm.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+					outStream.flush();
+					outStream.close();
+				}
+			}catch ( IOException e ) {
+				Log.e(LOG_TAG, e.toString());
+				finish();
+			}
+			return null;
+		}
+	}
 }
