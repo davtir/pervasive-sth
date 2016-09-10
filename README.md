@@ -93,11 +93,8 @@ own in order to recognize significant changes in the environmental conditions.
 
 SCREENSHOTS
 -------------------------
-![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
-![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
-![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
-![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
-![alt tag](https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg)
+<img src="https://github.com/davtir/pervasive-sth/blob/master/Screenshot/Screenshot_2016-09-10-16-19-46.jpg" width="48">
+
 
 INSTALLATION INSTRUCTIONS
 -------------------------
