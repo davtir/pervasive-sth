@@ -52,7 +52,7 @@ ARCHITECTURE
 ![alt tag](https://raw.githubusercontent.com/davtir/pervasive-sth/master/arch.jpg)
 
 The system architecture is composed by:
-* Web Server: Keeps informations about the treasure (Bluetooth ID, Name, coordinates, media data, sensors data)
+* Web Server: Keeps informations about the treasure (Bluetooth ID, Name, coordinates, media data, sensors data). [[here](https://github.com/davtir/ws-sth)]
 * Treasure Device: After the registration on the Web Server, periodically updates its own data on the web server in order to make available this informations 
 			 to the players.
 			 Moreover, continuously sends advertising packets via Bluetooth in order to be sensed by nearby hunter devices.
