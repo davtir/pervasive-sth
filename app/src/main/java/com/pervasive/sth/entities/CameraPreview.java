@@ -7,6 +7,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  *	@brief This class implements the camera functionalities
@@ -36,6 +37,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		_holder = getHolder();
 		_holder.addCallback(this);
 		_holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+		Camera.Parameters params = _camera.getParameters();
+		List<Camera.Size> pictureSizes = params.getSupportedPictureSizes();
+
+		Camera.Size minSize = pictureSizes.get(0);
+		for ( Camera.Size size : pictureSizes ) {
+			Log.i(LOG_TAG, "Available resolution: " + size.width + " " + size.height);
+			if ( size.width * size.height < minSize.width * minSize.height )
+				minSize = size;
+		}
+
+		Log.i(LOG_TAG, "Chosen resolution " + minSize.width + "x" + minSize.height);
+		params.setPictureSize(minSize.width, minSize.height);
+		_camera.setParameters(params);
 	}
 
 	public Camera getCamera() {
