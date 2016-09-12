@@ -208,6 +208,8 @@ public class TreasureActivity extends AppCompatActivity {
 
 		//Launch the camera intent
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		takePictureIntent.putExtra("outputX", _frontPreview.getMinSize().height);
+		takePictureIntent.putExtra("outputY", _frontPreview.getMinSize().width);
 		if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
 			startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
 		}

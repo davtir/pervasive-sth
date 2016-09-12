@@ -25,6 +25,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	 */
 	private Camera _camera;
 
+	private Camera.Size minSize;
 	/**
 	 *
 	 * @param context
@@ -41,7 +42,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		Camera.Parameters params = _camera.getParameters();
 		List<Camera.Size> pictureSizes = params.getSupportedPictureSizes();
 
-		Camera.Size minSize = pictureSizes.get(0);
+		minSize = pictureSizes.get(0);
 		for ( Camera.Size size : pictureSizes ) {
 			Log.i(LOG_TAG, "Available resolution: " + size.width + " " + size.height);
 			if ( size.width * size.height < minSize.width * minSize.height )
@@ -88,8 +89,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	 *
 	 * @param holder
 	 * @param format
-	 * @param w
-	 * @param h
+	 * @param width
+	 * @param height
 	 * @brief updates the photo surface preview
 	 */
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
