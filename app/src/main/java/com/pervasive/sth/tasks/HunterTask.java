@@ -100,6 +100,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 		// End when a cancel request is received
 		while ( !isCancelled() ) {
 			try {
+				Log.i(LOG_TAG, "The treasure not found yet.");
 				_treasureStatus = _webserver.retrieveTreasureStatus();
 				if ( _treasureStatus.isFound() ) {
 					Log.i(LOG_TAG, "The treasure have been found by a player.");
@@ -124,7 +125,7 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			try {
 				Thread.sleep(15000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.w(LOG_TAG, e.getMessage());
 			}
 
 			Suggestion suggestion = null;
@@ -141,26 +142,35 @@ public class HunterTask extends AsyncTask<Void, Void, Void> {
 			_context.sendBroadcast(intent);
 		}
 
-		Media picture;
+		Log.i(LOG_TAG, "HunterTask exited from main loop.");
 		try {
-			picture = _treasureStatus.getWinner();
-			File f = new File(pathName);
-			if ( !f.exists() ) {
-				f.mkdir();
-			}
-			FileOutputStream fo = null;
-			fo = new FileOutputStream(picture.getMediaName());
-			fo.write(picture.getData());
-
-			Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
-			winnerIntent.putExtra("WINNER_UPDATE", picture.getMediaName());
-			_context.sendBroadcast(winnerIntent);
+			_treasureStatus = _webserver.retrieveTreasureStatus();
 		} catch ( Exception e ) {
 			Log.e(LOG_TAG, e.toString());
-			Intent intent = new Intent(HunterActivity.EXIT_ACTION);
-			intent.putExtra("EXIT_GAME", true);
-			_context.sendBroadcast(intent);
 			return null;
+		}
+		if ( _treasureStatus.isFound() ) {
+			Media picture;
+			try {
+				picture = _treasureStatus.getWinner();
+				File f = new File(pathName);
+				if ( !f.exists() ) {
+					f.mkdir();
+				}
+				FileOutputStream fo = null;
+				fo = new FileOutputStream(picture.getMediaName());
+				fo.write(picture.getData());
+
+				Intent winnerIntent = new Intent(HunterActivity.WINNER_ACTION);
+				winnerIntent.putExtra("WINNER_UPDATE", picture.getMediaName());
+				_context.sendBroadcast(winnerIntent);
+			} catch ( Exception e ) {
+				Log.e(LOG_TAG, e.toString());
+				Intent intent = new Intent(HunterActivity.EXIT_ACTION);
+				intent.putExtra("EXIT_GAME", true);
+				_context.sendBroadcast(intent);
+				return null;
+			}
 		}
 		return null;
 	}
