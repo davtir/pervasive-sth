@@ -178,7 +178,6 @@ public class WSInterface {
 		}
 
 		JSONObject endGame = new JSONObject();
-		JSONArray jArr = new JSONArray();
 
 		String encodedData = Base64.encodeToString(pictureData, Base64.DEFAULT);
 
@@ -271,7 +270,6 @@ public class WSInterface {
 
 		jsonPicture.put("PIC_NAME", mediaFile.getMediaName());
 
-		JSONArray jArr = new JSONArray();
 		byte[] pictureData = mediaFile.getData();
 
 		String encodedData = Base64.encodeToString(pictureData, Base64.DEFAULT);

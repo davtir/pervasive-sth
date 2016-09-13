@@ -25,6 +25,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	 */
 	private Camera _camera;
 
+	public Camera.Size getMinSize() {
+		return minSize;
+	}
+
 	private Camera.Size minSize;
 	/**
 	 *

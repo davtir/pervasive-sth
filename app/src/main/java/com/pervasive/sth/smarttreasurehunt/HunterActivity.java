@@ -55,8 +55,6 @@ public class HunterActivity extends AppCompatActivity {
      */
     private static final int WINNER_REQUEST_CODE = 1;
 
-    public static final String EXCEPTION_NAME = "TASK_EXCEPTION";
-
     /*
      * Action codes for the interaction between the HunterActivity and the HunterTask
      */
@@ -109,9 +107,20 @@ public class HunterActivity extends AppCompatActivity {
     private String _audioPath, _picturePath;
 
     /*
-     * Suggestion message received from the HunterTask
+     * Luminosity suggestion message received from the HunterTask
      */
-    private String messageReceived;
+    private String _luxMessageReceived;
+
+    /*
+     * Temperature suggestion message received from the HunterTask
+     */
+    private String _temperatureMessageReceived;
+
+    /*
+     * Acceleration suggestion message received from the HunterTask
+     */
+    private String _accelerationMessageReceived;
+
 
     /*
      * Animated Font
@@ -204,7 +213,7 @@ public class HunterActivity extends AppCompatActivity {
      * Initialization on Hunter activity while resumed
      */
     protected void onResume() {
-        Log.d("HunterTask", "onResume() invoked.");
+        Log.d(LOG_TAG, "onResume() invoked.");
         super.onResume();
 
 		try {
@@ -292,7 +301,7 @@ public class HunterActivity extends AppCompatActivity {
      */
     protected void onPause() {
         super.onPause();
-        Log.d("HunterTask", "onPause() invoked.");
+        Log.d(LOG_TAG, "onPause() invoked.");
 
         if ( _receiverRegistered ) {
             unregisterReceiver(receiver);
@@ -338,10 +347,10 @@ public class HunterActivity extends AppCompatActivity {
         _luxButton.setClickable(false);
         _luxButton.setImageResource(R.drawable.appth_light_off);
 
-        textualSuggestion.setText(messageReceived);
+        textualSuggestion.setText(_luxMessageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
-        textualSuggestion.animateText(messageReceived);
+        textualSuggestion.animateText(_luxMessageReceived);
     }
 
     /**
@@ -352,10 +361,10 @@ public class HunterActivity extends AppCompatActivity {
         _temperatureButton.setClickable(false);
         _temperatureButton.setImageResource(R.drawable.appth_temp_off);
 
-        textualSuggestion.setText(messageReceived);
+        textualSuggestion.setText(_temperatureMessageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
-        textualSuggestion.animateText(messageReceived);
+        textualSuggestion.animateText(_temperatureMessageReceived);
     }
 
     /**
@@ -366,10 +375,10 @@ public class HunterActivity extends AppCompatActivity {
         _accelerometerButton.setClickable(false);
         _accelerometerButton.setImageResource(R.drawable.appth_movement_off);
 
-        textualSuggestion.setText(messageReceived);
+        textualSuggestion.setText(_accelerationMessageReceived);
         photoSuggestion.setVisibility(View.INVISIBLE);
         textualSuggestion.setVisibility(View.VISIBLE);
-        textualSuggestion.animateText(messageReceived);
+        textualSuggestion.animateText(_accelerationMessageReceived);
     }
 
     /**
@@ -504,19 +513,19 @@ public class HunterActivity extends AppCompatActivity {
 
             }
 
-            // Handle the suggtestion received action
+            // Handle the suggestion received action
             else if ( mIntentAction.equals(SUGGESTION_ACTION)) {
                 Suggestion received = (Suggestion)(intent.getSerializableExtra("SUGGESTION"));
                 Log.d(LOG_TAG, "TYPE: " + received.getType());
 
                 if( received.getType() == SuggestionsGenerator.LUX_SUGGESTION) {
-                    messageReceived = received.getMessage();
+                    _luxMessageReceived = received.getMessage();
                     _luxButton.setEnabled(true);
                     _luxButton.setClickable(true);
                     _luxButton.setImageResource(R.drawable.appth_light_on);
 
                 } else if (received.getType() == SuggestionsGenerator.TEMPERATURE_SUGGESTION ) {
-                    messageReceived = received.getMessage();
+                    _temperatureMessageReceived = received.getMessage();
                     _temperatureButton.setEnabled(true);
                     _temperatureButton.setClickable(true);
                     _temperatureButton.setImageResource(R.drawable.appth_temp_on);
@@ -537,7 +546,7 @@ public class HunterActivity extends AppCompatActivity {
                     _audioButton.setImageResource(R.drawable.appth_sound_on);
 
                 } else if ( received.getType() == SuggestionsGenerator.ACCELEROMETER_SUGGESTION) {
-                    messageReceived = received.getMessage();
+                    _accelerationMessageReceived = received.getMessage();
                     _accelerometerButton.setEnabled(true);
                     _accelerometerButton.setClickable(true);
                     _accelerometerButton.setImageResource(R.drawable.appth_movement_on);
